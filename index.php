@@ -5,20 +5,48 @@
 // =========================
 
 declare(strict_types=1);
+session_start();
 
-// ---- CONFIG (EDIT THESE) ----
-$SITE_URL       = "https://YOURDOMAIN.com/";          // Used for canonical/og + redirects
-$BUSINESS_EMAIL = "hello@YOURDOMAIN.com";             // Where you receive requests
-$BUSINESS_PHONE = "+1 (202) 555-0123";                // Display + tel links
-$MAIL_FROM      = "no-reply@YOURDOMAIN.com";          // Must be a domain email for best deliverability (create it in Hostinger email)
-$SUBJECT_PREFIX = "Quote Request — Nexus Live Media"; // Email subject prefix
+// ---- CONFIG ----
+$SITE_URL       = "https://nexuslivemedia.com/";
+$BUSINESS_EMAIL = "executive@nexuslivemedia.com";
+$CC_EMAIL       = "theonana@nexuslivemedia.com";
+$BUSINESS_PHONE = "+1 (202) 243-8880";
+$MAIL_FROM      = "no-reply@nexuslivemedia.com";
+$SUBJECT_PREFIX = "Quote Request — Nexus Live Media";
 
 // ---- Helper ----
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function clean(string $s): string { return trim(preg_replace('/\s+/', ' ', $s)); }
 
+// ---- CSRF token generation ----
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // ---- Form handling (POST -> send email -> redirect) ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+  // CSRF validation
+  $csrfPost = $_POST['csrf_token'] ?? '';
+  $csrfSess = $_SESSION['csrf_token'] ?? '';
+  if (!hash_equals($csrfSess, $csrfPost)) {
+    $err = rawurlencode("Invalid security token. Please refresh and try again.");
+    header("Location: {$SITE_URL}?error={$err}#contact");
+    exit;
+  }
+
+  // Rate limiting (session-based): max 3 submissions per 10 minutes
+  $_SESSION['submit_times'] = array_values(array_filter(
+    $_SESSION['submit_times'] ?? [],
+    fn($t) => $t > (time() - 600)
+  ));
+  if (count($_SESSION['submit_times']) >= 3) {
+    $err = rawurlencode("Too many requests. Please wait a few minutes.");
+    header("Location: {$SITE_URL}?error={$err}#contact");
+    exit;
+  }
+
   // Basic anti-bot honeypot
   $company = $_POST['company'] ?? '';
   if (!empty($company)) {
@@ -46,15 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // Build email body
-  $bodyLines = [
+  // Build plain-text email body
+  $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+  $ts = date('c');
+  $plainBody = implode("\n", [
     "New quote request from your website:",
     "",
-    "Name: {$name}",
-    "Email: {$email}",
-    "Phone: {$phone}",
-    "Event Date: {$date}",
-    "Primary Service: {$service}",
+    "Name:             {$name}",
+    "Email:            {$email}",
+    "Phone:            {$phone}",
+    "Event Date:       {$date}",
+    "Primary Service:  {$service}",
     "Estimated Budget: {$budget}",
     "",
     "Event Details:",
@@ -62,23 +92,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     "",
     "----",
     "Sent from: " . ($_SERVER['HTTP_HOST'] ?? 'website'),
-    "IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
-    "Time: " . date('c'),
+    "IP: {$ip}",
+    "Time: {$ts}",
+  ]);
+
+  // Build HTML email body
+  $htmlFields = [
+    ['Name',            h($name)],
+    ['Email',           '<a href="mailto:' . h($email) . '">' . h($email) . '</a>'],
+    ['Phone',           h($phone)],
+    ['Event Date',      h($date)],
+    ['Service',         h($service)],
+    ['Budget',          h($budget)],
+    ['Message',         nl2br(h($message !== '' ? $message : '(no additional details provided)'))],
   ];
+  $tableRows = '';
+  foreach ($htmlFields as [$label, $value]) {
+    $tableRows .= "<tr><td style='padding:8px 14px;font-weight:700;color:#A9B5DD;white-space:nowrap;vertical-align:top'>{$label}</td><td style='padding:8px 14px;color:#EAF0FF'>{$value}</td></tr>\n";
+  }
+  $htmlBody = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Quote Request</title></head>
+<body style="margin:0;padding:0;background:#070A16;font-family:ui-sans-serif,system-ui,Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#070A16;padding:30px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#0B1020;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12)">
+        <tr><td style="background:#0B1020;padding:28px 32px;text-align:center;border-bottom:1px solid rgba(255,255,255,.10)">
+          <h1 style="margin:0;font-size:22px;color:#EAF0FF;letter-spacing:-.3px">Nexus Live Media</h1>
+          <p style="margin:6px 0 0;color:#A9B5DD;font-size:14px">New Quote Request</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px">
+          <p style="margin:0 0 18px;color:#EAF0FF;font-size:15px">A new quote request was submitted from the website:</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid rgba(255,255,255,.12);border-radius:10px;overflow:hidden">
+            {$tableRows}
+          </table>
+        </td></tr>
+        <tr><td style="padding:16px 32px 28px;border-top:1px solid rgba(255,255,255,.10);color:#A9B5DD;font-size:12px">
+          Submitted: {$ts} &nbsp;|&nbsp; IP: {$ip}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+HTML;
 
   $subject = "{$SUBJECT_PREFIX} ({$service})";
 
-  // Headers (Reply-To set to customer)
+  // Multipart/alternative email (plain text + HTML)
+  $boundary = 'NLM_' . bin2hex(random_bytes(8));
   $headers = [];
   $headers[] = "MIME-Version: 1.0";
-  $headers[] = "Content-Type: text/plain; charset=UTF-8";
+  $headers[] = "Content-Type: multipart/alternative; boundary=\"{$boundary}\"";
   $headers[] = "From: Nexus Live Media <{$MAIL_FROM}>";
   $headers[] = "Reply-To: {$name} <{$email}>";
+  $headers[] = "Cc: {$CC_EMAIL}";
   $headers[] = "X-Mailer: PHP/" . phpversion();
 
-  $ok = @mail($BUSINESS_EMAIL, $subject, implode("\n", $bodyLines), implode("\r\n", $headers));
+  $emailBody = "--{$boundary}\r\n"
+    . "Content-Type: text/plain; charset=UTF-8\r\n"
+    . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
+    . quoted_printable_encode($plainBody) . "\r\n\r\n"
+    . "--{$boundary}\r\n"
+    . "Content-Type: text/html; charset=UTF-8\r\n"
+    . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
+    . quoted_printable_encode($htmlBody) . "\r\n\r\n"
+    . "--{$boundary}--";
+
+  $ok = @mail($BUSINESS_EMAIL, $subject, $emailBody, implode("\r\n", $headers));
 
   if ($ok) {
+    // Record submission time for rate limiting
+    $_SESSION['submit_times'][] = time();
+    // Regenerate CSRF token after successful use
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+    // Submission log
+    // NOTE: In production, move submissions.log above public_html and update this path.
+    $logPath = __DIR__ . '/submissions.log';
+    $logLine = sprintf(
+      "[%s] %s | %s | %s | %s | %s\n",
+      date('c'),
+      $name,
+      $email,
+      $service,
+      $budget,
+      $ip
+    );
+    try {
+      file_put_contents($logPath, $logLine, FILE_APPEND | LOCK_EX);
+    } catch (\Throwable $e) {
+      // Log failure is non-fatal — form still succeeds
+    }
+
     header("Location: {$SITE_URL}?sent=1#contact");
     exit;
   } else {
@@ -951,7 +1058,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
       <div class="section-head reveal">
         <div>
           <h2>What clients say</h2>
-          <p>Replace these placeholders with real reviews as you collect them (Google Business Profile is ideal).</p>
+          <p>Trusted by event organizers across the DMV area.</p>
         </div>
       </div>
 
@@ -1100,15 +1207,13 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
               <textarea id="message" name="message" placeholder="Venue, audience size, start/end time, number of speakers, streaming platform, LED needs, printing quantities, etc."></textarea>
             </div>
 
+            <input type="hidden" name="csrf_token" value="<?=h($_SESSION['csrf_token']??'')?>" />
+
             <div style="display:flex; gap:10px; flex-wrap:wrap">
               <button class="btn primary" type="submit">Send Request</button>
               <a class="btn" href="tel:<?=h(preg_replace('/\D+/', '', $BUSINESS_PHONE))?>">Call Now</a>
             </div>
 
-            <p class="note">
-              <b style="color:var(--text)">✅ This form sends directly from your website.</b>
-              If messages don’t arrive, create <b><?=h($MAIL_FROM)?></b> in Hostinger Email and use it as MAIL_FROM above.
-            </p>
           </form>
         </div>
 
