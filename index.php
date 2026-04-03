@@ -168,9 +168,12 @@ HTML;
     // Regenerate CSRF token after successful use
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-    // Submission log
-    // NOTE: In production, move submissions.log above public_html and update this path.
-    $logPath = __DIR__ . '/submissions.log';
+    // Submission log — stored one level ABOVE public_html (never web-accessible).
+    // dirname(__DIR__) = parent of the folder containing this file.
+    // On Hostinger: /home/u123456789/public_html/index.php
+    //   __DIR__        = /home/u123456789/public_html
+    //   dirname(__DIR__)= /home/u123456789          ← outside web root
+    $logPath = dirname(__DIR__) . '/submissions.log';
     $logLine = sprintf(
       "[%s] %s | %s | %s | %s | %s\n",
       date('c'),

@@ -21,8 +21,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
-# Protect sensitive files
-<FilesMatch "\.(log|md|env|json|lock|sql|sh|bak|config)$">
+# Protect sensitive files still inside public_html (log is now above public_html, but keep others blocked)
+<FilesMatch "\.(md|env|json|lock|sql|sh|bak|config|log)$">
     Require all denied
 </FilesMatch>
 
