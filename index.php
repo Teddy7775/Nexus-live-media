@@ -168,6 +168,32 @@ HTML;
     // Regenerate CSRF token after successful use
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
+    // ── Auto-reply to the client ──────────────────────────────────────────
+    $autoSubject = "We received your request — Nexus Live Media";
+    $autoBody    = implode("\r\n", [
+      "Hi {$name},",
+      "",
+      "Thank you for reaching out to Nexus Live Media!",
+      "",
+      "We received your quote request for: {$service}",
+      "",
+      "A member of our team will review your details and get back to you",
+      "within 1 business day.",
+      "",
+      "In the meantime, feel free to call us at +1 (202) 243-8880.",
+      "",
+      "— Nexus Live Media Team",
+      "nexuslivemedia.com",
+    ]);
+    $autoHeaders = implode("\r\n", [
+      "MIME-Version: 1.0",
+      "Content-Type: text/plain; charset=UTF-8",
+      "From: Nexus Live Media <{$MAIL_FROM}>",
+      "X-Mailer: PHP/" . phpversion(),
+    ]);
+    @mail($email, $autoSubject, $autoBody, $autoHeaders);
+    // ─────────────────────────────────────────────────────────────────────
+
     // Submission log — stored one level ABOVE public_html (never web-accessible).
     // dirname(__DIR__) = parent of the folder containing this file.
     // On Hostinger: /home/u123456789/public_html/index.php
@@ -1262,7 +1288,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <div class="panel" style="padding:16px">
             <h3 style="margin-top:0">Quick CTA</h3>
             <p style="margin-bottom:12px">Need fast turnaround? Tell us your date + venue and we’ll reply with options.</p>
-            <a class="btn primary" href="#contact" style="width:100%">Get a Fast Quote</a>
+            <a class="btn primary" href="#name" style="width:100%" onclick="setTimeout(()=>document.getElementById(‘name’).focus(),80)">Get a Fast Quote</a>
           </div>
         </div>
       </div>
