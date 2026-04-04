@@ -50,16 +50,8 @@ Options -Indexes
     ExpiresByType font/woff2 "access plus 1 year"
 </IfModule>
 
-# PHP settings (Hostinger shared hosting)
-<IfModule mod_php.c>
-    php_flag display_errors Off
-    php_value upload_max_filesize 8M
-    php_value post_max_size 10M
-    php_value max_execution_time 60
-    php_value session.cookie_httponly On
-    php_value session.cookie_secure On
-    php_value session.use_strict_mode On
-</IfModule>
+# PHP settings: configured via .user.ini (works with PHP-FPM on Hostinger)
+# See .user.ini in the same directory.
 
 # Error pages
 ErrorDocument 404 /index.php
