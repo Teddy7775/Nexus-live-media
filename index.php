@@ -609,17 +609,39 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
     .float-cta{position:fixed; right:18px; bottom:18px; z-index:9999; display:flex; flex-direction:column; gap:10px;}
     .float-cta .btn{box-shadow: var(--shadow2)}
+    /* ── Inline form alert (errors & success) ── */
+    .form-alert{
+      display:none;
+      padding:14px 16px;
+      border-radius:14px;
+      font-size:14px; font-weight:700; line-height:1.55;
+      margin-bottom:4px;
+    }
+    .form-alert.show{ display:block; }
+    .form-alert.is-error{
+      border:1px solid rgba(239,68,68,.45);
+      background:rgba(239,68,68,.10);
+      color:#fca5a5;
+    }
+    .form-alert.is-success{
+      border:1px solid rgba(52,211,153,.45);
+      background:rgba(52,211,153,.10);
+      color:#6ee7b7;
+    }
+
+    /* ── Toast (fallback, above the float CTA buttons) ── */
     .toast{
-      position:fixed; left:50%; bottom:18px; transform: translateX(-50%);
-      background: rgba(11,16,32,.75);
-      border:1px solid rgba(255,255,255,.14);
-      padding:10px 12px; border-radius:14px;
+      position:fixed; left:50%; bottom:110px; transform: translateX(-50%);
+      background: rgba(11,16,32,.92);
+      border:1px solid rgba(255,255,255,.18);
+      padding:13px 20px; border-radius:14px;
       backdrop-filter: blur(12px);
       box-shadow: var(--shadow2);
-      color:var(--text); font-weight:800; font-size:13px;
+      color:var(--text); font-weight:800; font-size:14px;
       opacity:0; pointer-events:none;
       transition:.25s var(--ease);
       z-index: 9999;
+      max-width:420px; width:calc(100% - 40px); text-align:center;
     }
     .toast.show{opacity:1; transform: translateX(-50%) translateY(-6px)}
 
@@ -1152,6 +1174,9 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
               <input id="company" name="company" autocomplete="off" tabindex="-1" />
             </div>
 
+            <!-- Inline alert: shown by JS for errors and success -->
+            <div id="formAlert" class="form-alert" role="alert" aria-live="assertive"></div>
+
             <div class="form-row">
               <div>
                 <label for="name">Full Name</label>
@@ -1348,28 +1373,69 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     // ===== Footer year =====
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ===== Toast from PHP redirect params =====
-    const toast = document.getElementById('toast');
+    // ===== Inline form alert =====
+    const formAlert = document.getElementById(‘formAlert’);
+
+    function showFormAlert(msg, type) {
+      if (!formAlert) return;
+      formAlert.textContent = msg;
+      formAlert.className = ‘form-alert show ‘ + (type === ‘success’ ? ‘is-success’ : ‘is-error’);
+      formAlert.scrollIntoView({ behavior: ‘smooth’, block: ‘center’ });
+    }
+    function clearFormAlert() {
+      if (formAlert) formAlert.className = ‘form-alert’;
+    }
+
+    // ===== Toast (fallback only) =====
+    const toast = document.getElementById(‘toast’);
     function showToast(msg){
       toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3200);
+      toast.classList.add(‘show’);
+      setTimeout(() => toast.classList.remove(‘show’), 5000);
     }
 
+    // ===== Handle PHP redirect params (sent / error) =====
     const url = new URL(window.location.href);
-    const sent = url.searchParams.get('sent');
-    const error = url.searchParams.get('error');
+    const sent  = url.searchParams.get(‘sent’);
+    const error = url.searchParams.get(‘error’);
 
-    if (sent === '1') {
-      showToast("✅ Request sent! We’ll contact you shortly.");
-      // clean URL without refreshing
-      url.searchParams.delete('sent');
-      window.history.replaceState({}, '', url.toString());
+    if (sent === ‘1’) {
+      showFormAlert("✅ Your request has been sent! We will contact you within 1 business day.", ‘success’);
+      url.searchParams.delete(‘sent’);
+      window.history.replaceState({}, ‘’, url.toString());
     }
     if (error) {
-      showToast("⚠️ " + decodeURIComponent(error));
-      url.searchParams.delete('error');
-      window.history.replaceState({}, '', url.toString());
+      showFormAlert("⚠️ " + decodeURIComponent(error), ‘error’);
+      url.searchParams.delete(‘error’);
+      window.history.replaceState({}, ‘’, url.toString());
+    }
+
+    // ===== Client-side form validation (instant feedback, no page reload) =====
+    const quoteForm = document.getElementById(‘quoteForm’);
+    if (quoteForm) {
+      quoteForm.addEventListener(‘submit’, function(e) {
+        const nameVal    = (document.getElementById(‘name’)?.value    || ‘’).trim();
+        const emailVal   = (document.getElementById(‘email’)?.value   || ‘’).trim();
+        const serviceVal = (document.getElementById(‘service’)?.value || ‘’).trim();
+        const emailOk    = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal);
+
+        const errs = [];
+        if (!nameVal)    errs.push("Please enter your full name.");
+        if (!emailVal)   errs.push("Please enter your email address.");
+        else if (!emailOk) errs.push("Please enter a valid email address.");
+        if (!serviceVal) errs.push("Please select a service.");
+
+        if (errs.length) {
+          e.preventDefault();
+          showFormAlert("⚠️ " + errs.join(‘  ·  ‘), ‘error’);
+        }
+      });
+
+      // Clear alert when the user starts correcting a field
+      [‘name’, ‘email’, ‘service’, ‘message’].forEach(id => {
+        document.getElementById(id)?.addEventListener(‘input’, clearFormAlert);
+        document.getElementById(id)?.addEventListener(‘change’, clearFormAlert);
+      });
     }
   </script>
 </body>
