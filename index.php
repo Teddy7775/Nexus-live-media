@@ -57,14 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // Basic anti-bot honeypot
-  $company = $_POST['company'] ?? '';
-  if (!empty($company)) {
-    header("Location: {$SITE_URL}?sent=1#contact");
-    exit;
-  }
-
-  // Gather + validate
+  // Gather + validate FIRST (always, before anything else)
   $name    = clean((string)($_POST['name'] ?? ''));
   $email   = clean((string)($_POST['email'] ?? ''));
   $phone   = clean((string)($_POST['phone'] ?? ''));
@@ -75,12 +68,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $errors = [];
   if ($name === '') $errors[] = "Please enter your name.";
-  if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Please enter a valid email.";
+  if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Please enter a valid email address.";
   if ($service === '') $errors[] = "Please select a service.";
 
   if (!empty($errors)) {
     $err = rawurlencode(implode(' ', $errors));
     header("Location: {$SITE_URL}?error={$err}#contact");
+    exit;
+  }
+
+  // Anti-bot honeypot — checked AFTER validation so that legitimate users
+  // with browser autofill always get validation feedback first.
+  // Field is named "fax_line" (not "company") to avoid being autofilled.
+  $honeypot = $_POST['fax_line'] ?? '';
+  if (!empty($honeypot)) {
+    header("Location: {$SITE_URL}?sent=1#contact");
     exit;
   }
 
@@ -1178,10 +1180,11 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <h3 style="margin-top:0">Event details</h3>
 
           <form id="quoteForm" method="post" action="#contact" novalidate>
-            <!-- Honeypot (bots fill this; humans never see it) -->
-            <div style="position:absolute; left:-9999px; height:0; overflow:hidden;">
-              <label for="company">Company</label>
-              <input id="company" name="company" autocomplete="off" tabindex="-1" />
+            <!-- Honeypot: bots fill this; real users never see it.
+                 Name "fax_line" avoids browser autofill (unlike "company"). -->
+            <div style="position:absolute; left:-9999px; height:0; overflow:hidden;" aria-hidden="true">
+              <label for="fax_line">Fax</label>
+              <input id="fax_line" name="fax_line" autocomplete="off" tabindex="-1" />
             </div>
 
             <div class="form-row">
