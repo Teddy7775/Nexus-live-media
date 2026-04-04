@@ -645,12 +645,16 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     }
     .toast.show{opacity:1; transform: translateX(-50%) translateY(-6px)}
 
-    .reveal{opacity:0; transform: translateY(16px); transition: .7s var(--ease);}
-    .reveal.show{opacity:1; transform:none;}
+    /* Progressive enhancement: content is ALWAYS visible by default.
+       JS adds 'js' class to <html> which enables the scroll-in animation.
+       If JS fails for any reason, the page still shows all content. */
+    .reveal{opacity:1; transform:none;}
+    html.js .reveal{opacity:0; transform: translateY(16px); transition: .7s var(--ease);}
+    html.js .reveal.show{opacity:1; transform:none;}
 
     @media (prefers-reduced-motion: reduce){
       html{scroll-behavior:auto}
-      .reveal{transition:none; transform:none; opacity:1;}
+      html.js .reveal{transition:none; transform:none; opacity:1;}
       .btn{transition:none}
     }
     @supports not (backdrop-filter: blur(1px)){
@@ -1335,6 +1339,10 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
+    // Mark <html> as JS-enabled immediately — enables scroll-reveal animations.
+    // Must be first: if anything below throws, content stays visible (opacity:1 default).
+    document.documentElement.classList.add('js');
+
     // ===== Mobile menu (with ARIA) =====
     const hamburger = document.getElementById('hamburger');
     const navlinks = document.getElementById('navlinks');
@@ -1357,17 +1365,22 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     }
 
     // ===== Reveal on scroll =====
-    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const revealEls = Array.from(document.querySelectorAll('.reveal'));
-    if (prefersReducedMotion) {
-      revealEls.forEach(el => el.classList.add('show'));
-    } else {
-      const io = new IntersectionObserver((entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) e.target.classList.add('show');
-        }
-      }, { threshold: 0.12 });
-      revealEls.forEach(el => io.observe(el));
+    try {
+      const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const revealEls = Array.from(document.querySelectorAll('.reveal'));
+      if (prefersReducedMotion) {
+        revealEls.forEach(el => el.classList.add('show'));
+      } else {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) e.target.classList.add('show');
+          }
+        }, { threshold: 0.12 });
+        revealEls.forEach(el => io.observe(el));
+      }
+    } catch(e) {
+      // Fallback: show all content immediately if observer fails
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('show'));
     }
 
     // ===== Footer year =====
