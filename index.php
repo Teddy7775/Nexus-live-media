@@ -609,6 +609,12 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
     .float-cta{position:fixed; right:18px; bottom:18px; z-index:9999; display:flex; flex-direction:column; gap:10px;}
     .float-cta .btn{box-shadow: var(--shadow2)}
+    /* Field-level error highlight */
+    .field-error{
+      border-color: rgba(239,68,68,.7) !important;
+      box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+    }
+
     /* ── Inline form alert (errors & success) ── */
     .form-alert{
       display:none;
@@ -1178,9 +1184,6 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
               <input id="company" name="company" autocomplete="off" tabindex="-1" />
             </div>
 
-            <!-- Inline alert: shown by JS for errors and success -->
-            <div id="formAlert" class="form-alert" role="alert" aria-live="assertive"></div>
-
             <div class="form-row">
               <div>
                 <label for="name">Full Name</label>
@@ -1235,6 +1238,9 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
             </div>
 
             <input type="hidden" name="csrf_token" value="<?=h($_SESSION['csrf_token']??'')?>" />
+
+            <!-- Alert sits right above the submit button — always in view when clicking -->
+            <div id="formAlert" class="form-alert" role="alert" aria-live="assertive"></div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap">
               <button class="btn primary" type="submit">Send Request</button>
@@ -1392,11 +1398,19 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     function showFormAlert(msg, type) {
       if (!formAlert) return;
       formAlert.textContent = msg;
+      // Alert is positioned just above the submit button — always visible, no scroll needed
       formAlert.className = ‘form-alert show ‘ + (type === ‘success’ ? ‘is-success’ : ‘is-error’);
-      formAlert.scrollIntoView({ behavior: ‘smooth’, block: ‘center’ });
     }
     function clearFormAlert() {
       if (formAlert) formAlert.className = ‘form-alert’;
+    }
+
+    // Highlight a field as invalid (red border)
+    function markField(id, invalid) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (invalid) el.classList.add(‘field-error’);
+      else         el.classList.remove(‘field-error’);
     }
 
     // ===== Toast (fallback only) =====
@@ -1427,27 +1441,42 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     const quoteForm = document.getElementById(‘quoteForm’);
     if (quoteForm) {
       quoteForm.addEventListener(‘submit’, function(e) {
-        const nameVal    = (document.getElementById(‘name’)?.value    || ‘’).trim();
-        const emailVal   = (document.getElementById(‘email’)?.value   || ‘’).trim();
-        const serviceVal = (document.getElementById(‘service’)?.value || ‘’).trim();
+        const nameEl    = document.getElementById(‘name’);
+        const emailEl   = document.getElementById(‘email’);
+        const serviceEl = document.getElementById(‘service’);
+
+        const nameVal    = (nameEl?.value    || ‘’).trim();
+        const emailVal   = (emailEl?.value   || ‘’).trim();
+        const serviceVal = (serviceEl?.value || ‘’).trim();
         const emailOk    = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal);
 
+        // Mark fields red/normal
+        markField(‘name’,    !nameVal);
+        markField(‘email’,   !emailVal || !emailOk);
+        markField(‘service’, !serviceVal);
+
         const errs = [];
-        if (!nameVal)    errs.push("Please enter your full name.");
-        if (!emailVal)   errs.push("Please enter your email address.");
-        else if (!emailOk) errs.push("Please enter a valid email address.");
-        if (!serviceVal) errs.push("Please select a service.");
+        if (!nameVal)      errs.push("Name is required.");
+        if (!emailVal)     errs.push("Email is required.");
+        else if (!emailOk) errs.push("Email must contain @ and a valid domain (ex: you@company.com).");
+        if (!serviceVal)   errs.push("Please select a service.");
 
         if (errs.length) {
           e.preventDefault();
-          showFormAlert("⚠️ " + errs.join(‘  ·  ‘), ‘error’);
+          showFormAlert("⚠️  " + errs.join("  —  "), ‘error’);
         }
       });
 
-      // Clear alert when the user starts correcting a field
-      [‘name’, ‘email’, ‘service’, ‘message’].forEach(id => {
-        document.getElementById(id)?.addEventListener(‘input’, clearFormAlert);
-        document.getElementById(id)?.addEventListener(‘change’, clearFormAlert);
+      // Clear field highlight + alert when the user corrects a field
+      [‘name’, ‘email’, ‘service’].forEach(id => {
+        document.getElementById(id)?.addEventListener(‘input’, function() {
+          this.classList.remove(‘field-error’);
+          clearFormAlert();
+        });
+        document.getElementById(id)?.addEventListener(‘change’, function() {
+          this.classList.remove(‘field-error’);
+          clearFormAlert();
+        });
       });
     }
   </script>
