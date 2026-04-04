@@ -1239,8 +1239,22 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
             <input type="hidden" name="csrf_token" value="<?=h($_SESSION['csrf_token']??'')?>" />
 
-            <!-- Alert sits right above the submit button — always in view when clicking -->
+            <?php
+              // Server-side alert — rendered directly in HTML, works without JS.
+              // $sent and $error are read from GET params (PHP redirect pattern).
+              if ($sent):
+            ?>
+            <div id="formAlert" class="form-alert show is-success" role="alert">
+              ✅ Your request has been sent! We will contact you within 1 business day.
+            </div>
+            <?php elseif ($error !== ''): ?>
+            <div id="formAlert" class="form-alert show is-error" role="alert">
+              ⚠️ <?=h($error)?>
+            </div>
+            <?php else: ?>
+            <!-- JS fills this on client-side validation errors -->
             <div id="formAlert" class="form-alert" role="alert" aria-live="assertive"></div>
+            <?php endif; ?>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap">
               <button class="btn primary" type="submit">Send Request</button>
@@ -1413,29 +1427,15 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
       else         el.classList.remove(‘field-error’);
     }
 
-    // ===== Toast (fallback only) =====
-    const toast = document.getElementById(‘toast’);
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add(‘show’);
-      setTimeout(() => toast.classList.remove(‘show’), 5000);
-    }
-
-    // ===== Handle PHP redirect params (sent / error) =====
-    const url = new URL(window.location.href);
-    const sent  = url.searchParams.get(‘sent’);
-    const error = url.searchParams.get(‘error’);
-
-    if (sent === ‘1’) {
-      showFormAlert("✅ Your request has been sent! We will contact you within 1 business day.", ‘success’);
-      url.searchParams.delete(‘sent’);
-      window.history.replaceState({}, ‘’, url.toString());
-    }
-    if (error) {
-      showFormAlert("⚠️ " + decodeURIComponent(error), ‘error’);
-      url.searchParams.delete(‘error’);
-      window.history.replaceState({}, ‘’, url.toString());
-    }
+    // ===== Clean ?sent= / ?error= from URL bar (PHP already rendered them in HTML) =====
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has(‘sent’) || url.searchParams.has(‘error’)) {
+        url.searchParams.delete(‘sent’);
+        url.searchParams.delete(‘error’);
+        window.history.replaceState({}, ‘’, url.toString());
+      }
+    } catch(e) { /* non-critical */ }
 
     // ===== Client-side form validation (instant feedback, no page reload) =====
     const quoteForm = document.getElementById(‘quoteForm’);
