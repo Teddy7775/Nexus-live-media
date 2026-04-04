@@ -84,66 +84,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // ── Build HTML email body (simple HTML — no multipart, no quoted-printable)
-  // Using plain HTML is the most reliable approach with PHP mail() on shared hosting.
+  // ── Build notification email (plain text — best deliverability for same-domain) ──
+  // HTML emails with gradients/buttons score higher on spam filters, especially
+  // when sending from and to the same domain (nexuslivemedia.com).
   $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
   $ts = date('D, d M Y H:i:s T');
 
-  $htmlFields = [
-    ['Name',              h($name)],
-    ['Email',             '<a href="mailto:' . h($email) . '" style="color:#7C3AED">' . h($email) . '</a>'],
-    ['Phone',             h($phone ?: '—')],
-    ['Event Date',        h($date ?: '—')],
-    ['Primary Service',   '<strong>' . h($service) . '</strong>'],
-    ['Estimated Budget',  h($budget ?: '—')],
-  ];
-  $tableRows = '';
-  foreach ($htmlFields as [$label, $value]) {
-    $tableRows .= "<tr>"
-      . "<td style='padding:10px 16px;background:#f0f4ff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7C3AED;white-space:nowrap;vertical-align:top;border-bottom:1px solid #e2e8f0'>{$label}</td>"
-      . "<td style='padding:10px 16px;font-size:14px;color:#1e293b;border-bottom:1px solid #e2e8f0'>{$value}</td>"
-      . "</tr>\n";
-  }
-  $msgText = nl2br(h($message !== '' ? $message : '(no additional details provided)'));
-  $replyLink = 'mailto:' . rawurlencode($name) . ' <' . rawurlencode($email) . '>';
-
-  $htmlBody = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>"
-    . "<title>Quote Request</title></head>"
-    . "<body style='margin:0;padding:0;background:#f8faff;font-family:Arial,sans-serif'>"
-    . "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f8faff;padding:24px 0'>"
-    . "<tr><td align='center'>"
-    . "<table width='600' cellpadding='0' cellspacing='0' style='max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)'>"
-    . "<tr><td style='background:linear-gradient(135deg,#7C3AED,#22D3EE);padding:24px 28px'>"
-    . "<p style='margin:0;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px'>Nexus Live Media</p>"
-    . "<h1 style='margin:6px 0 4px;color:#fff;font-size:20px;font-weight:900'>New Quote Request</h1>"
-    . "<p style='margin:0;color:rgba(255,255,255,.8);font-size:13px'>Service: <strong style='color:#fff'>" . h($service) . "</strong></p>"
-    . "</td></tr>"
-    . "<tr><td style='padding:24px 28px'>"
-    . "<table width='100%' cellpadding='0' cellspacing='0' style='border-radius:8px;overflow:hidden;border:1px solid #e2e8f0'>"
-    . $tableRows
-    . "</table>"
-    . "<p style='margin:18px 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7C3AED'>Event Details</p>"
-    . "<div style='background:#f8faff;border-left:3px solid #7C3AED;padding:12px 16px;border-radius:0 6px 6px 0;font-size:14px;color:#334155;line-height:1.65'>{$msgText}</div>"
-    . "<p style='margin:20px 0 0'><a href='mailto:" . h($email) . "' style='display:inline-block;background:linear-gradient(135deg,#7C3AED,#22D3EE);color:#fff;text-decoration:none;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px'>Reply to " . h($name) . " →</a></p>"
-    . "</td></tr>"
-    . "<tr><td style='background:#f8faff;padding:12px 28px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8'>"
-    . "Submitted: {$ts} &nbsp;·&nbsp; IP: {$ip} &nbsp;·&nbsp; nexuslivemedia.com"
-    . "</td></tr>"
-    . "</table></td></tr></table></body></html>";
+  $notifBody = implode("\n", [
+    "==============================================",
+    " NEXUS LIVE MEDIA — New Quote Request",
+    "==============================================",
+    "",
+    "Name:             {$name}",
+    "Email:            {$email}",
+    "Phone:            " . ($phone ?: "—"),
+    "Event Date:       " . ($date  ?: "—"),
+    "Primary Service:  {$service}",
+    "Est. Budget:      " . ($budget ?: "—"),
+    "",
+    "----------------------------------------------",
+    "Event Details:",
+    "----------------------------------------------",
+    ($message !== '' ? $message : "(no additional details provided)"),
+    "",
+    "==============================================",
+    "Reply directly to this email to contact {$name}.",
+    "----------------------------------------------",
+    "Submitted: {$ts}",
+    "IP: {$ip}",
+    "Source: nexuslivemedia.com",
+    "==============================================",
+  ]);
 
   $subject = "{$SUBJECT_PREFIX} ({$service})";
 
-  // ── Send to business (HTML only — reliable on shared hosting) ──────────
-  $headers = implode("\r\n", [
+  // ── Send to BOTH business addresses separately (more reliable than CC) ──────
+  $notifHeaders = implode("\r\n", [
     "MIME-Version: 1.0",
-    "Content-Type: text/html; charset=UTF-8",
+    "Content-Type: text/plain; charset=UTF-8",
     "From: Nexus Live Media <{$MAIL_FROM}>",
     "Reply-To: {$name} <{$email}>",
-    "Cc: {$CC_EMAIL}",
     "X-Mailer: PHP/" . phpversion(),
   ]);
 
-  $ok = @mail($BUSINESS_EMAIL, $subject, $htmlBody, $headers);
+  $ok1 = @mail($BUSINESS_EMAIL, $subject, $notifBody, $notifHeaders);
+  $ok2 = @mail($CC_EMAIL,       $subject, $notifBody, $notifHeaders);
+  $ok  = $ok1 || $ok2;   // succeed if at least one delivery was accepted
 
   if ($ok) {
     // Record submission time for rate limiting
