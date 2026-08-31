@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /submissions.log
+
+Sitemap: https://nexuslivemedia.com/sitemap.xml
