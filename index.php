@@ -204,14 +204,14 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Nexus Live Media — Live Video Production • Hybrid Events • LED Screen Rental</title>
-  <meta name="description" content="Professional live video production, hybrid & online conferencing, audio conferencing, LED screen rental, special events coverage, and event printing & branding." />
+  <title>Nexus Live Media — Live Video Production • Hybrid Events • LED Screen Rental • Photo Booths</title>
+  <meta name="description" content="Professional live video production, hybrid conferencing, audio, LED screen rental, open-air photo booths, media coverage, and event printing & branding in the DMV area." />
   <meta name="theme-color" content="#0B1020" />
 
   <!-- Canonical / Social (EDIT SITE URL + OG IMAGE) -->
   <link rel="canonical" href="<?=h($SITE_URL)?>" />
-  <meta property="og:title" content="Nexus Live Media — Live Video • Hybrid Events • LED Screens" />
-  <meta property="og:description" content="Broadcast-quality live event production and hybrid conferencing. LED video walls. Professional audio. Event printing & branding." />
+  <meta property="og:title" content="Nexus Live Media — Live Video • Hybrid Events • LED Screens • Photo Booths" />
+  <meta property="og:description" content="Broadcast-quality live event production, hybrid conferencing, LED video walls, open-air photo booths, and event branding in the DMV area." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="<?=h($SITE_URL)?>" />
   <meta property="og:image" content="<?=h($SITE_URL)?>og.jpg" />
@@ -435,7 +435,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
     .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:14px;}
     .card{
-      grid-column: span 4;
+      grid-column: span 3;
       border-radius: var(--radius);
       border:1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(16,27,63,.70), rgba(16,27,63,.35));
@@ -549,6 +549,96 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     }
     .features li .tick svg{width:12px;height:12px}
     .price-actions{margin-top:auto; display:flex; gap:10px; flex-wrap:wrap}
+
+    /* Savings badge */
+    .savings{
+      display:inline-flex; padding:4px 10px; border-radius:999px;
+      background: rgba(52,211,153,.15); border:1px solid rgba(52,211,153,.35);
+      color:#34d399; font-size:11px; font-weight:900;
+    }
+
+    /* Standalone pricing reference grid */
+    .pricing-ref{
+      margin-top:18px; border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow2); padding:18px; overflow:hidden;
+    }
+    .pricing-ref h3{margin:0 0 14px; font-size:18px}
+    .pricing-ref-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap:12px;
+    }
+    .pricing-ref-item{
+      padding:14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+    }
+    .pricing-ref-item b{display:block; margin-bottom:4px}
+    .pricing-ref-item .ref-price{color:var(--accent2); font-weight:800; font-size:15px}
+    .pricing-ref-item span{display:block; color:var(--muted); font-size:12px; margin-top:4px}
+
+    /* "NEW" badge on service cards */
+    .new-badge{
+      display:inline-flex; padding:3px 8px; border-radius:999px;
+      background: linear-gradient(135deg, var(--accent3), var(--accent1));
+      color:white; font-size:10px; font-weight:900;
+      letter-spacing:.5px; text-transform:uppercase;
+      margin-left:8px; vertical-align:middle;
+    }
+
+    /* Photo Booth Experiences section */
+    .booth-head{text-align:center; margin-bottom:18px}
+    .booth-head h2{margin:0 0 8px; font-size: clamp(24px, 2.4vw, 34px); letter-spacing:-.4px}
+    .booth-head p{margin:0 auto; color:var(--muted); max-width:62ch; line-height:1.55; font-size:14px}
+    .booth-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:14px}
+    .booth-card{
+      border-radius: var(--radius); padding:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(16,27,63,.70), rgba(16,27,63,.35));
+      box-shadow: var(--shadow2); display:flex; flex-direction:column; position:relative; overflow:hidden;
+    }
+    .booth-card::after{
+      content:""; position:absolute; inset:-1px;
+      background: radial-gradient(500px 200px at 50% 0%, rgba(34,211,238,.12), transparent 60%);
+      opacity:.7; z-index:0; pointer-events:none;
+    }
+    .booth-card > *{position:relative; z-index:1}
+    .booth-card.featured{border-color:rgba(34,211,238,.35)}
+    .booth-card .tier-label{font-size:11px; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+    .booth-card .tier-label.popular{color:var(--accent2)}
+    .booth-card h3{margin:0 0 4px; font-size:20px}
+    .booth-card .booth-price{font-size:28px; font-weight:900; color:var(--accent2); margin:0 0 4px}
+    .booth-card .booth-price small{font-size:14px; font-weight:600; color:var(--muted)}
+    .booth-card .booth-desc{color:var(--muted); font-size:13px; line-height:1.55; margin:0 0 12px}
+    .booth-card ul{list-style:none; padding:0; margin:0 0 14px; display:grid; gap:6px}
+    .booth-card li{display:flex; gap:8px; align-items:flex-start; color:var(--muted); font-size:12px; line-height:1.5}
+    .booth-card li .tick{
+      width:16px;height:16px;border-radius:6px;
+      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center; flex:0 0 auto; margin-top:1px;
+    }
+    .booth-card li .tick svg{width:10px;height:10px}
+    .addons{
+      margin-top:18px; padding:18px; border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow2);
+    }
+    .addons h4{margin:0 0 12px; font-size:16px}
+    .addon-grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px}
+    .addon-item{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02); font-size:13px}
+    .addon-item b{color:var(--accent2); white-space:nowrap}
+    .exp-standard{
+      margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+    }
+    .exp-badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 14px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+      font-size:12px; font-weight:700; color:var(--muted);
+    }
+    .exp-badge span{color:var(--accent2)}
 
     .quote{grid-column: span 4; border-radius: var(--radius2); border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); box-shadow: var(--shadow2); padding:18px;}
     .quote p{margin:0 0 14px; color:var(--text); line-height:1.65}
@@ -675,6 +765,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
       .card{grid-column: span 6}
       .pricing .price-card{grid-column: span 6}
       .quote{grid-column: span 6}
+      .booth-grid{grid-template-columns: 1fr 1fr}
     }
     @media (max-width: 640px){
       .nav{border-radius: 22px}
@@ -689,6 +780,8 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
       .foot{grid-template-columns: 1fr}
       .topbar-inner .pill:last-child{display:none;}
       :root{ --topbar-h: 52px; }
+      .booth-grid{grid-template-columns: 1fr}
+      .addon-grid{grid-template-columns: 1fr}
     }
   </style>
 
@@ -697,18 +790,33 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Nexus Live Media",
-    "description": "Live video production, hybrid & online conferencing, audio conferencing, LED screen rental, special events video, and printing & event branding services.",
+    "legalName": "US AFRIK MEDIA LLC",
+    "description": "Professional live video production, hybrid conferencing, audio reinforcement, LED screen rental, open-air photo booths, media coverage, special events video, and printing & event branding services in the DMV area.",
     "areaServed": "DMV Area (DC, Maryland, Virginia)",
     "url": "<?=h($SITE_URL)?>",
     "telephone": "<?=h($BUSINESS_PHONE)?>",
     "email": "<?=h($BUSINESS_EMAIL)?>",
-    "priceRange": "$$",
+    "priceRange": "$$-$$$$",
     "image": "<?=h($SITE_URL)?>logo.png",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Washington",
       "addressRegion": "DC",
       "addressCountry": "US"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Event Production Services",
+      "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Multi-Camera Live Video & Stream"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Hybrid & Online Conferencing"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Pro Audio & Sound Reinforcement"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Modular HD LED Wall Rental"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Open-Air Photo Booth Experiences"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Media Coverage & Highlight Recap"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Special Events Video"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Print-on-Demand Merchandise & Event Branding"}}
+      ]
     }
   }
   </script>
@@ -719,7 +827,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
   <div class="topbar" role="region" aria-label="Announcement">
     <div class="container topbar-inner">
-      <div class="pill"><span class="dot"></span><b style="color:var(--text)">Now booking</b>&nbsp;— Live • Hybrid • LED • Print</div>
+      <div class="pill"><span class="dot"></span><b style="color:var(--text)">Now booking</b>&nbsp;— Live • Hybrid • LED • Photo Booth • Print</div>
       <div class="pill">📍 DMV Area • Nationwide travel available</div>
     </div>
   </div>
@@ -739,9 +847,9 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
         <div class="nav-links" id="navlinks">
           <a href="#services">Services</a>
+          <a href="#photo-booth">Photo Booth</a>
           <a href="#packages">Packages</a>
           <a href="#why">Why Us</a>
-          <a href="#work">Use Cases</a>
           <a href="#faq">FAQ</a>
           <a href="#contact">Contact</a>
         </div>
@@ -761,6 +869,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <span class="tag">🎥 Broadcast-quality production</span>
           <span class="tag">🌐 Hybrid + Online conferencing</span>
           <span class="tag">🖥️ Giant LED screens</span>
+          <span class="tag">📸 Photo booth experiences</span>
           <span class="tag">🖨️ Printing & branding</span>
         </div>
 
@@ -769,7 +878,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
         </h1>
 
         <p>
-          We design, produce, and broadcast high-impact events with professional video, audio, LED display, and branding.
+          We design, produce, and broadcast high-impact events with professional video, audio, LED display, photo experiences, and branding.
           From conferences and graduations to worship services and celebrations—your audience gets a smooth, polished experience.
         </p>
 
@@ -782,6 +891,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <span class="badge">✅ Multi-camera • Live switching</span>
           <span class="badge">✅ Zoom/Teams/Webex production</span>
           <span class="badge">✅ LED wall + stage visuals</span>
+          <span class="badge">✅ Open-air photo booth</span>
           <span class="badge">✅ Branded merch & signage</span>
         </div>
       </div>
@@ -791,7 +901,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <div class="stat"><b>Live + Hybrid</b><span>In-room energy + online reach</span></div>
           <div class="stat"><b>Broadcast Quality</b><span>Polished visuals & clean audio</span></div>
           <div class="stat"><b>LED + Visuals</b><span>Big impact on any stage</span></div>
-          <div class="stat"><b>Branding</b><span>Print + merch for full experience</span></div>
+          <div class="stat"><b>Photo + Print</b><span>Booth experiences & branded merch</span></div>
         </div>
 
         <div class="mini-list">
@@ -811,7 +921,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
             <span class="check" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
-            One vendor for video, audio, LED, and event branding.
+            One vendor for video, audio, LED, photo booth, and event branding.
           </div>
         </div>
 
@@ -849,7 +959,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <div style="margin-top:12px"><a class="more" href="#contact">Request quote →</a></div>
         </article>
 
-        <article class="card reveal" style="transition-delay:.05s">
+        <article class="card reveal" style="transition-delay:.03s">
           <div class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -867,7 +977,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <div style="margin-top:12px"><a class="more" href="#contact">Book consult →</a></div>
         </article>
 
-        <article class="card reveal" style="transition-delay:.10s">
+        <article class="card reveal" style="transition-delay:.06s">
           <div class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Z" stroke="white" stroke-width="2"/>
@@ -885,7 +995,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <div style="margin-top:12px"><a class="more" href="#contact">Ask about audio →</a></div>
         </article>
 
-        <article class="card reveal">
+        <article class="card reveal" style="transition-delay:.09s">
           <div class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M4 6h16v12H4z" stroke="white" stroke-width="2"/>
@@ -894,16 +1004,50 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
             </svg>
           </div>
           <h3>Giant LED Screen Rental</h3>
-          <p>Indoor/outdoor LED video walls for stage backdrops, presentations, and live feed display.</p>
+          <p>Indoor/outdoor modular LED video walls for stage backdrops, presentations, and live feed display.</p>
           <ul>
-            <li>Install + operation</li>
-            <li>Live feed + slides</li>
-            <li>Brand visuals</li>
+            <li>P2.6 / P2.9 ultra-HD panels</li>
+            <li>Install, operation + video tech</li>
+            <li>Live feed + slides + IMAG</li>
           </ul>
           <div style="margin-top:12px"><a class="more" href="#contact">LED pricing →</a></div>
         </article>
 
-        <article class="card reveal" style="transition-delay:.05s">
+        <article class="card reveal">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2v11Z" stroke="white" stroke-width="2"/>
+              <circle cx="12" cy="13" r="4" stroke="white" stroke-width="2"/>
+            </svg>
+          </div>
+          <h3>Open-Air Photo Booths <span class="new-badge">New</span></h3>
+          <p>Commercial-grade DSLR photo experiences with instant prints, GIFs, boomerangs, and branded overlays.</p>
+          <ul>
+            <li>Stills, GIFs & boomerangs</li>
+            <li>Instant dye-sub prints</li>
+            <li>Custom overlays & branding</li>
+          </ul>
+          <div style="margin-top:12px"><a class="more" href="#photo-booth">See photo booth tiers →</a></div>
+        </article>
+
+        <article class="card reveal" style="transition-delay:.03s">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+              <path d="M10 9l5 3-5 3V9Z" fill="white" opacity=".85"/>
+            </svg>
+          </div>
+          <h3>Media Coverage & Highlight Recap</h3>
+          <p>Professional event photography and cinematic highlight reels—delivered within days of your event.</p>
+          <ul>
+            <li>Photos delivered in 48 hours</li>
+            <li>4K highlight reel (5–7 days)</li>
+            <li>Half-day & full-day options</li>
+          </ul>
+          <div style="margin-top:12px"><a class="more" href="#contact">Get coverage quote →</a></div>
+        </article>
+
+        <article class="card reveal" style="transition-delay:.06s">
           <div class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M21 8v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" stroke="white" stroke-width="2"/>
@@ -911,16 +1055,16 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
             </svg>
           </div>
           <h3>Special Events Video</h3>
-          <p>Weddings, graduations, ceremonies, and celebrations—live and recorded with care and precision.</p>
+          <p>Weddings, graduations, ceremonies, and celebrations—live streamed and recorded with care and precision.</p>
           <ul>
             <li>Live stream + recording</li>
-            <li>Highlight edits</li>
-            <li>Private links available</li>
+            <li>Private viewing links</li>
+            <li>Ceremony-specific directing</li>
           </ul>
           <div style="margin-top:12px"><a class="more" href="#contact">Check date →</a></div>
         </article>
 
-        <article class="card reveal" style="transition-delay:.10s">
+        <article class="card reveal" style="transition-delay:.09s">
           <div class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M6 9V4h12v5" stroke="white" stroke-width="2" opacity=".9"/>
@@ -937,6 +1081,101 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           </ul>
           <div style="margin-top:12px"><a class="more" href="#contact">Get print quote →</a></div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTO BOOTH EXPERIENCES -->
+  <section id="photo-booth">
+    <div class="container">
+      <div class="booth-head reveal">
+        <h2>Photo Booth Experiences</h2>
+        <p>Premium open-air photo activations for every event—from intimate celebrations to corporate brand campaigns. Commercial-grade Canon DSLR hardware, bespoke overlay design, and white-glove execution.</p>
+      </div>
+
+      <!-- Photo Booth tier comparison image -->
+      <div class="reveal" style="margin-bottom:22px; border-radius:var(--radius); overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:var(--shadow2)">
+        <img src="photo-booth-tiers.jpg" alt="Photo Booth Tier Comparison — Essential Digital $550/2hrs, Signature Print $950/3hrs (Most Popular), VIP Brand Suite $1,750/4hrs" style="width:100%; display:block; height:auto" loading="lazy" />
+      </div>
+
+      <div class="booth-grid">
+        <!-- Tier 1: Essential Digital -->
+        <div class="booth-card reveal">
+          <div class="tier-label">Starter / Social</div>
+          <h3>Essential Digital</h3>
+          <p class="booth-price">$550 <small>/ 2 Active Hours</small></p>
+          <p class="booth-desc">Sleek, modern, and built for instant social sharing. Ideal for birthdays, mixers, and private parties.</p>
+          <ul>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Stills, GIFs & Boomerangs</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Instant SMS, AirDrop & QR sharing</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Custom graphic overlay</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Studio LED ring light</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Curated backdrop</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 1 on-site attendant</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Full online gallery (90 days)</li>
+          </ul>
+          <div style="margin-top:auto"><a class="btn primary" href="#contact" style="width:100%">Book Essential</a></div>
+        </div>
+
+        <!-- Tier 2: Signature Print — MOST POPULAR -->
+        <div class="booth-card featured reveal" style="transition-delay:.06s">
+          <div class="tier-label popular">★ Most Popular Choice</div>
+          <h3>Signature Print</h3>
+          <p class="booth-price">$950 <small>/ 3 Active Hours</small></p>
+          <p class="booth-desc">The complete luxury keepsake experience. Perfect for weddings, formal galas, and milestone celebrations.</p>
+          <ul>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Everything in Essential Digital</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Unlimited dye-sub prints (2×6 / 4×6 in 8s)</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Studio DSLR optics (24MP)</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Premium backdrop collection</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Deluxe prop collection</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Dual-attendant service</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Post-event USB drive</li>
+          </ul>
+          <div style="margin-top:auto"><a class="btn primary" href="#contact" style="width:100%">Book Signature</a></div>
+        </div>
+
+        <!-- Tier 3: VIP Brand Suite -->
+        <div class="booth-card reveal" style="transition-delay:.12s">
+          <div class="tier-label">Corporate & Luxury</div>
+          <h3>VIP Brand Suite</h3>
+          <p class="booth-price">$1,750 <small>/ 4 Active Hours</small></p>
+          <p class="booth-desc">Engineered for brand activations, corporate galas, trade shows, and high-impact VIP marketing events.</p>
+          <ul>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Everything in Signature Print</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Custom 8×8 step & repeat backdrop</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Branded microsite & data capture</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Real-time TV/monitor slideshow</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Hollywood glam skin filter</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Audio / video confessional</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Detailed analytics report</li>
+          </ul>
+          <div style="margin-top:auto"><a class="btn primary" href="#contact" style="width:100%">Book VIP Suite</a></div>
+        </div>
+      </div>
+
+      <!-- À la carte enhancements -->
+      <div class="addons reveal" style="margin-top:18px">
+        <h4>À La Carte Enhancements</h4>
+        <div class="addon-grid">
+          <div class="addon-item"><span>Additional Active Coverage</span><b>+$175/hr</b></div>
+          <div class="addon-item"><span>Idle / Standby Time</span><b>+$60/hr</b></div>
+          <div class="addon-item"><span>Roaming Ring Photo Unit</span><b>+$150/hr</b></div>
+          <div class="addon-item"><span>Luxe Guest Memory Album</span><b>+$125 flat</b></div>
+          <div class="addon-item"><span>Retro Vintage Audio Guestbook</span><b>+$195 flat</b></div>
+        </div>
+      </div>
+
+      <!-- The Experiential Standard -->
+      <div class="exp-standard reveal" style="margin-top:18px">
+        <div class="exp-badge"><span>✦</span> Commercial-grade Canon DSLR hardware</div>
+        <div class="exp-badge"><span>✦</span> Bespoke visual design</div>
+        <div class="exp-badge"><span>✦</span> Cellular hotspot bonding</div>
+        <div class="exp-badge"><span>✦</span> White-glove 60–90 min silent setup</div>
+      </div>
+
+      <div class="reveal" style="text-align:center; margin-top:22px">
+        <a class="btn primary" href="#contact">Reserve Your Photo Booth Date →</a>
       </div>
     </div>
   </section>
@@ -1011,24 +1250,26 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
     <div class="container">
       <div class="section-head reveal">
         <div>
-          <h2>Packages that fit your event</h2>
-          <p>Transparent starting points. Custom quotes available for large-scale productions and LED wall builds.</p>
+          <h2>Full-Production Packages</h2>
+          <p>Turnkey bundles that combine our services at significant savings. 2026–2027 rates.</p>
         </div>
       </div>
 
       <div class="grid pricing">
         <div class="price-card reveal">
           <div class="price-top">
-            <span class="label">Basic Live</span>
-            <span class="label">Best for small events</span>
+            <span class="label">Corporate & Hybrid</span>
+            <span class="savings">SAVE $800</span>
           </div>
-          <h3 style="margin:0">Basic Live Package</h3>
-          <p class="price"><span>$1,200</span> <small>starting</small></p>
-          <p class="price-desc">Professional live stream with clean audio and reliable delivery.</p>
+          <h3 style="margin:0">Executive Hybrid Suite</h3>
+          <p class="price"><span>$4,450</span> <small>starting</small></p>
+          <p class="price-desc">Multi-camera live stream + pro audio + photo kiosk + media coverage for corporate events up to 120 guests.</p>
           <ul class="features">
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 1–2 cameras</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Live streaming setup</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Basic audio support</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 3-camera live stream + bonded Wi-Fi</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Digital PA + 4 wireless mics + FOH tech</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Digital photo kiosk (3 hrs)</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Photographer + 48-hr cloud gallery</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 4K raw ISO recordings</li>
           </ul>
           <div class="price-actions">
             <a class="btn primary" href="#contact">Get quote</a>
@@ -1038,17 +1279,18 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
         <div class="price-card featured reveal" style="transition-delay:.06s">
           <div class="price-top">
-            <span class="label">Most Popular</span>
-            <span class="label">Hybrid-ready</span>
+            <span class="label">★ Most Popular</span>
+            <span class="savings">SAVE $1,650</span>
           </div>
-          <h3 style="margin:0">Professional Hybrid Package</h3>
-          <p class="price"><span>$2,800</span> <small>starting</small></p>
-          <p class="price-desc">Multi-camera production with streaming + recording + professional conferencing.</p>
+          <h3 style="margin:0">Gala & Summit Immersion</h3>
+          <p class="price"><span>$7,850</span> <small>starting</small></p>
+          <p class="price-desc">Full broadcast + LED wall + signature print booth + concert audio + media recap for galas and summits up to 300 guests.</p>
           <ul class="features">
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Multi-camera live switching</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Zoom/Teams/Webex production</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Recording + clean audio</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Titles/graphics</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Modular LED wall (10×6 ft) + video processor</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 3-cam live stream + broadcast TD</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Full PA + 6 wireless mics + sound engineer</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Signature print photo booth (4 hrs)</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Photography (48h) + 90s 4K highlight film</li>
           </ul>
           <div class="price-actions">
             <a class="btn primary" href="#contact">Book consult</a>
@@ -1058,17 +1300,18 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
         <div class="price-card reveal" style="transition-delay:.12s">
           <div class="price-top">
-            <span class="label">Premium</span>
-            <span class="label">Big stage impact</span>
+            <span class="label">Full Enterprise</span>
+            <span class="savings">SAVE $2,600+</span>
           </div>
-          <h3 style="margin:0">Signature Event Package</h3>
-          <p class="price"><span>$5,500</span> <small>starting</small></p>
-          <p class="price-desc">Full production + LED screen + branding options for high-end events.</p>
+          <h3 style="margin:0">Enterprise 360 Experience</h3>
+          <p class="price"><span>$11,500</span> <small>+ starting</small></p>
+          <p class="price-desc">The complete production: 4-cam broadcast, giant LED stage, VIP photo suite, full audio, media coverage, and branded merch.</p>
           <ul class="features">
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Full broadcast production</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Giant LED screen rental</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Pro audio + redundancy plan</li>
-            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Branding/printing starter pack</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Giant LED display (13×8 ft) + video processor</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> 4-camera broadcast + jib/gimbal + ISOs</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> VIP Brand Suite photo booth + data capture</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Multi-zone audio + 8 wireless mics</li>
+            <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Photo, 4K film + same-day social clips + 100 shirts/hats</li>
           </ul>
           <div class="price-actions">
             <a class="btn primary" href="#contact">Request premium quote</a>
@@ -1077,9 +1320,49 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
         </div>
       </div>
 
+      <!-- Standalone Service Pricing -->
+      <div class="pricing-ref reveal" style="margin-top:18px">
+        <h3>Standalone Service Pricing</h3>
+        <p style="color:var(--muted); margin:0 0 14px; font-size:14px">Each service is also available independently. Prices are starting rates for standard configurations.</p>
+        <div class="pricing-ref-grid">
+          <div class="pricing-ref-item">
+            <b>Open-Air Photo Booths</b>
+            <div class="ref-price">$550 – $1,750</div>
+            <span>2–4 hours · 3 tiers: Essential, Signature, VIP</span>
+          </div>
+          <div class="pricing-ref-item">
+            <b>Multi-Camera Live Video & Stream</b>
+            <div class="ref-price">$1,850 – $2,500+</div>
+            <span>Up to 4 hrs active · 3 or 4 cameras + bonded Wi-Fi</span>
+          </div>
+          <div class="pricing-ref-item">
+            <b>Modular HD LED Wall Rental</b>
+            <div class="ref-price">$3,000 – $4,300</div>
+            <span>Includes $500 logistics fee · Install + video tech</span>
+          </div>
+          <div class="pricing-ref-item">
+            <b>Pro Audio & Sound Reinforcement</b>
+            <div class="ref-price">$850 – $1,800</div>
+            <span>Up to 300+ guests · Digital console + wireless mics</span>
+          </div>
+          <div class="pricing-ref-item">
+            <b>Media Coverage & Highlight Recap</b>
+            <div class="ref-price">$1,250 – $2,400</div>
+            <span>Half to full day · Photos 48h + 4K reel 5–7 days</span>
+          </div>
+          <div class="pricing-ref-item">
+            <b>Print-on-Demand Merchandise</b>
+            <div class="ref-price">Custom pricing</div>
+            <span>Shirts, hats, stoles, mugs · Live heat-press available</span>
+          </div>
+        </div>
+      </div>
+
       <p class="note reveal" style="margin-top:14px">
-        <b style="color:var(--text)">Add-ons:</b> Extra cameras, highlight edits, private streaming links, LED screen sizing, additional sound reinforcement, and custom printing quantities.
-        <br/><b style="color:var(--text)">Pricing note:</b> Packages are starting estimates. Final quote depends on venue, duration, crew size, equipment needs, and event complexity.
+        <b style="color:var(--text)">Overtime:</b> $175/hr standalone services, $350/hr turnkey bundles (30-min increments).
+        <b style="color:var(--text)">Travel:</b> Free within 35 mi of DC; $1.75/mi beyond. Client covers parking/dock passes.
+        <br/><b style="color:var(--text)">Booking:</b> 30% non-refundable retainer secures your date. Balance due 14 days before event.
+        All packages are starting estimates—final quote depends on venue, duration, and event complexity.
       </p>
     </div>
   </section>
@@ -1117,49 +1400,109 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
       <div class="section-head reveal">
         <div>
           <h2>FAQ</h2>
-          <p>Common questions organizers ask before booking live production, conferencing, LED walls, and printing.</p>
+          <p>Common questions event planners ask before booking production, LED, photo booths, and printing.</p>
         </div>
       </div>
 
       <div class="faq">
         <details class="reveal">
           <summary>
-            How far in advance should we book?
+            What are the booking and cancellation terms?
             <span class="chev" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </summary>
-          <p>For best availability, book 2–6 weeks ahead. Large events (LED walls, multiple rooms, multi-day conferences) should be booked earlier.</p>
+          <p>A 30% non-refundable retainer and signed Master Agreement reserve your date. The remaining 70% balance is due 14 days prior to the event. Rescheduling is permitted up to 30 days prior, subject to calendar availability.</p>
+        </details>
+
+        <details class="reveal" style="transition-delay:.03s">
+          <summary>
+            How much time do you need for setup and teardown?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>Full-production packages (LED walls, multi-camera, audio) require 3–4 hours of uninterrupted load-in before doors, and 2 hours for teardown. Photo-booth-only setups require 60–90 minutes.</p>
         </details>
 
         <details class="reveal" style="transition-delay:.06s">
           <summary>
-            Can you stream privately (not public on YouTube/Facebook)?
+            Do you carry event insurance and provide COIs?
             <span class="chev" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </summary>
-          <p>Yes—private links, password-protected streams, and restricted access options are available depending on platform and requirements.</p>
+          <p>Yes. We carry a comprehensive $2,000,000 Commercial General Liability Policy. We issue formal Certificates of Insurance (COI) naming the client, venue, and property management as Additional Insured at no extra charge.</p>
         </details>
 
-        <details class="reveal" style="transition-delay:.12s">
+        <details class="reveal" style="transition-delay:.09s">
           <summary>
-            Do you provide microphones and sound reinforcement?
+            What is your policy on severe weather for outdoor setups?
             <span class="chev" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </summary>
-          <p>Yes. We can supply wireless microphones, mixers, speakers, and operator support. We also integrate with venue systems.</p>
+          <p>To protect human life and delicate electronics, Nexus Live Media reserves the right to suspend operations, cover, or strike electrical gear (LED walls, audio, cameras) if rain, lightning, or winds exceeding 20 mph occur. Weather suspensions are non-refundable.</p>
         </details>
 
         <details class="reveal">
           <summary>
-            What information do you need for a quote?
+            Do you need our venue's Wi-Fi to live stream?
             <span class="chev" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </summary>
-          <p>Event date/time, venue location, audience size (in-person + online), services needed (video/audio/LED/printing), and whether you want recording or highlight edits.</p>
+          <p>No. We deploy bonded multi-carrier gateways (AT&T/Verizon/T-Mobile) so we never depend on venue Wi-Fi. In the rare event of a macro telecom blackout, full 4K ISO master recordings fulfill stream delivery.</p>
+        </details>
+
+        <details class="reveal" style="transition-delay:.03s">
+          <summary>
+            How is overtime handled if the event runs late?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>Overtime is billed in 30-minute increments at $175/hr for standalone services and $350/hr for full production bundles. We always confirm verbal authorization with the lead planner before initiating overtime coverage.</p>
+        </details>
+
+        <details class="reveal" style="transition-delay:.06s">
+          <summary>
+            When will we receive photos, highlight reels, and stream recordings?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>Event photography is delivered as a high-res color-graded cloud gallery within 48 hours. Cinematic 4K highlight reels are delivered in 5–7 business days. Live stream master and ISO records are transferred within 24–48 hours via a secure cloud link.</p>
+        </details>
+
+        <details class="reveal" style="transition-delay:.09s">
+          <summary>
+            Who is liable for equipment damage at the venue?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>The client is 100% financially liable for the repair or full replacement value of any equipment damaged, stolen, or vandalized by event attendees, guests, or third-party venue staff during the contracted window.</p>
+        </details>
+
+        <details class="reveal">
+          <summary>
+            What are the deadlines for custom merchandise and printing?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>All vector artwork (300 DPI) and apparel sizing matrices must be approved in writing at least 14 business days prior to the event. Submissions within 14 days incur a 25% rush fee or default to standard unisex size distributions.</p>
+        </details>
+
+        <details class="reveal" style="transition-delay:.03s">
+          <summary>
+            Do you charge for travel?
+            <span class="chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </summary>
+          <p>Travel is 100% complimentary within a 35-mile radius of the Washington, D.C. Metro Area. Beyond the 35-mile zone, travel is billed at $1.75 per additional mile. Client covers venue loading dock passes and parking passes at actual cost.</p>
         </details>
       </div>
     </div>
@@ -1218,6 +1561,8 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
                   <option>Hybrid / Online Conferencing</option>
                   <option>Audio Conferencing / Sound</option>
                   <option>LED Screen Rental</option>
+                  <option>Photo Booth</option>
+                  <option>Media Coverage / Highlight Recap</option>
                   <option>Special Events Video</option>
                   <option>Printing / Branding</option>
                   <option>Full Package (Recommended)</option>
@@ -1227,10 +1572,12 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
                 <label for="budget">Estimated Budget</label>
                 <select id="budget" name="budget">
                   <option value="" selected>Not sure yet</option>
-                  <option>$1,000 – $2,500</option>
-                  <option>$2,500 – $5,000</option>
-                  <option>$5,000 – $10,000</option>
-                  <option>$10,000+</option>
+                  <option>Under $1,000</option>
+                  <option>$1,000 – $3,000</option>
+                  <option>$3,000 – $5,000</option>
+                  <option>$5,000 – $8,000</option>
+                  <option>$8,000 – $12,000</option>
+                  <option>$12,000+</option>
                 </select>
               </div>
             </div>
@@ -1324,15 +1671,16 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
             <span class="logo" aria-hidden="true"></span>
             <div>
               <b style="font-size:16px">Nexus Live Media</b><br/>
-              <span style="color:var(--muted); font-weight:800; font-size:12px">Live Video • Hybrid Events • Broadcast Solutions</span>
+              <span style="color:var(--muted); font-weight:800; font-size:12px">Live Video • Hybrid Events • Photo Experiences • Broadcast Solutions</span>
             </div>
           </div>
-          <p>Professional live event production and conferencing solutions: video, audio, LED screens, special events coverage, plus printing and branding.</p>
+          <p>Professional live event production, hybrid conferencing, LED screens, open-air photo booths, media coverage, special events video, and printing & branding. A division of US AFRIK MEDIA LLC.</p>
         </div>
 
         <div>
           <h4>Quick Links</h4>
           <a href="#services">Services</a>
+          <a href="#photo-booth">Photo Booth</a>
           <a href="#packages">Packages</a>
           <a href="#faq">FAQ</a>
           <a href="#contact">Contact</a>
@@ -1342,13 +1690,16 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
           <h4>Services</h4>
           <a href="#services">Live Video Production</a>
           <a href="#services">Hybrid & Online Conferencing</a>
+          <a href="#services">Audio & Sound</a>
           <a href="#services">LED Screen Rental</a>
+          <a href="#photo-booth">Photo Booths</a>
+          <a href="#services">Media Coverage</a>
           <a href="#services">Printing & Branding</a>
         </div>
       </div>
 
       <div class="copy">
-        <span>© <span id="year"></span> Nexus Live Media. All rights reserved.</span>
+        <span>© <span id="year"></span> Nexus Live Media · US AFRIK MEDIA LLC. All rights reserved.</span>
         <span><a href="#home" style="color:var(--muted);font-weight:900">Back to top ↑</a></span>
       </div>
     </div>
