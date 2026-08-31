@@ -21,11 +21,143 @@ $BUSINESS_EMAIL = "executive@nexuslivemedia.com";
 $CC_EMAIL       = "theonana@nexuslivemedia.com";
 $BUSINESS_PHONE = "+1 (202) 243-8880";
 $MAIL_FROM      = "no-reply@nexuslivemedia.com";
+$MAIL_FROM_NAME = "Nexus Live Media";
 $SUBJECT_PREFIX = "Quote Request — Nexus Live Media";
+
+// ---- SMTP CONFIG (Hostinger authenticated sending) ----
+// Why SMTP instead of mail()? PHP's mail() hands the message to the local
+// MTA, which does NOT authenticate or DKIM-sign the email. Hostinger's SMTP
+// server authenticates with your mailbox credentials and adds proper DKIM
+// signatures, so emails land in Inbox instead of Spam.
+//
+// SETUP: Set the password for your no-reply@nexuslivemedia.com mailbox below.
+// You created this mailbox in Hostinger → Emails → Manage. Use the same
+// password you set there.
+$SMTP_HOST = 'smtp.hostinger.com';
+$SMTP_PORT = 465;        // SSL — Hostinger's recommended port
+$SMTP_USER = 'no-reply@nexuslivemedia.com';
+$SMTP_PASS = '';          // ← PUT YOUR MAILBOX PASSWORD HERE
 
 // ---- Helper ----
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function clean(string $s): string { return trim(preg_replace('/\s+/', ' ', $s)); }
+
+/**
+ * Lightweight SMTP sender — sends one email via authenticated SMTP over SSL.
+ * No Composer, no PHPMailer — just PHP sockets.
+ *
+ * Falls back to mail() if SMTP password is not configured (so the site
+ * doesn't break before you set the password).
+ *
+ * @return bool  true if the SMTP server accepted the message
+ */
+function smtp_send(
+  string $to,
+  string $subject,
+  string $body,
+  string $fromEmail,
+  string $fromName,
+  string $replyTo = '',
+  string $smtpHost = '',
+  int    $smtpPort = 465,
+  string $smtpUser = '',
+  string $smtpPass = ''
+): bool {
+  // ── Fallback to mail() if SMTP is not configured ──
+  if ($smtpPass === '') {
+    $headers = implode("\r\n", array_filter([
+      "MIME-Version: 1.0",
+      "Content-Type: text/plain; charset=UTF-8",
+      "From: {$fromName} <{$fromEmail}>",
+      $replyTo ? "Reply-To: {$replyTo}" : '',
+      "Organization: {$fromName}",
+      "X-Priority: 3",
+    ]));
+    return @mail($to, $subject, $body, $headers, "-f{$fromEmail}");
+  }
+
+  // ── Build the raw RFC-2822 message ──
+  $date = date('r');
+  $msgId = '<' . bin2hex(random_bytes(16)) . '@' . explode('@', $fromEmail)[1] . '>';
+  $rawHeaders = implode("\r\n", array_filter([
+    "Date: {$date}",
+    "From: {$fromName} <{$fromEmail}>",
+    "To: {$to}",
+    "Subject: {$subject}",
+    $replyTo ? "Reply-To: {$replyTo}" : '',
+    "Message-ID: {$msgId}",
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Transfer-Encoding: 8bit",
+    "Organization: {$fromName}",
+    "X-Priority: 3",
+  ]));
+  $message = $rawHeaders . "\r\n\r\n" . $body;
+
+  // ── Connect via SSL ──
+  $ctx = stream_context_create(['ssl' => [
+    'verify_peer'      => true,
+    'verify_peer_name' => true,
+  ]]);
+  $conn = @stream_socket_client(
+    "ssl://{$smtpHost}:{$smtpPort}",
+    $errno, $errstr, 15,
+    STREAM_CLIENT_CONNECT, $ctx
+  );
+  if (!$conn) return false;
+  stream_set_timeout($conn, 15);
+
+  // Helper: read server response
+  $readReply = function () use ($conn): string {
+    $reply = '';
+    while (($line = fgets($conn, 512)) !== false) {
+      $reply .= $line;
+      if (isset($line[3]) && $line[3] === ' ') break;  // final line: "250 OK"
+    }
+    return $reply;
+  };
+  // Helper: send command & return response
+  $cmd = function (string $command) use ($conn, $readReply): string {
+    fwrite($conn, $command . "\r\n");
+    return $readReply();
+  };
+
+  $ok = false;
+  try {
+    $readReply();                                            // 220 greeting
+    $cmd("EHLO " . gethostname());                           // EHLO
+    $cmd("AUTH LOGIN");                                      // AUTH
+    $cmd(base64_encode($smtpUser));                          // username
+    $authReply = $cmd(base64_encode($smtpPass));             // password
+    if (!str_starts_with($authReply, '235')) {
+      // Auth failed
+      $cmd("QUIT");
+      fclose($conn);
+      return false;
+    }
+    $cmd("MAIL FROM:<{$fromEmail}>");
+    $cmd("RCPT TO:<{$to}>");
+    $dataReply = $cmd("DATA");
+    if (!str_starts_with($dataReply, '354')) {
+      $cmd("QUIT");
+      fclose($conn);
+      return false;
+    }
+    // Send message body — dot-stuff any line starting with "."
+    $lines = explode("\n", str_replace("\r\n", "\n", $message));
+    foreach ($lines as $line) {
+      if (isset($line[0]) && $line[0] === '.') $line = '.' . $line;
+      fwrite($conn, $line . "\r\n");
+    }
+    $endReply = $cmd(".");                                   // end of DATA
+    $ok = str_starts_with($endReply, '250');
+    $cmd("QUIT");
+  } catch (\Throwable $e) {
+    $ok = false;
+  }
+  @fclose($conn);
+  return $ok;
+}
 
 // ---- CSRF token generation ----
 if (empty($_SESSION['csrf_token'])) {
@@ -120,19 +252,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $subject = "{$SUBJECT_PREFIX} ({$service})";
 
-  // ── Send to BOTH business addresses separately (more reliable than CC) ──────
-  $notifHeaders = implode("\r\n", [
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "From: Nexus Live Media <{$MAIL_FROM}>",
-    "Reply-To: {$name} <{$email}>",
-    "Organization: Nexus Live Media",
-    "X-Priority: 3",
-  ]);
+  // ── Send to BOTH business addresses via authenticated SMTP ──────────────
+  // SMTP authentication ensures Hostinger's mail server adds proper DKIM
+  // signatures and SPF alignment, so emails land in Inbox, not Spam.
+  $replyTo = "{$name} <{$email}>";
 
-  $envelopeSender = "-f{$MAIL_FROM}";
-  $ok1 = @mail($BUSINESS_EMAIL, $subject, $notifBody, $notifHeaders, $envelopeSender);
-  $ok2 = @mail($CC_EMAIL,       $subject, $notifBody, $notifHeaders, $envelopeSender);
+  $ok1 = smtp_send(
+    $BUSINESS_EMAIL, $subject, $notifBody,
+    $MAIL_FROM, $MAIL_FROM_NAME, $replyTo,
+    $SMTP_HOST, $SMTP_PORT, $SMTP_USER, $SMTP_PASS
+  );
+  $ok2 = smtp_send(
+    $CC_EMAIL, $subject, $notifBody,
+    $MAIL_FROM, $MAIL_FROM_NAME, $replyTo,
+    $SMTP_HOST, $SMTP_PORT, $SMTP_USER, $SMTP_PASS
+  );
   $ok  = $ok1 || $ok2;   // succeed if at least one delivery was accepted
 
   if ($ok) {
@@ -158,14 +292,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       "— Nexus Live Media Team",
       "nexuslivemedia.com",
     ]);
-    $autoHeaders = implode("\r\n", [
-      "MIME-Version: 1.0",
-      "Content-Type: text/plain; charset=UTF-8",
-      "From: Nexus Live Media <{$MAIL_FROM}>",
-      "Organization: Nexus Live Media",
-      "X-Priority: 3",
-    ]);
-    @mail($email, $autoSubject, $autoBody, $autoHeaders, $envelopeSender);
+    smtp_send(
+      $email, $autoSubject, $autoBody,
+      $MAIL_FROM, $MAIL_FROM_NAME, '',
+      $SMTP_HOST, $SMTP_PORT, $SMTP_USER, $SMTP_PASS
+    );
     // ─────────────────────────────────────────────────────────────────────
 
     // Submission log — stored one level ABOVE public_html (never web-accessible).
