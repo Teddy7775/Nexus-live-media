@@ -126,13 +126,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     "Content-Type: text/plain; charset=UTF-8",
     "From: Nexus Live Media <{$MAIL_FROM}>",
     "Reply-To: {$name} <{$email}>",
-    "Organization: Nexus Live Media",
-    "X-Priority: 3",
+    "X-Mailer: PHP/" . phpversion(),
   ]);
 
-  $envelopeSender = "-f{$MAIL_FROM}";
-  $ok1 = @mail($BUSINESS_EMAIL, $subject, $notifBody, $notifHeaders, $envelopeSender);
-  $ok2 = @mail($CC_EMAIL,       $subject, $notifBody, $notifHeaders, $envelopeSender);
+  $ok1 = @mail($BUSINESS_EMAIL, $subject, $notifBody, $notifHeaders);
+  $ok2 = @mail($CC_EMAIL,       $subject, $notifBody, $notifHeaders);
   $ok  = $ok1 || $ok2;   // succeed if at least one delivery was accepted
 
   if ($ok) {
@@ -162,10 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       "MIME-Version: 1.0",
       "Content-Type: text/plain; charset=UTF-8",
       "From: Nexus Live Media <{$MAIL_FROM}>",
-      "Organization: Nexus Live Media",
-      "X-Priority: 3",
+      "X-Mailer: PHP/" . phpversion(),
     ]);
-    @mail($email, $autoSubject, $autoBody, $autoHeaders, $envelopeSender);
+    @mail($email, $autoSubject, $autoBody, $autoHeaders);
     // ─────────────────────────────────────────────────────────────────────
 
     // Submission log — stored one level ABOVE public_html (never web-accessible).
@@ -1098,7 +1095,7 @@ $error = isset($_GET['error']) ? (string)$_GET['error'] : '';
 
       <!-- Photo Booth tier comparison image -->
       <div class="reveal" style="margin-bottom:22px; border-radius:var(--radius); overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:var(--shadow2)">
-        <img src="photo-booth-tiers.jpg" alt="Photo Booth Tier Comparison — Essential Digital $550/2hrs, Signature Print $950/3hrs (Most Popular), VIP Brand Suite $1,750/4hrs" style="width:100%; display:block; height:auto" loading="lazy" onerror="this.parentElement.style.display='none'" />
+        <img src="photo-booth-tiers.jpg" alt="Photo Booth Tier Comparison — Essential Digital $550/2hrs, Signature Print $950/3hrs (Most Popular), VIP Brand Suite $1,750/4hrs" style="width:100%; display:block; height:auto" loading="lazy" />
       </div>
 
       <div class="booth-grid">
