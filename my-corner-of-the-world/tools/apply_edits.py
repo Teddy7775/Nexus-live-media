@@ -12,7 +12,8 @@ import re
 import sys
 from pathlib import Path
 
-BOOK = Path(__file__).resolve().parents[1] / "books" / "ananya-stolen-flame"
+# usage: python3 tools/apply_edits.py [book-slug]   (default: ananya-stolen-flame)
+BOOK = Path(__file__).resolve().parents[1] / "books" / (sys.argv[1] if len(sys.argv) > 1 else "ananya-stolen-flame")
 SP = "[   ]"
 
 

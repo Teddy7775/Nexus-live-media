@@ -43,7 +43,7 @@ def check_book(P: Project, book: Book) -> tuple[list[str], list[str]]:
     for lang, ms in mss.items():
         ch2 = [s for s in ms.sections if s.id == "ch-02"][0]
         first = strip_tags(_paras(ch2)[0].html)
-        cnt = sum(1 for b in _paras(ch2) if re.match(r"^(Lie number|Mensonge numéro|Mentira número)", strip_tags(b.html)))
+        cnt = sum(1 for b in _paras(ch2) if re.match(r"^(Lie number|Mensonge numéro|Deuxième mensonge|Troisième mensonge|Mentira número)", strip_tags(b.html)))
         notes.append(f"[{lang}] ch-02 opens “{first[:60]}…” and enumerates {cnt + 1} lies (first lie is unnumbered in the text)")
     return errors, notes
 

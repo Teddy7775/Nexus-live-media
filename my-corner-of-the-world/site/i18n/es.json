@@ -162,5 +162,11 @@
  },
  "root": {
   "choose": "Elige tu idioma"
+ },
+ "secslug": {
+  "prologue": "prologo",
+  "epilogue": "epilogo",
+  "glossary": "glosario",
+  "note": "nota"
  }
 }

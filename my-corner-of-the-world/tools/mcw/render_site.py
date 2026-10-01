@@ -50,6 +50,10 @@ class SiteBuilder:
     def seg(self, lang: str, key: str) -> str:
         return self.tx[lang]["seg"][key]
 
+    def sslug(self, lang: str, sid: str) -> str:
+        """URL segment of a reader section (chapters keep ch-NN; front/back matter is localised)."""
+        return self.tx[lang].get("secslug", {}).get(sid, sid)
+
     def path(self, lang: str, *parts: str) -> str:
         p = "/".join([lang, *[x for x in parts if x]])
         return f"{self.base}/{p}/"
@@ -363,7 +367,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         nsample = book.cfg.get("reader", {}).get("sample_chapters", 3)
         allowed = [s for s in readable if access == "full" or s.kind == "prologue" or (s.kind == "chapter" and s.number <= nsample)]
         parts = {s.number: s for s in ms.sections if s.kind == "part"}
-        sec_url = lambda l, sid: self.path(l, self.seg(l, "books"), bs(l), self.seg(l, "read"), sid)
+        sec_url = lambda l, sid: self.path(l, self.seg(l, "books"), bs(l), self.seg(l, "read"), self.sslug(l, sid))
         items = []
         last_part = None
         for s in ms.sections:
@@ -391,7 +395,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
                        "prev": {"url": sec_url(lang, prev.id), "title": prev.title} if prev else None,
                        "next": {"url": sec_url(lang, nxt.id), "title": nxt.title} if nxt else None},
                       (lambda sid: (lambda l: sec_url(l, sid)))(s.id),
-                      f"{lang}/{self.seg(lang, 'books')}/{bs(lang)}/{self.seg(lang, 'read')}/{s.id}/index.html",
+                      f"{lang}/{self.seg(lang, 'books')}/{bs(lang)}/{self.seg(lang, 'read')}/{self.sslug(lang, s.id)}/index.html",
                       f"{(s.label + ' · ') if s.label else ''}{s.title} · {title}", desc, "books", og_image=og_abs, og_type="article")
         # ---- guide page
         facts_html = ""

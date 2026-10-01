@@ -41,6 +41,25 @@ def main():
         from mcw.pipeline import build_epub_all
         for b in books:
             build_epub_all(P, b, langs, a.edition)
+    if a.cmd == "check":
+        from mcw.check import art_report, check_book
+        bad = 0
+        for b in books:
+            errs, notes = check_book(P, b)
+            print(f"== {b.slug}: editorial/structure ==")
+            for n in notes:
+                print("  note:", n)
+            for e in errs:
+                print("  ERROR:", e)
+            bad += len(errs)
+            print(f"== {b.slug}: artwork ==")
+            for r in art_report(b):
+                if r.get("status") == "MISSING":
+                    print(f"  {r['id']:<7} MISSING")
+                    continue
+                flag = "" if r["ok_aspect"] else "  (aspect differs from register)"
+                print(f"  {r['id']:<7} {r['px']:<10} {r['placement']:<16} ~{r['ppi']} ppi{flag}")
+        sys.exit(1 if bad else 0)
     if a.cmd in ("site", "all"):
         from mcw.pipeline import build_site
         build_site(P)
