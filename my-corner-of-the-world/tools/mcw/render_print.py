@@ -128,6 +128,14 @@ class PrintBuilder:
         self.toc_pages: dict[str, int] = {}
         self.constraints: list[tuple[str, str]] = []   # (element id, 'r' recto | 'v' verso) in document order
         self.spacers: set[str] = set()
+        # page-art placement: full-page plates and spreads are moved to the end of the page that holds their
+        # anchor paragraph (never before it), so the text page before a plate is not left nearly empty.
+        self.plate_pos: dict[str, int] = {}       # art id -> index of the block the plate follows
+        self.flow_mode = False                    # True while rendering the text-only "flow" pass
+        self.flow_cands: dict[str, tuple[str, int, list[int]]] = {}
+        self.flow_xy: dict[str, tuple[int, float]] = {}
+        self._flow_ids: list[str] = []
+        self._flow_seen: list[str] = []
         self.out_dir = BUILD / book.slug / "print" / f"{lang}-{edition}"
         self.out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -164,6 +172,16 @@ class PrintBuilder:
         raise SystemExit(
             f"[{self.lang}] anchor for {aid} not found in {sec.id}: “{slot['anchor'][self.lang]}”. "
             "An edit changed the anchor sentence; restore it or update art/register.json.")
+
+    def is_page_art(self, aid: str, slot: dict) -> bool:
+        """True when the picture takes whole pages (plate or spread) instead of sitting inline."""
+        kind = slot["kind"]
+        af = self.art.get(aid)
+        if kind not in ("full", "spread"):
+            return False
+        if af is None:
+            return True
+        return (kind == "spread" and af.aspect > 1.2) or (kind == "full" and af.aspect < 1.0)
 
     def render_art(self, aid: str, slot: dict) -> str:
         af = self.art.get(aid)
@@ -316,14 +334,29 @@ class PrintBuilder:
             op = ""
         # where do illustrations go?
         inserts: dict[int, list[str]] = {}
+        flow_marks: dict[int, str] = {}
         for aid, slot in self.slots_for(sec.id):
             idx = self.locate(sec, aid, slot)
+            if self.is_page_art(aid, slot):
+                if self.flow_mode:      # text-only pass: measure where the blocks after the anchor end
+                    cands = [i for i in range(idx, min(idx + 70, len(sec.blocks))) if sec.blocks[i].kind == "p"]
+                    self.flow_cands[aid] = (sec.id, idx, cands)
+                    for i in cands:
+                        flow_marks[i] = f"fe-{aid}-{i}"
+                    continue
+                idx = self.plate_pos.get(aid, idx)
             inserts.setdefault(idx, []).append(self.render_art(aid, slot))
+            if aid in self.placed:
+                self.placed[aid]["after_block"] = idx
         parts, after_plate = [], False
         cls_extra = " glossary" if sec.kind == "glossary" else (" note-page" if sec.kind == "note" else "")
         body, seg_open = [], False
         for i, b in enumerate(sec.blocks):
-            body.append(self.render_block(b, sec, first_after_plate=after_plate))
+            blk = self.render_block(b, sec, first_after_plate=after_plate)
+            if i in flow_marks and blk.endswith("</p>"):
+                self._flow_seen.append(flow_marks[i])
+                blk = blk[:-4] + f'<a id="{flow_marks[i]}" style="display:inline-block;width:0;height:0"></a></p>'
+            body.append(blk)
             after_plate = False
             for art_html in inserts.get(i, []):
                 is_page = "plate" in art_html.split(">", 1)[0] or 'class="plate' in art_html[:40]
@@ -453,13 +486,14 @@ class PrintBuilder:
 
     def anchor_index(self) -> str:
         """1px invisible links to every parity-constrained id (Chromium only emits destinations that are linked)."""
-        ids = self._all_ids
+        ids = self._all_ids + (self._flow_ids if self.flow_mode else [])
         links = "".join(f'<a href="#{i}" style="display:block;width:1px;height:1px"></a>' for i in ids)
         return f'<div style="position:absolute;left:0;top:0;width:1px;height:{max(1, len(ids))}px;overflow:hidden">{links}</div>'
 
     # ---------- assemble -------------------------------------------------------
     def build_html(self, with_pages: bool) -> tuple[str, list[dict]]:
         self.constraints = []
+        self._flow_ids, self._flow_seen = self._flow_seen, []
         chapters = self.ms.chapters()
         pieces, heads = [], []
         for sec in self.ms.sections:
@@ -512,6 +546,74 @@ class PrintBuilder:
                     out[name] = l["page"]
         doc.close()
         return out
+
+    @staticmethod
+    def read_dests_xy(pdf_path: Path) -> dict[str, tuple[int, float]]:
+        """Named destinations -> (0-based page, distance of the target from the top of the page in pt)."""
+        out: dict[str, tuple[int, float]] = {}
+        doc = fitz.open(pdf_path)
+        H = doc[0].rect.height
+        for page in doc:
+            for l in page.get_links():
+                name, pg, to = l.get("nameddest"), l.get("page", -1), l.get("to")
+                if name and pg >= 0 and to is not None:
+                    out[name] = (pg, H - to.y)
+        doc.close()
+        return out
+
+    def fill_of(self, y_top_pt: float) -> float:
+        """How full the text area is, 0..1, when the last line's baseline sits y_top_pt below the page top."""
+        G = self.geo
+        pr = self.book.cfg["print"]
+        line = pr["body_pt"] * pr["leading"]
+        top = (G.b + G.top) * 72
+        return max(0.0, min(1.0, (y_top_pt - top + 0.3 * line) / (G.text_h * 72)))
+
+    def plate_candidates(self, aid: str) -> list[tuple[int, int, float]]:
+        """(block index, end page, fill of that page) for every block the plate could follow."""
+        _, _, cands = self.flow_cands[aid]
+        out = []
+        for i in cands:
+            k = self.flow_xy.get(f"fe-{aid}-{i}")
+            if k:
+                out.append((i, k[0], self.fill_of(k[1])))
+        return out
+
+    def pick_on_page(self, aid: str, page: int):
+        on = [c for c in self.plate_candidates(aid) if c[1] == page]
+        return max(on, key=lambda c: (c[2], c[0])) if on else None
+
+    def plan_plates(self) -> None:
+        """Choose, for every plate/spread, the block after which it goes.
+
+        Text is first laid out without them; the plate then follows the last block that still fits on the
+        page that ends the anchor paragraph. If that page would stay mostly empty, the next page is used."""
+        self.plate_pos = {}
+        if not any(self.is_page_art(a, s) for a, s in self.book.register["slots"].items()):
+            return
+        self.flow_mode, self.flow_cands = True, {}
+        self._flow_seen, self._flow_ids = [], []
+        self.build_html(False)
+        html, _ = self.build_html(False)
+        flow = self.out_dir / "flow.pdf"
+        self.render_pdf(html, flow)
+        self.flow_xy = self.read_dests_xy(flow)
+        self.flow_mode = False
+        for aid, (_, idx, _) in self.flow_cands.items():
+            cs = self.plate_candidates(aid)
+            if not cs:
+                self.plate_pos[aid] = idx
+                continue
+            pa = cs[0][1]
+            best = self.pick_on_page(aid, pa)
+            if best and best[2] >= 0.70:
+                self.plate_pos[aid] = best[0]
+                continue
+            nxt = self.pick_on_page(aid, pa + 1)
+            if nxt and nxt[2] >= 0.82:
+                self.plate_pos[aid] = nxt[0]
+            else:
+                self.plate_pos[aid] = best[0] if best else idx
 
     def classify(self, doc, dests: dict[str, int]) -> list[dict]:
         N = len(doc)
@@ -656,6 +758,7 @@ class PrintBuilder:
         # base render (no spacers) to learn where every constrained element starts
         self.spacers = set()
         self._all_ids = []
+        self.plan_plates()
         html0, _ = self.build_html(with_pages=False)          # first emission fills self.constraints
         self._all_ids = [e for e, _ in self.constraints]
         html0, _ = self.build_html(with_pages=False)          # second emission now carries the anchor index
@@ -663,6 +766,27 @@ class PrintBuilder:
         self.render_pdf(html0, base)
         d0 = self.read_dests(base)
         self.spacers = self.solve_spacers(d0)
+        # a spread that would need a blank page in front of it moves to the next page break instead
+        for _ in range(2):
+            moved = False
+            for aid in [a for a in self.flow_cands if f"fig-{a}" in self.spacers]:
+                cs = self.plate_candidates(aid)
+                if not cs:
+                    continue
+                alt = self.pick_on_page(aid, cs[0][1] + 1)
+                if alt and alt[0] != self.plate_pos[aid] and alt[2] >= 0.70:
+                    self.plate_pos[aid] = alt[0]
+                    moved = True
+            if not moved:
+                break
+            self.spacers = set()
+            self._all_ids = []
+            self.build_html(with_pages=False)
+            self._all_ids = [e for e, _ in self.constraints]
+            html0, _ = self.build_html(with_pages=False)
+            self.render_pdf(html0, base)
+            d0 = self.read_dests(base)
+            self.spacers = self.solve_spacers(d0)
         html1, _ = self.build_html(with_pages=False)
         pdf1 = self.out_dir / "pass1.pdf"
         self.render_pdf(html1, pdf1)

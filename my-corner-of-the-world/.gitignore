@@ -4,3 +4,4 @@ __pycache__/
 node_modules/
 public_html/api/config.php
 public_html/api/private/
+public_html/

@@ -106,10 +106,11 @@ class CoverBuilder:
         af = self.art.get("AN-C04")
         bw = self.b + self.tw
         if af:
-            ih = bw / af.aspect
+            iw = max(bw, self.H * af.aspect)          # cover-fit: never leave a strip of paper at an edge
+            ih = iw / af.aspect
             top = -(max(ih - self.H, 0)) / 2
             img = (f'<img src="{af.web.resolve().as_uri()}" style="position:absolute;left:0;top:{top:.3f}in;'
-                   f'width:{bw:.3f}in;height:{ih:.3f}in" alt="">')
+                   f'width:{iw:.3f}in;height:{ih:.3f}in" alt="">')
         else:
             img = f'<div style="position:absolute;inset:0;background:{bk.palette["paper"]}"></div>'
             self.warnings.append("AN-C04 artwork missing")
