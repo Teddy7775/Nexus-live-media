@@ -1,0 +1,166 @@
+{
+ "seg": {
+  "books": "livres",
+  "read": "lire",
+  "guide": "guide-decouverte",
+  "parents": "parents-et-enseignants",
+  "about": "a-propos",
+  "contact": "contact",
+  "legal": "mentions-legales"
+ },
+ "nav": {
+  "home": "Accueil",
+  "books": "Les livres",
+  "parents": "Parents et enseignants",
+  "about": "À propos",
+  "contact": "Contact",
+  "legal": "Mentions légales",
+  "menu": "Menu",
+  "language": "Langue",
+  "skip": "Aller au contenu"
+ },
+ "home": {
+  "kicker": "Une collection pour les 9–13 ans",
+  "title": "Quatre jeunes narrateurs. Quatre coins du monde.",
+  "lead": "Des romans en forme de carnet sur les lieux d’où l’on vient et sur les choix qui font ce que l’on devient. Chaque livre peut se lire seul.",
+  "cta_read": "Lire le tome 1 en ligne",
+  "cta_books": "Découvrir la collection",
+  "how_title": "Lisez à votre façon",
+  "how": [
+   {
+    "t": "Lire en ligne",
+    "p": "Le roman entier, gratuit dans votre navigateur, avec les illustrations, un mode de lecture pour toutes les lumières, sans compte ni publicité."
+   },
+   {
+    "t": "Broché et ebook",
+    "p": "Des éditions papier et EPUB en français, en anglais et en espagnol, avec ou sans le guide de découverte."
+   },
+   {
+    "t": "Pour la classe et la famille",
+    "p": "Un guide avec des repères, des questions de discussion et des activités pour chaque groupe de chapitres."
+   }
+  ],
+  "volumes": "La collection",
+  "coming": "Bientôt",
+  "vol": "Tome {n}",
+  "narrator": "Narrateur",
+  "where": "Où et quand",
+  "question": "La question au cœur du livre"
+ },
+ "newsletter": {
+  "title": "Des nouvelles des prochains tomes",
+  "text": "Pour les parents, enseignants et bibliothécaires. Un court message à la parution d’un nouveau tome, rien de plus.",
+  "email": "Adresse e-mail",
+  "consent": "Je suis un adulte (parent, enseignant ou bibliothécaire) et j’accepte de recevoir des nouvelles des prochains tomes. Je peux me désinscrire à tout moment.",
+  "submit": "Tenez-moi au courant",
+  "thanks": "Merci, vous êtes inscrit.",
+  "error": "Un problème est survenu. Vérifiez votre adresse e-mail et réessayez."
+ },
+ "book": {
+  "read": "Lire en ligne",
+  "start": "Commencer la lecture",
+  "continue": "Reprendre la lecture",
+  "download": "Télécharger",
+  "downloads": "Éditions et téléchargements",
+  "ed_story": "Édition roman",
+  "ed_guide": "Roman + guide de découverte",
+  "ed_story_p": "Le roman seul.",
+  "ed_guide_p": "Le roman suivi du guide de découverte (le guide dévoile l’histoire : à lire après le roman).",
+  "epub": "EPUB pour liseuses et téléphones",
+  "paperback": "Broché",
+  "paperback_soon": "Version brochée bientôt disponible",
+  "guide": "Guide de découverte",
+  "guide_p": "Repères, glossaire, conseils de sécurité, questions de discussion et activités pour les lecteurs, les familles et les classes.",
+  "gallery": "Un aperçu",
+  "gallery_note": "Quelques illustrations qui ne dévoilent rien de l’histoire. D’autres apparaissent au fil de la lecture.",
+  "characters": "Qui est qui",
+  "details": "En un coup d’œil",
+  "ages": "Âge",
+  "setting": "Cadre",
+  "time": "Époque",
+  "form": "Forme",
+  "language": "Langue",
+  "spoiler": "Le guide parle de toute l’histoire, y compris de la fin.",
+  "series_label": "Mon coin du monde",
+  "note_label": "Une fiction enracinée dans des lieux réels. Voir « Note documentaire » à la fin du livre.",
+  "read_guide": "Lire le guide en ligne",
+  "age_value": "9–13 ans"
+ },
+ "reader": {
+  "contents": "Sommaire",
+  "prev": "Précédent",
+  "next": "Suivant",
+  "back": "Retour au livre",
+  "smaller": "Texte plus petit",
+  "larger": "Texte plus grand",
+  "light": "Clair",
+  "sepia": "Papier",
+  "dark": "Sombre",
+  "settings": "Réglages de lecture",
+  "progress": "Progression de la lecture",
+  "end": "Vous êtes arrivé à la fin de l’histoire.",
+  "next_chapter": "Chapitre suivant",
+  "chapter": "Chapitre",
+  "open_guide": "Ouvrir le guide de découverte",
+  "sample_end": "Fin de l’aperçu gratuit.",
+  "sample_cta": "Procurez-vous le livre complet en broché ou en ebook."
+ },
+ "guide": {
+  "on_page": "Sur cette page",
+  "title": "Guide de découverte",
+  "spoiler": "Attention, ce guide parle de toute l’histoire, y compris de la fin. Lisez-le après le roman."
+ },
+ "parents": {
+  "title": "Pour les parents et les enseignants",
+  "lead": "Ce qu’il faut savoir sur le livre, comment le lire avec de jeunes lecteurs, et comment ce site protège votre vie privée.",
+  "from_guide": "Extrait du guide de découverte",
+  "privacy_title": "Vie privée, en clair",
+  "privacy": "Ce site n’utilise ni cookies, ni publicité, ni outil d’analyse. Votre position de lecture et vos choix d’affichage sont enregistrés uniquement dans votre navigateur et ne nous sont jamais transmis. On ne demande jamais d’informations personnelles aux enfants ; les formulaires de ce site s’adressent aux parents, enseignants et bibliothécaires.",
+  "safety_title": "Un mot sur la sécurité des cerfs-volants",
+  "safety": "Le livre montre des situations dangereuses à dessein, et montre aussi des adultes qui les gèrent. Lisez la partie sécurité du guide de découverte avant toute activité de cerf-volant, et ne reproduisez jamais ce que font les personnages sur le toit."
+ },
+ "about": {
+  "title": "À propos de la collection",
+  "p1": "Mon coin du monde suit quatre jeunes narrateurs fictifs dans quatre pays, sur trois continents. Chaque livre peut se lire seul, et ils se répondent de façon surprenante.",
+  "p2": "Chaque tome est écrit comme un carnet : des dates, des listes, des choses dites et des choses tues. Les histoires sont inventées ; les lieux, les métiers, les fêtes et les dangers qu’elles décrivent sont réels, et chaque livre se termine par une note qui distingue l’un de l’autre.",
+  "p3": "Les livres s’adressent aux lecteurs de 9 à 13 ans et peuvent se partager avec de plus jeunes enfants comme avec de plus grands lecteurs.",
+  "trio_title": "Une idée, quatre questions",
+  "author_title": "L’auteur"
+ },
+ "contact": {
+  "title": "Contact",
+  "lead": "Pour les parents, enseignants, bibliothécaires et libraires. Cette page n’est pas destinée aux enfants.",
+  "name": "Votre nom",
+  "email": "Adresse e-mail",
+  "message": "Message",
+  "send": "Envoyer le message",
+  "thanks": "Merci, votre message a bien été envoyé.",
+  "error": "Le message n’a pas pu être envoyé. Vérifiez les champs et réessayez.",
+  "consent": "Je suis un adulte et j’accepte que mes coordonnées servent à répondre à ce message.",
+  "direct": "Ou écrivez directement à"
+ },
+ "legal": {
+  "title": "Mentions légales et vie privée",
+  "publisher": "Éditeur",
+  "address": "Adresse",
+  "email": "Contact",
+  "hosting": "Hébergement",
+  "rights": "Les textes et illustrations sont protégés par le droit d’auteur. Tous droits réservés.",
+  "todo": "À compléter avant la mise en ligne",
+  "privacy_h": "Données personnelles",
+  "privacy": "Le site ne dépose aucun cookie et ne charge rien depuis des services tiers. Si vous utilisez un formulaire, nous recevons uniquement ce que vous saisissez (nom, e-mail, message) et ne l’utilisons que pour répondre ou, pour la lettre d’information, pour vous envoyer des nouvelles des prochains tomes. Vous pouvez demander la suppression de vos données à tout moment.",
+  "hosted": "Ce site est hébergé par Hostinger."
+ },
+ "foot": {
+  "tagline": "Fait avec soin pour les lecteurs curieux de 9 à 13 ans.",
+  "copyright": "© {year} {holder}",
+  "rights": "Tous droits réservés."
+ },
+ "e404": {
+  "title": "Page introuvable",
+  "text": "Cette page s’est envolée. Essayez l’accueil ou les livres."
+ },
+ "root": {
+  "choose": "Choisissez votre langue"
+ }
+}

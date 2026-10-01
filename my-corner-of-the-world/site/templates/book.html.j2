@@ -1,0 +1,53 @@
+{% extends "base.html.j2" %}{% import "_macros.j2" as m %}
+{% block main %}
+<section class="book-hero"><div class="wrap">
+  <div class="cover">{{ m.picture(cover, title ~ ': ' ~ subtitle, '(min-width: 52rem) 28rem, 70vw', eager=True) }}</div>
+  <div class="blurb">
+    <p class="kicker">{{ series_name }} · {{ t.home.vol.format(n=volume) }}</p>
+    <h1>{{ title }}</h1><p class="sub">{{ subtitle }}</p>
+    <p class="tagline">{{ tagline }}</p>
+    {% for p in blurb %}<p>{{ p }}</p>{% endfor %}
+    <p class="actions" style="display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.4rem">
+      <a class="btn btn-primary" href="{{ read_url }}" data-continue="{{ slug }}:{{ L }}" data-continue-label="{{ t.book.continue }}">{{ t.book.start }}</a>
+      <a class="btn btn-ghost" href="#downloads">{{ t.book.download }}</a>
+    </p>
+  </div>
+</div></section>
+
+<section class="block alt"><div class="wrap grid" style="grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:2.5rem">
+  <div>
+    <h2>{{ t.book.details }}</h2>
+    <dl class="facts">
+      <dt>{{ t.book.ages }}</dt><dd>{{ t.book.age_value }}</dd>
+      <dt>{{ t.book.setting }}</dt><dd>{{ place }}</dd>
+      <dt>{{ t.book.time }}</dt><dd>{{ time_range }}</dd>
+      <dt>{{ t.book.form }}</dt><dd>{{ form_text }}</dd>
+      <dt>{{ t.book.language }}</dt><dd>{{ lang_name }}</dd>
+    </dl>
+    <p class="warn" style="margin-top:1rem">{{ t.book.note_label }}</p>
+  </div>
+  <div>
+    <h2>{{ t.book.characters }}</h2>
+    <div class="chars">{% for c in characters %}<div class="card"><b>{{ c.name|safe }}</b>{{ c.text|safe }}</div>{% endfor %}</div>
+  </div>
+</div></section>
+
+{% if gallery %}<section class="block"><div class="wrap">
+  <h2>{{ t.book.gallery }}</h2><p class="lead">{{ t.book.gallery_note }}</p>
+  <div class="gallery mt">{% for g in gallery %}<button type="button" data-full="{{ g.full }}" data-cap="{{ g.cap }}"><img src="{{ g.thumb }}" alt="{{ g.alt }}" width="{{ g.w }}" height="{{ g.h }}" loading="lazy" decoding="async"></button>{% endfor %}</div>
+  <dialog class="lb" aria-label="{{ t.book.gallery }}"><button class="x" type="button" aria-label="×">×</button><img alt="" src=""><p></p></dialog>
+</div></section>{% endif %}
+
+<section class="block alt" id="downloads"><div class="wrap">
+  <h2>{{ t.book.downloads }}</h2>
+  <div class="grid g3 mt">
+    {% for e in editions %}<div class="card edition"><h3>{{ e.title }}</h3><p>{{ e.text }}</p>
+      <div class="row">{% if e.epub %}<a class="btn btn-quiet" href="{{ e.epub }}" download>{{ t.book.epub }}</a>{% endif %}
+      {% if e.buy %}<a class="btn btn-primary" href="{{ e.buy }}" rel="noopener">{{ t.book.paperback }}</a>{% else %}<span class="badge soon">{{ t.book.paperback_soon }}</span>{% endif %}</div>
+    </div>{% endfor %}
+    <div class="card edition"><h3>{{ t.book.guide }}</h3><p>{{ t.book.guide_p }}</p><p class="warn">{{ t.book.spoiler }}</p><div class="row"><a class="btn btn-ghost" href="{{ guide_url }}">{{ t.book.read_guide }}</a></div></div>
+  </div>
+</div></section>
+
+<section class="block"><div class="narrow"><h2>{{ t.newsletter.title }}</h2><p class="lead">{{ t.newsletter.text }}</p>{{ m.newsletter(t, u, base, ts) }}</div></section>
+{% endblock %}

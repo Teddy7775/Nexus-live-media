@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ names.en }} · {{ names.fr }} · {{ names.es }}</title>
+<meta name="description" content="{{ desc.en }}">
+{% for l in langs %}<link rel="alternate" hreflang="{{ l }}" href="{{ abs_url(l) }}">
+{% endfor %}<link rel="alternate" hreflang="x-default" href="{{ abs_url('en') }}">
+{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+<link rel="icon" href="{{ base }}/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{ base }}/assets/css/site.css?v={{ ver }}">
+<script>(function(){try{var t=localStorage.getItem('mcw:theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+<main id="main" class="hero" style="min-height:100vh;display:grid;align-items:center" data-auto-lang="{{ langs|join(',') }}" data-base="{{ base }}/">
+<div class="wrap center">
+  {% if cover %}<div class="cover" style="width:min(60%,14rem);margin:0 auto 1.4rem;transform:none">{{ cover|safe }}</div>{% endif %}
+  <p class="kicker">{{ names.en }} · {{ names.fr }} · {{ names.es }}</p>
+  <h1>{{ choose.en }} · {{ choose.fr }} · {{ choose.es }}</h1>
+  <div class="lang-choice">{% for l in langs %}<a href="{{ base }}/{{ l }}/" hreflang="{{ l }}" lang="{{ l }}">{{ lang_names[l] }}</a>{% endfor %}</div>
+  <noscript><p class="mt">{{ desc.en }}</p></noscript>
+</div>
+</main>
+<script src="{{ base }}/assets/js/site.js?v={{ ver }}" defer></script>
+</body></html>

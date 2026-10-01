@@ -2,23 +2,43 @@
   "slug": "ananya-stolen-flame",
   "volume": 1,
   "status": "published",
-  "narrator": {"name": "Ananya Sharma", "age": 12},
-  "place": {"en": "Jaipur, Rajasthan, India", "fr": "Jaipur, Rajasthan, Inde", "es": "Jaipur, Rajastán, India"},
-  "story_dates": {"from": "2024-12-28", "to": "2025-01-29"},
-  "age_range": [9, 13],
+  "narrator": {
+    "name": "Ananya Sharma",
+    "age": 12
+  },
+  "place": {
+    "en": "Jaipur, Rajasthan, India",
+    "fr": "Jaipur, Rajasthan, Inde",
+    "es": "Jaipur, Rajastán, India"
+  },
+  "story_dates": {
+    "from": "2024-12-28",
+    "to": "2025-01-29"
+  },
+  "age_range": [
+    9,
+    13
+  ],
   "year": 2026,
-
   "titles": {
-    "en": {"title": "Ananya’s Notebook", "subtitle": "The Stolen Flame"},
-    "fr": {"title": "Le Vol du Safran Interdit", "subtitle": "Carnet d’Ananya Sharma"},
-    "es": {"title": "El cuaderno de Ananya", "subtitle": "La llama robada"}
+    "en": {
+      "title": "Ananya’s Notebook",
+      "subtitle": "The Stolen Flame"
+    },
+    "fr": {
+      "title": "Le Vol du Safran Interdit",
+      "subtitle": "Carnet d’Ananya Sharma"
+    },
+    "es": {
+      "title": "El cuaderno de Ananya",
+      "subtitle": "La llama robada"
+    }
   },
   "url_slugs": {
     "en": "ananyas-notebook-the-stolen-flame",
     "fr": "le-vol-du-safran-interdit",
     "es": "el-cuaderno-de-ananya-la-llama-robada"
   },
-
   "taglines": {
     "en": "Holding the spool was never the hard part.",
     "fr": "Tenir la bobine n’a jamais été le plus difficile.",
@@ -47,11 +67,34 @@
     "es": "En Jaipur, una niña de doce años sostiene el carrete de su hermano. Luego toma algo que no es suyo. Una novela en forma de cuaderno para lectores de 9 a 13 años."
   },
   "keywords": {
-    "en": ["middle grade novel", "kites", "Jaipur", "Makar Sankranti", "diary novel", "family", "honesty"],
-    "fr": ["roman jeunesse", "cerf-volant", "Jaipur", "Makar Sankranti", "journal intime", "famille", "honnêteté"],
-    "es": ["novela infantil", "cometas", "Jaipur", "Makar Sankranti", "diario", "familia", "honestidad"]
+    "en": [
+      "middle grade novel",
+      "kites",
+      "Jaipur",
+      "Makar Sankranti",
+      "diary novel",
+      "family",
+      "honesty"
+    ],
+    "fr": [
+      "roman jeunesse",
+      "cerf-volant",
+      "Jaipur",
+      "Makar Sankranti",
+      "journal intime",
+      "famille",
+      "honnêteté"
+    ],
+    "es": [
+      "novela infantil",
+      "cometas",
+      "Jaipur",
+      "Makar Sankranti",
+      "diario",
+      "familia",
+      "honestidad"
+    ]
   },
-
   "palette": {
     "paper": "#F2E7D2",
     "plaster": "#C88E82",
@@ -66,31 +109,69 @@
     "ch-01": "#1D1D22",
     "ch-04": "#C66B32"
   },
-
   "editions": [
-    {"id": "story", "guide": false},
-    {"id": "guide", "guide": true}
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
   ],
   "isbn": {
-    "story":  {"en": "", "fr": "", "es": ""},
-    "guide":  {"en": "", "fr": "", "es": ""},
-    "ebook":  {"en": "", "fr": "", "es": ""}
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
   },
-
   "print": {
-    "trim_in": [6, 9],
+    "trim_in": [
+      6,
+      9
+    ],
     "bleed_in": 0.125,
     "bleed_mode": "all",
     "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
     "paper": "cream",
     "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
-    "margins_in": {"top": 0.78, "bottom": 0.9, "inner": 0.85, "outer": 0.65},
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
     "body_pt": 11.5,
     "leading": 1.5
   },
-
   "reader": {
     "access": "full",
     "sample_chapters": 3
-  }
+  },
+  "question": {
+    "en": "Is a win worth anything if it’s built on a lie?",
+    "fr": "Une victoire bâtie sur un mensonge vaut-elle quelque chose ?",
+    "es": "¿Vale algo una victoria construida sobre una mentira?"
+  },
+  "site": {
+    "gallery": [
+      "AN-I01",
+      "AN-I04",
+      "AN-I05",
+      "AN-I06",
+      "AN-I07"
+    ]
+  },
+  "buy_links": {}
 }

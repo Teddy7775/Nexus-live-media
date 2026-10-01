@@ -1,0 +1,27 @@
+{% extends "base.html.j2" %}{% import "_macros.j2" as m %}
+{% block main %}
+<section class="hero"><div class="wrap">
+  <div>
+    <p class="kicker">{{ t.home.kicker }}</p>
+    <h1>{{ t.home.title }}</h1>
+    <p class="lead">{{ t.home.lead }}</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="{{ feat.read_url }}">{{ t.home.cta_read }}</a>
+      <a class="btn btn-ghost" href="{{ u.books }}">{{ t.home.cta_books }}</a>
+    </div>
+  </div>
+  <a class="cover" href="{{ feat.url }}" aria-label="{{ feat.title }}">{{ m.picture(feat.cover, feat.title ~ ': ' ~ feat.subtitle, '(min-width: 52rem) 24rem, 70vw', eager=True) }}</a>
+</div></section>
+<section class="block"><div class="wrap">
+  <h2 class="center">{{ t.home.how_title }}</h2>
+  <div class="grid g3 mt">{% for h in t.home.how %}<div class="card"><h3>{{ h.t }}</h3><p>{{ h.p }}</p></div>{% endfor %}</div>
+</div></section>
+<section class="block alt"><div class="wrap">
+  <h2>{{ t.home.volumes }}</h2>
+  <div class="grid g4 mt">{% for v in volumes %}{{ m.volume_card(v, t) }}{% endfor %}</div>
+</div></section>
+<section class="block"><div class="narrow">
+  <h2>{{ t.newsletter.title }}</h2><p class="lead">{{ t.newsletter.text }}</p>
+  {{ m.newsletter(t, u, base, ts) }}
+</div></section>
+{% endblock %}

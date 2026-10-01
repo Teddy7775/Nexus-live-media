@@ -1,0 +1,28 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<div class="reader-bar"><div class="wrap">
+  <a href="{{ toc_url }}">☰ {{ t.reader.contents }}</a>
+  <span class="sp"></span>
+  <div class="settings"><button type="button" aria-expanded="false" aria-label="{{ t.reader.settings }}">Aa</button>
+    <div class="pop" role="group" aria-label="{{ t.reader.settings }}">
+      <div class="row"><button type="button" data-size="down" aria-label="{{ t.reader.smaller }}">A−</button><button type="button" data-size="up" aria-label="{{ t.reader.larger }}">A+</button></div>
+      <div class="row"><button type="button" data-theme-set="light">{{ t.reader.light }}</button><button type="button" data-theme-set="sepia">{{ t.reader.sepia }}</button><button type="button" data-theme-set="dark">{{ t.reader.dark }}</button></div>
+    </div></div>
+  <div class="progress" role="progressbar" aria-label="{{ t.reader.progress }}"></div>
+</div></div>
+<article class="chapter"><div class="narrow">
+  <header class="opener">
+    {% if part_line %}<div class="lab" style="opacity:.75;margin-bottom:.5rem">{{ part_line }}</div>{% endif %}
+    {% if sec.label %}<div class="lab">{{ sec.label }}</div>{% endif %}
+    {% if sec.number %}<div class="num" aria-hidden="true">{{ sec.number }}</div>{% endif %}
+    <h1>{{ sec.title }}</h1>
+    {% if sec.date %}<div class="date">{{ sec.date }}</div>{% endif %}
+  </header>
+  <div class="prose{% if sec.kind=='glossary' %} glossary{% endif %}" data-book="{{ slug }}" data-lang="{{ L }}" lang="{{ L }}">{{ body|safe }}</div>
+  {% if sample_end %}<div class="card mt center"><p><b>{{ t.reader.sample_end }}</b></p><p>{{ t.reader.sample_cta }}</p><p><a class="btn btn-primary" href="{{ book_url }}#downloads">{{ t.book.download }}</a></p></div>{% endif %}
+  <nav class="pager" aria-label="{{ t.reader.contents }}">
+    {% if prev %}<a rel="prev" href="{{ prev.url }}"><small>{{ t.reader.prev }}</small>{{ prev.title }}</a>{% else %}<span></span>{% endif %}
+    {% if next %}<a rel="next" class="next" href="{{ next.url }}"><small>{{ t.reader.next }}</small>{{ next.title }}</a>{% else %}<a class="next" href="{{ guide_url }}"><small>{{ t.reader.end }}</small>{{ t.reader.open_guide }}</a>{% endif %}
+  </nav>
+</div></article>
+{% endblock %}

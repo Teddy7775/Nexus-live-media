@@ -1,0 +1,11 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<section class="block"><div class="narrow">
+  <p class="kicker">{{ series_name }}</p><h1>{{ t.parents.title }}</h1><p class="lead">{{ t.parents.lead }}</p>
+  <div class="card mt"><h2 style="font-size:1.3rem">{{ t.parents.privacy_title }}</h2><p>{{ t.parents.privacy }}</p></div>
+  <div class="card mt"><h2 style="font-size:1.3rem">{{ t.parents.safety_title }}</h2><p>{{ t.parents.safety }}</p></div>
+  <h2 class="mt">{{ t.parents.from_guide }}</h2>
+  <div class="guide-body" lang="{{ L }}">{{ guide_html|safe }}</div>
+  <p class="mt"><a class="btn btn-ghost" href="{{ guide_url }}">{{ t.book.read_guide }}</a></p>
+</div></section>
+{% endblock %}
