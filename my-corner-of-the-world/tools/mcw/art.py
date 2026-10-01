@@ -25,11 +25,12 @@ Image.MAX_IMAGE_PIXELS = None
 class ArtFile:
     aid: str
     src: Path
-    work: Path          # processed JPEG used by the layout
+    work: Path          # processed JPEG used by the print layout
     w: int
     h: int
     kind: str           # slot kind from the register
     notes: list
+    web: Path = None    # processed JPEG for web/ebook (no print-only vignette)
 
     @property
     def aspect(self) -> float:
@@ -83,6 +84,17 @@ def remove_fold(bgr: np.ndarray, x: int, line_half: int = 3, shadow_span: int = 
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
+def fade_bottom_to_white(bgr: np.ndarray, frac: float) -> np.ndarray:
+    """Dissolve the bottom `frac` of the image into white paper (print vignette for letterboxed panoramas)."""
+    img = bgr.astype(np.float32)
+    h = img.shape[0]
+    n = max(2, int(h * frac))
+    t = np.linspace(0.0, 1.0, n)
+    a = (t * t * (3 - 2 * t))[:, None, None]          # smoothstep 0 -> 1
+    img[h - n:, :, :] = img[h - n:, :, :] * (1 - a) + 255.0 * a
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
 class Art:
     def __init__(self, book: Book):
         self.book = book
@@ -114,9 +126,15 @@ class Art:
             cfg = ov["remove_fold"]
             arr = remove_fold(arr, cfg["x"], cfg.get("line_half", 3), cfg.get("shadow_span", 70))
             notes.append(f"removed baked-in book-fold shadow and line at x={cfg['x']}")
+        # web/ebook copy: all fixes except print-only vignettes
+        web = self.out / f"{aid}.web.jpg"
+        Image.fromarray(cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)).save(web, quality=93, subsampling=0, optimize=True)
+        if ov.get("print_fade_bottom"):
+            arr = fade_bottom_to_white(arr, float(ov["print_fade_bottom"]))
+            notes.append("print copy: bottom edge fades to paper")
         work = self.out / f"{aid}.jpg"
         Image.fromarray(cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)).save(work, quality=95, subsampling=0, optimize=True)
-        af = ArtFile(aid, src, work, im.width, im.height, self.slot(aid)["kind"], notes)
+        af = ArtFile(aid, src, work, im.width, im.height, self.slot(aid)["kind"], notes, web=web)
         self._cache[aid] = af
         return af
 

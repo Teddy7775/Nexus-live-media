@@ -421,7 +421,7 @@ class PrintBuilder:
                 body.append(self.render_table(s.blocks[0]))
                 continue
             gn = f'<span class="gn">{s.number}</span>' if s.number else ""
-            body.append(f'<h2>{gn}{self.T(esc(s.title))}</h2>')
+            body.append(f'<h2 class="{"first" if first else ""}">{gn}{self.T(esc(s.title))}</h2>')
             first = False
             for b in s.blocks:
                 if s.title.lower().startswith(("words from", "quelques mots", "palabras")) and b.kind == "table":
@@ -618,7 +618,7 @@ class PrintBuilder:
             clean.append([lvl, t, pg]); prev = lvl
         doc.set_toc(clean)
         tmp = final.with_suffix(".tmp.pdf")
-        doc.save(tmp, garbage=4, deflate=True, clean=True)
+        doc.save(tmp, garbage=4, deflate=True)
         n = len(doc)
         doc.close()
         shutil.move(tmp, final)

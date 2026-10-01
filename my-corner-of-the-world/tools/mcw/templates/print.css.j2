@@ -88,6 +88,8 @@ em{ font-style:italic; }
 .opener.plain .ttl{ margin-top:.16in; }
 .opener + p, .opener + .seg > p:first-child{ text-indent:0; }
 .opener + p::first-letter{ font:600 3.05em/.82 "Literata"; float:left; padding:.06em .09em 0 0; color:var(--kes); }
+.glossary .opener + p::first-letter{ all:unset; }
+.glossary .opener + p{ text-indent:0; }
 .noind{ text-indent:0; }
 .after-plate{ text-indent:0; }
 
@@ -155,6 +157,7 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .guide table.kv td:first-child{ width:23%; font-weight:600; color:var(--indigo); }
 .guide .intro{ font:italic 400 10pt/1.45 "Literata"; color:var(--petrol); margin-bottom:.7em; }
 .guide .lead-q{ font-weight:600; color:var(--indigo); margin-top:.9em; }
+.guide h2.first{ break-before:auto; margin-top:.28in; }
 .guide a{ color:var(--petrol); text-decoration:none; overflow-wrap:anywhere; }
 .guide .src li{ font-size:8.6pt; line-height:1.35; }
 .guide .gloss td:nth-child(2){ font-size:10pt; white-space:nowrap; }

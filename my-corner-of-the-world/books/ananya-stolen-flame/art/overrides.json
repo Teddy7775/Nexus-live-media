@@ -1,4 +1,4 @@
 {
-  "AN-I13": {"remove_fold": {"x": 1000, "line_half": 3, "shadow_span": 70}},
-  "AN-I14": {"remove_fold": {"x": 1000, "line_half": 3, "shadow_span": 70}}
+  "AN-I13": {"remove_fold": {"x": 1000, "line_half": 3, "shadow_span": 70}, "print_fade_bottom": 0.14},
+  "AN-I14": {"remove_fold": {"x": 1000, "line_half": 3, "shadow_span": 70}, "print_fade_bottom": 0.14}
 }
