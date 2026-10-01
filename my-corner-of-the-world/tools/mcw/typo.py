@@ -15,7 +15,7 @@ from functools import lru_cache
 import pyphen
 
 NBSP = "\u00a0"
-NNBSP = "\u202f"
+NNBSP = "\u00a0"  # narrow nbsp (U+202F) is missing from the bundled fonts; use the regular nbsp
 SHY = "\u00ad"
 TAG_SPLIT = re.compile(r"(<[^>]+>)")
 DEVA = re.compile(r"([\u0900-\u097F]+(?:[\s\u00a0]+[\u0900-\u097F]+)*)")

@@ -28,36 +28,8 @@
 @page :left  { margin: {{ m_top }}in {{ m_in_l }}in {{ m_bot }}in {{ m_out_l }}in; }
 /* ^ for :left the *outer* edge is the left edge; the names above are mirrored on purpose */
 
-/* default body pages: folio at the outer bottom corner */
-@page :right { @bottom-right { content: counter(page); font: 600 8.6pt "Nunito Sans", sans-serif; color: var(--stain); vertical-align: middle; } }
-@page :left  { @bottom-left  { content: counter(page); font: 600 8.6pt "Nunito Sans", sans-serif; color: var(--stain); vertical-align: middle; } }
-
-/* pages without furniture */
 @page plate { margin: 0; }
 @page spread { margin: 0; }
-
-{% for c in chapters %}
-/* running heads for {{ c.id }} */
-@page {{ c.pg }}:left  { @top-left  { content: "{{ book_title_css }}"; font: 600 7.4pt "Nunito Sans", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--stain); vertical-align: middle; } }
-@page {{ c.pg }}:right { @top-right { content: "{{ c.head_css }}";       font: 600 7.4pt "Nunito Sans", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--stain); vertical-align: middle; } }
-@page {{ c.pg }}:first { @top-left { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-right { content: none; } }
-@page {{ c.pg }}x:left  { @top-left  { content: "{{ book_title_css }}"; font: 600 7.4pt "Nunito Sans", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--stain); vertical-align: middle; } }
-@page {{ c.pg }}x:right { @top-right { content: "{{ c.head_css }}";       font: 600 7.4pt "Nunito Sans", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--stain); vertical-align: middle; } }
-{% endfor %}
-
-/* furniture off */
-@page front:left  { @bottom-left  { content: none; } }
-@page front:right { @bottom-right { content: none; } }
-@page part:left   { @bottom-left  { content: none; } }
-@page part:right  { @bottom-right { content: none; } }
-@page guide-title:left  { @bottom-left  { content: none; } }
-@page guide-title:right { @bottom-right { content: none; } }
-@page plate:left  { @bottom-left  { content: none; } }
-@page plate:right { @bottom-right { content: none; } }
-@page spread:left  { @bottom-left  { content: none; } }
-@page spread:right { @bottom-right { content: none; } }
-@page blank:left  { @bottom-left  { content: none; } }
-@page blank:right { @bottom-right { content: none; } }
 
 /* ---------- base ----------------------------------------------------------- */
 *{ box-sizing: border-box; }
@@ -69,8 +41,8 @@ h1,h2,h3,h4{ font-weight:600; margin:0; }
 em{ font-style:italic; }
 
 /* ---------- front matter ---------------------------------------------------- */
-.front{ page: front; break-before: right; height: {{ text_h }}in; position:relative; }
-.front.verso{ break-before: left; }
+.front{ break-before: page; height: {{ text_h }}in; position:relative; }
+.front.verso{ break-before: page; }
 .halftitle{ text-align:center; padding-top:2.6in; }
 .halftitle .series{ font:700 8.5pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); margin-bottom:1.1em; }
 .halftitle .ttl{ font:600 25pt/1.12 "Literata"; color:var(--indigo); }
@@ -84,10 +56,12 @@ em{ font-style:italic; }
 .copyright{ font:400 8pt/1.5 "Nunito Sans"; color:#4b423b; position:absolute; bottom:.3in; left:0; right:0; }
 .copyright p{ text-indent:0; text-align:left; margin:0 0 .5em; hyphens:manual; }
 .todo{ background:#ffe9a8; color:#7a3b00; padding:0 .25em; border-radius:2pt; }
-.toc{ break-before:right; page: front; }
-.toc h2{ font:700 9pt "Nunito Sans"; letter-spacing:.26em; text-transform:uppercase; color:var(--kes); text-align:center; margin:.35in 0 .32in; }
-.toc .part{ font:700 8pt "Nunito Sans"; letter-spacing:.18em; text-transform:uppercase; color:var(--petrol); margin:1.05em 0 .25em; }
-.toc .row{ display:flex; align-items:baseline; gap:.45em; font-size:10.4pt; line-height:1.55; }
+.toc{ break-before:page; }
+.toc a{ color:inherit; text-decoration:none; }
+.toc a.part{ display:block; }
+.toc h2{ font:700 9pt "Nunito Sans"; letter-spacing:.26em; text-transform:uppercase; color:var(--kes); text-align:center; margin:.3in 0 .26in; }
+.toc .part{ font:700 7.8pt "Nunito Sans"; letter-spacing:.18em; text-transform:uppercase; color:var(--petrol); margin:.85em 0 .2em; }
+.toc .row{ display:flex; align-items:baseline; gap:.45em; font-size:9.8pt; line-height:1.38; }
 .toc .row .n{ width:1.55em; color:var(--kes); font:700 9pt "Nunito Sans"; flex:none; text-align:right; }
 .toc .row .t{ flex:none; }
 .toc .row .dots{ flex:1; border-bottom:1.1pt dotted #b9a995; transform:translateY(-.25em); }
@@ -95,13 +69,14 @@ em{ font-style:italic; }
 .toc .row.plain .n{ visibility:hidden; }
 
 /* ---------- parts & chapter openers -------------------------------------- */
-.partpage{ page: part; break-before: left; height:{{ text_h }}in; position:relative; text-align:center; padding-top:2.35in; }
+.partpage{ break-before: page; height:{{ text_h }}in; position:relative; text-align:center; padding-top:2.35in; }
 .partpage .lab{ font:700 9pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
 .partpage .big{ font:600 28pt/1.12 "Literata"; color:var(--indigo); margin:.28in .2in .1in; }
 .partpage .orn{ width:1.4in; height:.42in; margin:.34in auto 0; }
 .partpage .rng{ margin-top:.35in; font:italic 400 10.5pt "Literata"; color:var(--stain); }
 
-.chapter{ break-before: right; }
+.chapter{ break-before: page; }
+.spacer{ break-before: page; height: 1px; }
 .chapter.nobreak{ break-before:auto; }
 .chapter > .seg{ }
 .opener{ text-align:center; padding-top:{{ opener_top }}in; margin-bottom:.46in; }
@@ -146,7 +121,7 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .plate{ page: plate; position:relative; width:{{ PW }}in; height:{{ PH }}in; overflow:hidden; break-before: page; break-after: page; margin:0; }
 .plate img{ position:absolute; display:block; }
 .plate.missing{ background:#fbf5ea; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--stain); font:600 10pt/1.6 "Nunito Sans"; }
-.spread-l{ page: spread; break-before: left; }
+.spread-l{ page: spread; }
 .spread-r{ page: spread; }
 .seg{ }
 
@@ -154,14 +129,14 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .glossary p{ text-indent:0; text-align:left; margin:0 0 .5em; font-size:10.4pt; line-height:1.42; hyphens:manual; }
 .glossary p strong{ font:700 9.6pt "Nunito Sans"; color:var(--indigo); }
 .note-page p{ text-indent:0; margin:0 0 .75em; }
-.endpage{ page: front; break-before: right; text-align:center; padding-top:2.2in; }
+.endpage{ break-before: page; text-align:center; padding-top:2.2in; }
 .endpage h3{ font:700 9pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); margin-bottom:.4in; }
 .endpage .it{ margin:.2in 0; font-size:10.8pt; line-height:1.4; }
 .endpage .it em{ color:var(--indigo); font-style:italic; }
 .endpage .it small{ display:block; font:600 8pt "Nunito Sans"; color:var(--stain); letter-spacing:.06em; margin-top:.1em; }
 
 /* ---------- guide edition -------------------------------------------------- */
-.guide-title{ page: guide-title; break-before:right; height:{{ text_h }}in; text-align:center; padding-top:2.1in; }
+.guide-title{ break-before:page; height:{{ text_h }}in; text-align:center; padding-top:2.1in; }
 .guide-title .lab{ font:700 8.6pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
 .guide-title .big{ font:600 27pt/1.1 "Literata"; color:var(--indigo); margin:.22in 0 .12in; }
 .guide-title .sub{ font:italic 400 11.5pt/1.45 "Literata"; color:var(--petrol); margin:0 .4in; }
@@ -170,7 +145,6 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .guide p{ text-indent:0; text-align:left; margin:0 0 .55em; hyphens:manual; }
 .guide h2{ break-before:page; break-after:avoid; font:600 17pt/1.2 "Literata"; color:var(--indigo); margin:.1in 0 .16in; padding-bottom:.1in; border-bottom:1.4pt solid var(--pale); }
 .guide h2 .gn{ color:var(--kes); margin-right:.35em; font-family:"Nunito Sans"; font-weight:800; }
-.guide h2.first{ break-before:right; }
 .guide h3{ break-after:avoid; font:700 8.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--petrol); margin:1.1em 0 .4em; }
 .guide ul,.guide ol{ margin:.2em 0 .7em; padding-left:1.3em; }
 .guide li{ margin:.22em 0; text-align:left; hyphens:manual; }
