@@ -36,9 +36,10 @@ Chromium is driven through Playwright. If the browser is not where Playwright ex
 
 ### Proof vs final builds
 
-Without `--final`, a missing illustration or author name is replaced by a clearly marked placeholder
-so you can still review the layout. With `--final`, the build **stops** instead of printing a placeholder.
-Use `--final` only for the files you upload to a printer.
+The default build is a **proof**: a missing author name, publisher or ISBN is shown as a highlighted
+placeholder so the layout can be reviewed. `--final` is for the files you upload to a printer. It **stops**,
+with a list, if the author name is empty, an illustration is missing, or any picture would print below
+250 ppi (`--allow-lowres` overrides the last check; use it only knowingly). Final files omit every placeholder.
 
 ## Layout of the repository
 

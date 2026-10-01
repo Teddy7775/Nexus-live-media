@@ -18,7 +18,28 @@ def _meta_path(book: Book, lang: str, ed: str) -> Path:
     return BUILD / book.slug / "print" / f"{lang}-{ed}" / "meta.json"
 
 
-def build_print_all(P: Project, book: Book, langs, edition: str, mode: str):
+MIN_PPI = 250
+
+
+def final_gate(P: Project, book: Book, allow_lowres: bool = False) -> None:
+    """--final: stop with a clear list instead of silently producing a file that is not ready for a printer."""
+    from .check import art_report
+    problems = []
+    if not P.series.get("author", {}).get("name"):
+        problems.append("series.json: author.name is empty (it prints on the covers and title page)")
+    for r in art_report(book):
+        if r.get("status") == "MISSING":
+            problems.append(f"{r['id']}: artwork missing")
+        elif r["ppi"] < MIN_PPI and not allow_lowres:
+            problems.append(f"{r['id']}: only ~{r['ppi']} ppi at its printed size ({r['px']} px); need >= {MIN_PPI} (art/final/ master, or --allow-lowres)")
+    if problems:
+        raise SystemExit("Cannot make a final print build:\n  - " + "\n  - ".join(problems)
+                         + "\nUse the default (proof) build to review layout with placeholders.")
+
+
+def build_print_all(P: Project, book: Book, langs, edition: str, mode: str, allow_lowres: bool = False):
+    if mode == "final":
+        final_gate(P, book, allow_lowres)
     from .render_print import PrintBuilder
     dest = RELEASE / book.slug / "print"
     for lang in langs:
@@ -36,7 +57,9 @@ def build_print_all(P: Project, book: Book, langs, edition: str, mode: str):
                 print("   !", w)
 
 
-def build_covers_all(P: Project, book: Book, langs, edition: str, mode: str):
+def build_covers_all(P: Project, book: Book, langs, edition: str, mode: str, allow_lowres: bool = False):
+    if mode == "final":
+        final_gate(P, book, allow_lowres)
     from .render_cover import CoverBuilder
     dest = RELEASE / book.slug / "covers"
     for lang in langs:

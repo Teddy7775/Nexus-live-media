@@ -1,26 +1,29 @@
-# Work in progress: My Corner of the World, Volume 1 (Ananya's Notebook)
+# Status: My Corner of the World, Volume 1 (Ananya’s Notebook)
 
-_This file is the handoff note. It is updated at every commit so nothing lives only in a chat._
+_Handoff note, updated at each commit so nothing lives only in a chat._
 
-## Done so far
-- Repo skeleton under `my-corner-of-the-world/` (the existing Nexus `index.php` at the repo root is untouched).
-- Sources preserved verbatim: `books/ananya-stolen-flame/manuscript/original/{en,fr,es}.md`, `guide/original/{en,fr,es}.md`, dossier + register under `docs/source/`.
-- All 17 illustrations recovered from the chat session and filed under their register names in `art/source/` (+ one alternate of AN-I04). They are the chat-resized copies (max 2000 px), **not print masters**.
-- `art/register.json`: 17 slots, EN/FR/ES alt text and scene titles, per-language anchor sentences.
-- `series.json`, `book.json` (titles, blurbs, palette, print spec, editions: story / story+guide).
-- Parser (`tools/mcw/mdparse.py`) for manuscripts + guides, typography (`typo.py`), art loader with fold-line removal (`art.py`).
-- Print interior renderer (`render_print.py` + `templates/print.css.j2`), first EN render = 156 pages.
+## Delivered (all rebuilt from source by `python3 build.py all`)
+- **Print interiors, 6**: EN / FR / ES × story / story + Discovery Guide, 6 × 9 in with bleed, 156–186 pages, fonts embedded, bookmarks, clickable contents, even page count.
+  Full-page plates and spreads sit at the end of the page that holds their anchor paragraph, so no text page before a picture is left nearly empty.
+- **Cover wraps, 6** (print PDF, proof PDF with guides, front PNG): spine computed from each interior’s real page count.
+- **EPUB 3, 6**: EPUBCheck valid, 0 messages (`docs/PREFLIGHT.md`).
+- **Website** (`public_html/`, zip in `release/`): EN/FR/ES, reader, Discovery Guide, parents page, forms (PHP), sitemap/hreflang/JSON-LD, README-DEPLOY for Hostinger. 96 pages.
+- **Editorial pass**: 85 logged edits (`books/ananya-stolen-flame/docs/EDIT_LOG.md`), originals preserved verbatim.
+- **Docs**: `README.md`, `docs/ILLUSTRATION_AUDIT.md`, `docs/PREFLIGHT.md`, `books/_template/README.md`.
 
-## Known issues being fixed next
-- Running heads/folios: Chromium `@page :first` is unreliable, so heads/folios will be drawn as a vector overlay after layout (contents links give page targets).
-- FR/ES masters need markup normalisation (bullets, italic notes) to match EN.
+## Not final until the author supplies (cannot be invented)
+author / pen name, publisher or imprint, ISBNs (one per language and format), domain + contact email,
+print-master artwork (300 ppi, see `docs/ILLUSTRATION_AUDIT.md`), printer choice (KDP vs IngramSpark:
+`bleed_mode`, spine factor). Proof files show highlighted placeholders for the missing items; `--final` refuses to build with them.
 
-## Still to do
-1. Editorial pass EN/FR/ES (human-voice line edit, keep the 15 anchor sentences, log every change).
-2. Cover wrap per language/edition (spine from real page count), front-cover typography.
-3. EPUB3 (6 files).
-4. Website (EN/FR/ES), PHP handlers, Hostinger README.
-5. QA + preflight report.
+## Decisions to confirm
+- Lie count: the manuscripts and guides now consistently say **four** lies in chapter 2 (the original FR/ES text said “three” while listing four). Reversible in `edits/`.
+- Ananya’s volume number: “first volume” everywhere (the validation note called it the third book).
+- Age range 9–13 (the art dossier says 10–14).
+- Tagline, blurbs, short descriptions and site copy are proposals written in this project.
+- “Upcoming volumes” cards on the site come from `series.json` (`visible: true`); hide them if the other titles are not public yet.
 
-## Inputs only the author can supply (cannot be invented)
-author/pen name, publisher/imprint, ISBNs, domain + contact email, printer (spine/bleed template), print-master artwork.
+## Open items / ideas
+- Replace the supplied pictures with 300 ppi masters in the registered aspect ratios (five slots need re-generation: see audit) and run `python3 build.py all --final`.
+- Add “43” / “Redo 43. Do not cut.” lettering to AN-I03 and AN-I09 once the final art exists.
+- A deeper line edit is possible but changes the author’s text; measured effect of the current pass is small (see README, “AI detection and disclosure”).
