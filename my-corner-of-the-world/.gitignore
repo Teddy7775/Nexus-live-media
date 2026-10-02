@@ -1,0 +1,7 @@
+build/
+__pycache__/
+*.pyc
+node_modules/
+public_html/api/config.php
+public_html/api/private/
+public_html/

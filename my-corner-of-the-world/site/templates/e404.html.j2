@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>404</title><meta name="robots" content="noindex">
+<link rel="stylesheet" href="{{ base }}/assets/css/site.css?v={{ ver }}"><link rel="icon" href="{{ base }}/assets/img/favicon.svg" type="image/svg+xml"></head>
+<body><main class="hero" style="min-height:100vh;display:grid;align-items:center"><div class="wrap center">
+<p class="kicker">404</p><h1>{{ tx.en.title }} · {{ tx.fr.title }} · {{ tx.es.title }}</h1>
+<div class="lang-choice">{% for l in langs %}<a href="{{ base }}/{{ l }}/" lang="{{ l }}">{{ tx[l].text }}</a>{% endfor %}</div></div></main></body></html>

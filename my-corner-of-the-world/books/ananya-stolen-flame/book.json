@@ -1,0 +1,203 @@
+{
+  "slug": "ananya-stolen-flame",
+  "volume": 1,
+  "status": "published",
+  "narrator": {
+    "name": "Ananya Sharma",
+    "age": 12,
+    "short": "Ananya"
+  },
+  "place": {
+    "en": "Jaipur, Rajasthan, India",
+    "fr": "Jaipur, Rajasthan, Inde",
+    "es": "Jaipur, Rajastán, India"
+  },
+  "story_dates": {
+    "from": "2024-12-28",
+    "to": "2025-01-29"
+  },
+  "age_range": [
+    9,
+    13
+  ],
+  "year": 2026,
+  "titles": {
+    "en": {
+      "title": "Ananya’s Notebook",
+      "subtitle": "The Stolen Flame"
+    },
+    "fr": {
+      "title": "Le Vol du Safran Interdit",
+      "subtitle": "Carnet d’Ananya Sharma"
+    },
+    "es": {
+      "title": "El cuaderno de Ananya",
+      "subtitle": "La llama robada"
+    }
+  },
+  "url_slugs": {
+    "en": "ananyas-notebook-the-stolen-flame",
+    "fr": "le-vol-du-safran-interdit",
+    "es": "el-cuaderno-de-ananya-la-llama-robada"
+  },
+  "taglines": {
+    "en": "Holding the spool was never the hard part.",
+    "fr": "Tenir la bobine n’a jamais été le plus difficile.",
+    "es": "Sostener el carrete nunca fue lo difícil."
+  },
+  "blurbs": {
+    "en": [
+      "Ananya has held her brother’s kite spool for three years. Rohan flies. She follows orders.",
+      "Then Rohan comes home with eight stitches in his hand and a story that doesn’t add up, and the Makar Sankranti duel is two weeks away. Ananya wants to fly too. All she needs is a color worth seeing, and one square of saffron cotton in her father’s workshop that isn’t hers to take.",
+      "A novel about kites, cloth, a line nobody should cross, and what it costs to be seen."
+    ],
+    "fr": [
+      "Depuis trois ans, Ananya tient la bobine de son frère. Rohan fait voler. Elle obéit.",
+      "Puis Rohan rentre avec huit points de suture à la main et une histoire qui ne tient pas debout, et le duel de Makar Sankranti n’est plus que dans deux semaines. Ananya veut voler, elle aussi. Il lui faut une couleur qui se voie de loin, et un carré de coton safran, dans l’atelier de son père, qui n’est pas à elle.",
+      "Un roman de cerfs-volants, de tissu, d’un fil qu’il ne faut pas franchir, et de ce que coûte le désir d’être vue."
+    ],
+    "es": [
+      "Desde hace tres años, Ananya sostiene el carrete de su hermano. Rohan vuela. Ella obedece.",
+      "Entonces Rohan llega a casa con ocho puntos en la mano y una historia que no cuadra, y el duelo de Makar Sankranti está a dos semanas. Ananya también quiere volar. Necesita un color que se vea de lejos, y un cuadro de algodón color azafrán, en el taller de su papá, que no es suyo.",
+      "Una novela de cometas, de tela, de un hilo que nunca se debe cruzar y de lo que cuesta querer ser vista."
+    ]
+  },
+  "short_descriptions": {
+    "en": "A twelve-year-old holds her brother’s kite spool in Jaipur. Then she takes something that isn’t hers. A novel in notebook form for readers aged 9 to 13.",
+    "fr": "À Jaipur, une fille de douze ans tient la bobine de son frère. Puis elle prend ce qui n’est pas à elle. Un roman en forme de carnet, pour les 9-13 ans.",
+    "es": "En Jaipur, una niña de doce años sostiene el carrete de su hermano. Luego toma algo que no es suyo. Una novela en forma de cuaderno para lectores de 9 a 13 años."
+  },
+  "keywords": {
+    "en": [
+      "middle grade novel",
+      "kites",
+      "Jaipur",
+      "Makar Sankranti",
+      "diary novel",
+      "family",
+      "honesty"
+    ],
+    "fr": [
+      "roman jeunesse",
+      "cerf-volant",
+      "Jaipur",
+      "Makar Sankranti",
+      "journal intime",
+      "famille",
+      "honnêteté"
+    ],
+    "es": [
+      "novela infantil",
+      "cometas",
+      "Jaipur",
+      "Makar Sankranti",
+      "diario",
+      "familia",
+      "honestidad"
+    ]
+  },
+  "palette": {
+    "paper": "#F2E7D2",
+    "plaster": "#C88E82",
+    "petrol": "#315768",
+    "indigo": "#35445D",
+    "kesariya": "#C66B32",
+    "ember": "#A13F30",
+    "pale": "#DDA16C",
+    "stain": "#805F4D"
+  },
+  "chapter_swatches": {
+    "ch-01": "#1D1D22",
+    "ch-04": "#C66B32"
+  },
+  "editions": [
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
+  ],
+  "isbn": {
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
+  },
+  "print": {
+    "trim_in": [
+      6,
+      9
+    ],
+    "bleed_in": 0.125,
+    "bleed_mode": "all",
+    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "cream",
+    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
+    "body_pt": 11.5,
+    "leading": 1.5
+  },
+  "reader": {
+    "access": "full",
+    "sample_chapters": 3
+  },
+  "question": {
+    "en": "Is a win worth anything if it’s built on a lie?",
+    "fr": "Une victoire bâtie sur un mensonge vaut-elle quelque chose ?",
+    "es": "¿Vale algo una victoria construida sobre una mentira?"
+  },
+  "site": {
+    "gallery": [
+      "AN-I01",
+      "AN-I04",
+      "AN-I05",
+      "AN-I06",
+      "AN-I07"
+    ]
+  },
+  "buy_links": {},
+  "parents_note": {
+    "en": {
+      "title": "A note on kite safety",
+      "text": "The book shows dangerous situations on purpose, and also shows adults handling them. Please read the safety section of the Discovery Guide before any kite-flying activity, and never copy what the characters do on the roof."
+    },
+    "fr": {
+      "title": "Un mot sur la sécurité des cerfs-volants",
+      "text": "Le livre montre des situations dangereuses à dessein, et montre aussi des adultes qui les gèrent. Lisez la partie sécurité du guide de découverte avant toute activité de cerf-volant, et ne reproduisez jamais ce que font les personnages sur le toit."
+    },
+    "es": {
+      "title": "Una nota sobre la seguridad con cometas",
+      "text": "El libro muestra situaciones peligrosas a propósito, y también muestra a personas adultas que las manejan. Lee la sección de seguridad de la guía de descubrimiento antes de cualquier actividad con cometas y nunca copies lo que hacen los personajes en la azotea."
+    }
+  },
+  "age_label": {
+    "en": "9–13",
+    "fr": "9–13 ans",
+    "es": "9–13 años"
+  },
+  "checks": {
+    "lies": true
+  },
+  "design": {
+    "guide_flow": true
+  }
+}

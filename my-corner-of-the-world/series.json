@@ -1,0 +1,93 @@
+{
+  "id": "my-corner-of-the-world",
+  "names": {
+    "en": "My Corner of the World",
+    "fr": "Mon coin du monde",
+    "es": "Mi rincón del mundo"
+  },
+  "descriptions": {
+    "en": "My Corner of the World follows four fictional young narrators in four countries on three continents. Each book can be read on its own, and they speak to each other in surprising ways.",
+    "fr": "Mon coin du monde suit quatre jeunes narrateurs fictifs dans quatre pays, sur trois continents. Chaque livre peut se lire seul, et ils se répondent de façon surprenante.",
+    "es": "Mi rincón del mundo sigue a cuatro jóvenes narradores ficticios en cuatro países de tres continentes. Cada libro se puede leer por separado, y entre ellos se hablan de maneras sorprendentes."
+  },
+  "languages": [
+    "en",
+    "fr",
+    "es"
+  ],
+  "default_language": "en",
+  "language_names": {
+    "en": "English",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "locales": {
+    "en": "en_US",
+    "fr": "fr_FR",
+    "es": "es_MX"
+  },
+  "site": {
+    "url": "",
+    "url_note": "Set to your final https:// address (no trailing slash) before the production build, e.g. https://mycorneroftheworld.com",
+    "contact_email": "",
+    "analytics": "none"
+  },
+  "publisher": {
+    "name": "",
+    "address": "",
+    "copyright_holder": "",
+    "copyright_year": 2026
+  },
+  "author": {
+    "name": "",
+    "note": "Leave empty until the approved author or pen name is decided. Print covers and title pages show a clearly marked placeholder in PROOF files and print nothing in PRINT files."
+  },
+  "books": [
+    "ananya-stolen-flame",
+    "anastasiya-echo"
+  ],
+  "upcoming": [
+    {
+      "id": "sokha",
+      "visible": true,
+      "titles": {
+        "en": "Sokha’s Diary: The Road to the Bell",
+        "fr": "Le Journal de Sokha : Le chemin de la cloche",
+        "es": "El diario de Sokha: El camino de la campana"
+      },
+      "narrator": "Sokha, 12",
+      "where": {
+        "en": "Banteay Meanchey, Cambodia, spring 2025",
+        "fr": "Banteay Meanchey, Cambodge, printemps 2025",
+        "es": "Banteay Meanchey, Camboya, primavera de 2025"
+      },
+      "question": {
+        "en": "How do you help without taking over?",
+        "fr": "Comment aider sans décider à la place de l’autre ?",
+        "es": "¿Cómo se ayuda sin decidir por el otro?"
+      },
+      "accent": "#8A6B2F"
+    },
+    {
+      "id": "lamine",
+      "visible": true,
+      "titles": {
+        "en": "The Drum and the Ball: Lamine’s Journal",
+        "fr": "Le Tambour et le Ballon : Le journal de Lamine NDiop",
+        "es": "El tambor y el balón: El diario de Lamine"
+      },
+      "narrator": "Lamine, 12",
+      "where": {
+        "en": "Bambali, Senegal, early 2024",
+        "fr": "Bambali, Sénégal, début 2024",
+        "es": "Bambali, Senegal, principios de 2024"
+      },
+      "question": {
+        "en": "Can you follow your dream and still honor where you come from?",
+        "fr": "Peut-on suivre son rêve et honorer d’où l’on vient ?",
+        "es": "¿Se puede seguir un sueño y honrar de dónde vienes?"
+      },
+      "accent": "#2F6B4F"
+    }
+  ]
+}

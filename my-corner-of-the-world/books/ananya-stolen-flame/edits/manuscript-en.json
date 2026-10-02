@@ -1,0 +1,155 @@
+[
+ {
+  "id": "EN-01",
+  "kind": "fix",
+  "find": "I didn’t know him when he’s ashamed.",
+  "replace": "I had never seen him ashamed.",
+  "why": "Tense slip (“he’s”); the new line also states what the sentence means (she knew him proud, never ashamed).",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-02",
+  "kind": "consistency",
+  "find": "That night, I took down the copy of the duel poster I had drawn and pinned it on my bedroom wall.",
+  "replace": "That night, I pinned the copy of the duel poster I had drawn on my bedroom wall.",
+  "why": "“took down … and pinned it” contradicts itself; FR/ES said she took it down. All three now say she pins it up.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-03",
+  "kind": "typography",
+  "find": "“Okay. There are a lot of “worst” parts.”",
+  "replace": "“Okay. There are a lot of ‘worst’ parts.”",
+  "why": "Nested quotation marks: inner quotes must be single.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-04",
+  "kind": "fix",
+  "find": "His silence changed shape. It wasn’t the locked silence he had kept in front of our parents anymore. It was the silence of a door left open by a crack.",
+  "replace": "His silence changed shape. The locked silence he had kept in front of our parents was gone. What was left was the silence of a door open by a crack.",
+  "why": "Removes a stacked “It wasn’t … It was …” pair; same image, plainer syntax.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-05",
+  "kind": "voice",
+  "find": "It wasn’t a big, cruel laugh. It was worse. It was an automatic laugh, the same laugh they would have given me if I’d offered to drive a bus instead of Rohan.",
+  "replace": "It wasn’t a big, cruel laugh. It was worse: the automatic laugh they would have given me if I’d offered to drive a bus instead of Rohan.",
+  "why": "Merges three short beats into one sentence (FR and ES already read this way).",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-06",
+  "kind": "voice",
+  "find": "It wasn’t brave yet. It was just fast, hot, and silent, like when you step on a burning stone and run before you can think.",
+  "replace": "It wasn’t brave yet, just fast and hot and silent, like stepping on a burning stone and running before you can think.",
+  "why": "One flowing sentence instead of a stacked contrast; keeps the burning-stone image.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-07",
+  "kind": "voice",
+  "find": "This is what I should have understood: Rohan wasn’t offering me his place.",
+  "replace": "I see it now: Rohan wasn’t offering me his place.",
+  "why": "“This is what I should have understood” is a narrator-announces-the-lesson tic; “I see it now” sounds like a twelve-year-old looking back.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-08",
+  "kind": "voice",
+  "find": "\n\nI didn’t know yet how useful that sentence was going to be.",
+  "replace": "",
+  "why": "Removed a foreshadowing tic; the line about “wet paper” works without being told it will matter.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-09",
+  "kind": "voice",
+  "find": "That wouldn’t be true. The pain only proved",
+  "replace": "It only proved",
+  "why": "Cuts a redundant denial; the next sentence already says what the pain proved.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-10",
+  "kind": "voice",
+  "find": "That’s exactly why my lie mattered. I wasn’t just hiding a project. I was treating her discretion as something she owed me.",
+  "replace": "That’s why my lie mattered: I wasn’t only hiding a project, I was treating her discretion as something she owed me.",
+  "why": "One sentence in place of three short, formula-shaped ones.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-11",
+  "kind": "voice",
+  "find": "I understood that he was looking for an ending that would let him breathe",
+  "replace": "He was looking for an ending that would let him breathe",
+  "why": "Shows Ananya’s reading of Rohan directly instead of announcing that she understood it.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-12",
+  "kind": "cliche",
+  "find": "The consequences kept rippling away from me like circles on water. Folded up, the stolen square fit in my palm. And yet it reached people whose names I didn’t even know.",
+  "replace": "The consequences kept spreading. Folded up, the stolen square fit in my palm, and it had still reached people whose names I didn’t even know.",
+  "why": "Drops the “circles on water” cliché; keeps the detail that the folded square fits in her palm.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-13",
+  "kind": "rhythm",
+  "find": "I had flown under my own name. I had chosen a move. It had worked in front of the same people",
+  "replace": "I had flown under my own name and chosen my own move, and it had worked in front of the same people",
+  "why": "Merges a rule-of-three staccato into one longer sentence (the text has very few sentences over 25 words).",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-14",
+  "kind": "cliche",
+  "find": "Everything happened too fast, and yet slowly enough for me to see every detail.",
+  "replace": "It all happened too fast, and I still saw every detail.",
+  "why": "Stock “too fast and yet slowly” construction simplified.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-15",
+  "kind": "rhythm",
+  "find": "It wasn’t the stolen kesariya. It didn’t have to prove anything. It was a scrap I was allowed to use",
+  "replace": "It wasn’t the stolen kesariya, and it didn’t have to prove anything. It was a scrap I was allowed to use",
+  "why": "Merges the first two beats; keeps the three-part payoff.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-16",
+  "kind": "cliche",
+  "find": "My heart stopped.",
+  "replace": "I didn’t move.",
+  "why": "Replaces a stock bodily reaction (heart / stomach reactions appear several times) with a concrete one.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "EN-17",
+  "kind": "cliche",
+  "find": "My stomach clenched.",
+  "replace": "The square on his bed suddenly looked a lot more important.",
+  "why": "Same reason as EN-16; gives her reaction a wry, concrete object.",
+  "regex": false,
+  "count": 1
+ }
+]

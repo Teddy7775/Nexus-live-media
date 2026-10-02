@@ -1,0 +1,165 @@
+{
+ "seg": {
+  "books": "books",
+  "read": "read",
+  "guide": "discovery-guide",
+  "parents": "parents-and-teachers",
+  "about": "about",
+  "contact": "contact",
+  "legal": "legal"
+ },
+ "nav": {
+  "home": "Home",
+  "books": "The books",
+  "parents": "Parents & teachers",
+  "about": "About",
+  "contact": "Contact",
+  "legal": "Legal & privacy",
+  "menu": "Menu",
+  "language": "Language",
+  "skip": "Skip to content"
+ },
+ "home": {
+  "kicker": "Notebook novels for curious readers, from 9 and up",
+  "title": "Four young narrators. Four corners of the world.",
+  "lead": "Notebook novels about the places we come from and the choices that make us who we are. Each book can be read on its own.",
+  "cta_read": "Read Volume 1 online",
+  "cta_books": "Explore the books",
+  "how_title": "Read it your way",
+  "how": [
+   {
+    "t": "Read online",
+    "p": "The whole novel, free in your browser, with illustrations, a reading mode for any light, and no accounts or ads."
+   },
+   {
+    "t": "Paperback and ebook",
+    "p": "Print and EPUB editions in English, French and Spanish, each with or without the Discovery Guide."
+   },
+   {
+    "t": "For classrooms and families",
+    "p": "A guide with background, discussion questions and activities for every chapter group."
+   }
+  ],
+  "volumes": "The collection",
+  "coming": "Coming soon",
+  "vol": "Volume {n}",
+  "narrator": "Narrator",
+  "where": "Where and when",
+  "question": "The question at its heart"
+ },
+ "newsletter": {
+  "title": "News about the next volumes",
+  "text": "For parents, teachers and librarians. A short message when a new volume is ready, nothing more.",
+  "email": "Email address",
+  "consent": "I am an adult (parent, teacher or librarian) and I agree to receive news about new volumes. I can unsubscribe at any time.",
+  "submit": "Keep me posted",
+  "thanks": "Thank you. You are on the list.",
+  "error": "Something went wrong. Please check your email address and try again."
+ },
+ "book": {
+  "read": "Read online",
+  "start": "Start reading",
+  "continue": "Continue reading",
+  "download": "Download",
+  "downloads": "Editions and downloads",
+  "ed_story": "Story edition",
+  "ed_guide": "Story + Discovery Guide",
+  "ed_story_p": "The novel on its own.",
+  "ed_guide_p": "The novel followed by the Discovery Guide (spoilers: read the guide after the story).",
+  "epub": "EPUB for e-readers and phones",
+  "paperback": "Paperback",
+  "paperback_soon": "Paperback coming soon",
+  "guide": "Discovery Guide",
+  "guide_p": "Background, glossary, safety notes, discussion questions and activities for readers, families and classrooms.",
+  "gallery": "A look inside",
+  "gallery_note": "A few illustrations that do not give away the story. More appear as you read.",
+  "characters": "Who’s who",
+  "details": "At a glance",
+  "ages": "Ages",
+  "setting": "Setting",
+  "time": "Time",
+  "form": "Form",
+  "language": "Language",
+  "spoiler": "The guide discusses the whole story, including the ending.",
+  "series_label": "My Corner of the World",
+  "note_label": "A work of fiction rooted in real places. See “A Note on the Story” at the end of the book.",
+  "read_guide": "Read the guide online",
+  "age_value": "9–13"
+ },
+ "reader": {
+  "contents": "Contents",
+  "prev": "Previous",
+  "next": "Next",
+  "back": "Back to the book",
+  "smaller": "Smaller text",
+  "larger": "Larger text",
+  "light": "Light",
+  "sepia": "Paper",
+  "dark": "Dark",
+  "settings": "Reading settings",
+  "progress": "Reading progress",
+  "end": "You have reached the end of the story.",
+  "next_chapter": "Next chapter",
+  "chapter": "Chapter",
+  "open_guide": "Open the Discovery Guide",
+  "sample_end": "This is the end of the free preview.",
+  "sample_cta": "Get the full book as a paperback or ebook."
+ },
+ "guide": {
+  "on_page": "On this page",
+  "title": "Discovery Guide",
+  "spoiler": "Spoiler warning: this guide discusses the whole story, including the ending. Read it after the novel."
+ },
+ "parents": {
+  "title": "For parents and teachers",
+  "lead": "What to expect from each book, how to read it with young readers, and how this site treats your privacy.",
+  "from_guide": "From the Discovery Guide",
+  "privacy_title": "Privacy, in plain words",
+  "privacy": "This website does not use cookies, advertising or analytics. Your reading position and display choices are stored only in your own browser and are never sent to us. Children are never asked for personal information; the forms on this site are for parents, teachers and librarians."
+ },
+ "about": {
+  "title": "About the collection",
+  "p1": "My Corner of the World follows four fictional young narrators in four countries on three continents. Each book can be read on its own, and they speak to each other in surprising ways.",
+  "p2": "Every volume is written as a notebook: dates, lists, things said and things held back. The stories are invented; the places, trades, festivals and dangers they describe are real, and each book ends with a note that separates the two.",
+  "p3": "Each book shows its own age range: some are written for readers aged 9 to 13, others for readers 13 and up. Younger children can enjoy them with an adult, and older readers are welcome too.",
+  "trio_title": "One idea, four questions",
+  "author_title": "The author"
+ },
+ "contact": {
+  "title": "Contact",
+  "lead": "For parents, teachers, librarians and booksellers. This page is not for children.",
+  "name": "Your name",
+  "email": "Email address",
+  "message": "Message",
+  "send": "Send message",
+  "thanks": "Thank you, your message has been sent.",
+  "error": "The message could not be sent. Please check the fields and try again.",
+  "consent": "I am an adult and agree that my details are used to answer this message.",
+  "direct": "Or write directly to"
+ },
+ "legal": {
+  "title": "Legal notice and privacy",
+  "publisher": "Publisher",
+  "address": "Address",
+  "email": "Contact",
+  "hosting": "Hosting",
+  "rights": "Texts and illustrations are protected by copyright. All rights reserved.",
+  "todo": "To be completed before launch",
+  "privacy_h": "Personal data",
+  "privacy": "The site sets no cookies and loads nothing from third parties. If you use a form, we receive only what you type (name, email, message) and use it only to reply or, for the newsletter, to send news about new volumes. You can ask us to delete your data at any time.",
+  "hosted": "This site is hosted by Hostinger."
+ },
+ "foot": {
+  "tagline": "Made with care for curious young readers.",
+  "copyright": "© {year} {holder}",
+  "rights": "All rights reserved."
+ },
+ "e404": {
+  "title": "Page not found",
+  "text": "This page has flown away. Try the home page or the books."
+ },
+ "root": {
+  "choose": "Choose your language"
+ },
+ "secslug": {}
+}
