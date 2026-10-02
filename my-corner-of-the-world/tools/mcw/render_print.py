@@ -469,7 +469,7 @@ class PrintBuilder:
         if self.guide_on:
             rows.append(f'<div class="part">&nbsp;</div>' + row("guide", "", S["guide"], "plain"))
         rows.append(row("endpage", "", S["series_page"], "plain"))
-        dense = " dense" if len(rows) > 34 else ""
+        dense = " dense" if len(rows) > 30 else ""
         return self.mark("toc", "r") + f'<section class="toc{dense}" id="toc"><h2>{esc(S["contents"])}</h2>{"".join(rows)}</section>'
 
     # ---------- guide ---------------------------------------------------------

@@ -52,12 +52,12 @@ Page size expected for bleed mode `all`: **6.250 × 9.250 in**.
 
 | Edition | Pages | Size (in) | Even | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |
 |---|---|---|---|---|---|---|---|---|
-| en-story | 188 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 47, 81, 188] | 8.7 |
+| en-story | 188 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 7, 47, 81, 188] | 8.7 |
 | en-guide | 210 | 6.250 × 9.250 ✓ | ✓ | 28 ✓ | 33 | 130 | [2, 47, 81] | 9.0 |
-| fr-story | 194 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 85, 194] | 8.8 |
-| fr-guide | 220 | 6.250 × 9.250 ✓ | ✓ | 28 ✓ | 33 | 130 | [2, 85, 220] | 9.1 |
-| es-story | 192 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 47, 131] | 8.8 |
-| es-guide | 218 | 6.250 × 9.250 ✓ | ✓ | 28 ✓ | 33 | 130 | [2, 47, 131, 192] | 9.0 |
+| fr-story | 194 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 7, 85, 194] | 8.9 |
+| fr-guide | 220 | 6.250 × 9.250 ✓ | ✓ | 28 ✓ | 33 | 130 | [2, 85, 220] | 9.2 |
+| es-story | 192 | 6.250 × 9.250 ✓ | ✓ | 18 ✓ | 32 | 130 | [2, 7, 47, 131] | 8.7 |
+| es-guide | 218 | 6.250 × 9.250 ✓ | ✓ | 28 ✓ | 33 | 130 | [2, 47, 131, 192] | 9.1 |
 
 Blank pages are intentional (verso after the half-title, recto/verso balancing before part pages, final page when the count had to be rounded to an even number).
 
