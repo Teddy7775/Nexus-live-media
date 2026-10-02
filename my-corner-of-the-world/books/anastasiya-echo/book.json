@@ -180,7 +180,8 @@
     "orn": "bell",
     "part_period": true,
     "plate_stop_at_notebook": true,
-    "opener_num": false
+    "opener_num": false,
+    "guide_flow": true
   },
   "question": {
     "en": "How do you care for someone without disappearing?",

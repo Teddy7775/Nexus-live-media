@@ -1,8 +1,12 @@
 # My Corner of the World
 
 Publishing system and website for the collection **My Corner of the World / Mon coin du monde /
-Mi rincón del mundo**. Volume 1 is *Ananya’s Notebook: The Stolen Flame* (FR *Le Vol du Safran
-Interdit*, ES *El cuaderno de Ananya*).
+Mi rincón del mundo**.
+
+| Volume | Title | Slug | Readers |
+|---|---|---|---|
+| 1 | *Ananya’s Notebook: The Stolen Flame* (FR *Le Vol du Safran Interdit*, ES *El cuaderno de Ananya*) | `ananya-stolen-flame` | 9–13 |
+| 2 | *Anastasiya’s Echo: Katya’s Notebook* (FR *L’Écho d’Anastasiya*, ES *El eco de Anastasiya*) | `anastasiya-echo` | 13 and up |
 
 One source of truth per book (Markdown + a few JSON files) produces, for **each of the three
 languages** and **each of the two editions** (story only; story + Discovery Guide):
@@ -66,16 +70,33 @@ release/                     built deliverables
 build/                       scratch space (git-ignored)
 ```
 
-## Adding Volume 2 (and later)
+## Adding the next volume
+
+Volume 2 was added this way and needed no change to the site templates.
 
 1. `cp -r books/_template books/<new-slug>` and fill `book.json`.
-2. Add the manuscripts, guides and artwork (see `books/_template/README.md`).
+2. Add the manuscripts, guides and artwork (see `books/_template/README.md`). If the supplied files are
+   word-processor exports (headings as plain paragraphs, as for Volume 2), add `books/<slug>/normalize.py`
+   (see `books/anastasiya-echo/normalize.py`): it converts structure only; every wording change stays a logged edit.
 3. Add the slug to `books` in `series.json`; remove or hide (`"visible": false`) the matching entry in `upcoming`.
 4. `python3 build.py check --book <new-slug>` then `python3 build.py all --book <new-slug>`.
 
-The collection page, home page, sitemap (with hreflang), language switcher, reader and downloads are
-generated from the data. No template needs editing for a new volume. Per-volume accent colours come from
-`palette` in `book.json`; the "coming soon" cards on the home page come from `upcoming` in `series.json`.
+The collection page, home page (all covers), sitemap (with hreflang), language switcher, reader, parents page
+and downloads are generated from the data. Per-volume colours come from `palette` in `book.json` and are turned into
+contrast-checked CSS for that volume’s pages; the "coming soon" cards come from `upcoming` in `series.json`.
+
+Per-book switches in `book.json` (all optional, defaults reproduce Volume 1):
+
+| Key | Effect |
+|---|---|
+| `parser.sound_lines` / `parser.tail` | read the italic "Sound …" line under each chapter date; keep closing notebook blocks as ordinary blocks |
+| `design.hand` | `false` = serif italics instead of the handwriting face for dates, notes and lists |
+| `design.nb_cards` | notebook pages (lists under a bold title) set as ruled paper with a margin line |
+| `design.sound_lines`, `design.opener_num`, `design.part_period`, `design.orn` | chapter-opener layout, part-page period line, ornament (`bell`) |
+| `design.guide_flow` | Discovery Guide sections flow one after another instead of each starting a page |
+| `design.plate_stop_at_notebook` | a full-page plate stays before the next notebook page when possible |
+| `cover.*` | cover style (`paper` = dark text on a cream upper area), title lines, age label, panel fit, barcode box |
+| `age_label`, `age_note`, `parents_note` | text shown on the site (age, reading advice, content note on the parents page) |
 
 ## Website
 

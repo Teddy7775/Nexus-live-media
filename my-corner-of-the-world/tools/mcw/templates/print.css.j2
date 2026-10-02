@@ -178,7 +178,7 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .guide-title .warn{ margin:.55in .3in 0; padding:.7em 1em; border:1pt solid var(--pale); background:#fbf5ea; font:600 9.4pt/1.45 "Nunito Sans"; color:var(--ember); text-align:left; }
 .guide{ font-size:10pt; line-height:1.42; }
 .guide p{ text-indent:0; text-align:left; margin:0 0 .55em; hyphens:manual; }
-.guide h2{ break-before:page; break-after:avoid; font:600 17pt/1.2 "Literata"; color:var(--indigo); margin:.1in 0 .16in; padding-bottom:.1in; border-bottom:1.4pt solid var(--pale); }
+.guide h2{ break-before:{{ 'auto' if design.guide_flow else 'page' }}; margin-top:{{ '.42in' if design.guide_flow else '.1in' }}; break-after:avoid; font:600 17pt/1.2 "Literata"; color:var(--indigo); margin-bottom:.16in; padding-bottom:.1in; border-bottom:1.4pt solid var(--pale); }
 .guide h2 .gn{ color:var(--kes); margin-right:.35em; font-family:"Nunito Sans"; font-weight:800; }
 .guide h3{ break-after:avoid; font:700 8.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--petrol); margin:1.1em 0 .4em; }
 .guide ul,.guide ol{ margin:.2em 0 .7em; padding-left:1.3em; }

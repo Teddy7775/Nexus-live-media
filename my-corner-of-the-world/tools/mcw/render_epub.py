@@ -272,7 +272,8 @@ class EpubBuilder:
                 self.add(fn.replace(".xhtml", ""), fn, "application/xhtml+xml", spine=True)
 
         # series page
-        items = [f'<p style="text-indent:0;text-align:center"><em>{x(bk.title(lang))}: {x(bk.subtitle(lang))}</em></p>']
+        items = [f'<p style="text-indent:0;text-align:center"><em>{x(b.title(lang))}: {x(b.subtitle(lang))}</em></p>'
+                 for b in sorted(self.P.books.values(), key=lambda b: b.cfg["volume"])]
         for u in series["upcoming"]:
             if u.get("visible"):
                 items.append(f'<p style="text-indent:0;text-align:center"><em>{x(u["titles"][lang])}</em></p>')

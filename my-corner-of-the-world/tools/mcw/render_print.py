@@ -469,7 +469,7 @@ class PrintBuilder:
         if self.guide_on:
             rows.append(f'<div class="part">&nbsp;</div>' + row("guide", "", S["guide"], "plain"))
         rows.append(row("endpage", "", S["series_page"], "plain"))
-        dense = " dense" if len(rows) > 28 else ""
+        dense = " dense" if len(rows) > 34 else ""
         return self.mark("toc", "r") + f'<section class="toc{dense}" id="toc"><h2>{esc(S["contents"])}</h2>{"".join(rows)}</section>'
 
     # ---------- guide ---------------------------------------------------------
@@ -508,7 +508,10 @@ class PrintBuilder:
     # ---------- series end page ------------------------------------------------
     def end_page(self) -> str:
         S, lang = self.S, self.lang
-        items = [f'<div class="it"><em>{esc(self.book.title(lang))}: {esc(self.book.subtitle(lang))}</em></div>']
+        from .core import load_project
+        items = []
+        for b in sorted(load_project().books.values(), key=lambda b: b.cfg["volume"]):
+            items.append(f'<div class="it"><em>{esc(b.title(lang))}: {esc(b.subtitle(lang))}</em></div>')
         for u in self.series["upcoming"]:
             if u.get("visible"):
                 items.append(f'<div class="it"><em>{esc(u["titles"][lang])}</em></div>')

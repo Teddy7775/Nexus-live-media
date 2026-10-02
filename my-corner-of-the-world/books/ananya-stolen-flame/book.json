@@ -196,5 +196,8 @@
   },
   "checks": {
     "lies": true
+  },
+  "design": {
+    "guide_flow": true
   }
 }
