@@ -138,6 +138,8 @@ class PrintBuilder:
         # page-art placement: full-page plates and spreads are moved to the end of the page that holds their
         # anchor paragraph (never before it), so the text page before a plate is not left nearly empty.
         self.plate_pos: dict[str, int] = {}       # art id -> index of the block the plate follows
+        self.inline_scale: dict[str, float] = {}  # art id -> width factor (<1) for an inline picture that would leave a gap
+        self._second_pass = False
         self.flow_mode = False                    # True while rendering the text-only "flow" pass
         self.flow_cands: dict[str, tuple[str, int, list[int], int]] = {}
         self.flow_xy: dict[str, tuple[int, float]] = {}
@@ -256,6 +258,9 @@ class PrintBuilder:
         if kind == "half" and abs(af.aspect - 1.5) > 0.2:
             self.warnings.append(f"{aid}: aspect {af.aspect:.2f} differs from 3:2; kept uncropped at text width")
         self.placed[aid] = info
+        sc = self.inline_scale.get(aid)
+        if sc and sc < 0.995:      # shrunk so that it fits into the gap at the foot of the previous page
+            return f'<figure class="inline"><img src="{url}" alt="{alt}" style="width:{sc * 100:.1f}%;margin:0 auto"></figure>'
         return f'<figure class="inline"><img src="{url}" alt="{alt}"></figure>'
 
     # ---------- blocks ------------------------------------------------------
@@ -655,8 +660,8 @@ class PrintBuilder:
                 self.plate_pos[aid] = nxt[0]
                 continue
             far = self.pick_on_page(aid, pa, near_only=False)   # last resort: float past a notebook page
-            if far and far[2] >= 0.70 and (not best or best[2] < 0.5):
-                self.plate_pos[aid] = far[0]
+            if far and (not best or far[2] > best[2] + 0.02):
+                self.plate_pos[aid] = far[0]                    # e.g. the chapter's closing notebook page stays before the plate
             else:
                 self.plate_pos[aid] = best[0] if best else idx
 
@@ -799,6 +804,47 @@ class PrintBuilder:
                 shift += 1
         return out
 
+    def inline_gap_fixes(self, pdf: Path) -> dict[str, float]:
+        """Inline pictures that start a page while the previous page ends well short: scale them to fill that gap.
+
+        (An inline picture is never split, so one that does not fit moves whole to the next page.) Only done when the
+        picture stays at least 62 % of the text width; otherwise the gap is accepted."""
+        inline = [a for a, i in self.placed.items() if i.get("mode") == "inline"]
+        order = {a: n for n, a in enumerate(self.book.register["slots"])}
+        inline.sort(key=lambda a: order[a])
+        G = self.geo
+        top_pt = (G.b + G.top) * 72
+        bot_pt = (G.b + G.top + G.text_h) * 72
+        doc = fitz.open(pdf)
+        found = []
+        for i, pg in enumerate(doc):
+            for im in pg.get_images(full=True):
+                for r in pg.get_image_rects(im[0]):
+                    if r.width > 0.5 * (G.PW * 72 - 2 * (G.b + G.inner) * 72 + 1) and r.height < 0.6 * pg.rect.height and r.width * r.height < 0.5 * pg.rect.width * pg.rect.height:
+                        found.append((i, r))
+        found.sort(key=lambda t: (t[0], t[1].y0))
+        fixes: dict[str, float] = {}
+        if len(found) != len(inline):
+            doc.close()
+            return fixes
+        for aid, (i, r) in zip(inline, found):
+            if i == 0 or r.y0 > top_pt + 30:         # does not start a page
+                continue
+            prev = doc[i - 1]
+            body = [w for w in prev.get_text("words") if top_pt - 5 < w[1] < bot_pt]
+            if not body:
+                continue
+            text_bottom = max(w[3] for w in body)
+            gap = bot_pt - text_bottom
+            h = r.height
+            if gap < 0.2 * (bot_pt - top_pt):
+                continue
+            scale = (gap - 30) / h
+            if scale >= 0.62:
+                fixes[aid] = min(scale, 0.98)
+        doc.close()
+        return fixes
+
     def build(self) -> dict:
         # base render (no spacers) to learn where every constrained element starts
         self.spacers = set()
@@ -845,6 +891,13 @@ class PrintBuilder:
         if bad:
             self.warnings.append("parity not satisfied for: " + ", ".join(bad))
         final = self.out_dir / f"{self.book.slug}_{self.lang}_{self.edition}_interior.pdf"
+        if not self._second_pass:
+            fix = self.inline_gap_fixes(raw)
+            if fix:                                   # one more full build with the pictures that left a gap shrunk to fit
+                self.inline_scale.update(fix)
+                self._second_pass = True
+                self.warnings = [w for w in self.warnings]
+                return self.build()
         n = self.finish_pdf(raw, final, d2)
         return {"pdf": final, "pages": n, "toc": {k: v + 1 for k, v in d2.items()}, "warnings": sorted(set(self.warnings)),
                 "placed": self.placed, "spacers": sorted(self.spacers)}

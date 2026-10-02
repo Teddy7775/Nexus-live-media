@@ -6,9 +6,9 @@ and `Anastasiya_Illustration_Index_ID.csv` (copies in `docs/source/`). Register 
 
 **Bottom line.** All 15 interior illustrations and both covers were supplied and are placed at their anchors in
 EN, FR and ES. They are good enough for proofs, the website and the ebooks. They are **not print masters**:
-seven full-page plates and both cover images are 896 × 1200 px (≈ 143–146 ppi at print size, a printer wants
-300), and nine have the wrong proportion for their slot. Five images contradict the art-direction notes or
-the manuscript (section 3); those are worth regenerating before printing.
+five full-page plates and both cover images are 896 × 1200 px (≈ 143–146 ppi at print size, a printer wants
+300), and nine have the wrong proportion for their slot. **Four pictures (I04, I11, I13, I14) were regenerated after
+the first review**; most of the continuity problems found then are fixed (section 3), two are not.
 
 ## 1. Resolution and placement
 
@@ -17,17 +17,17 @@ the manuscript (section 3); those are worth regenerating before printing.
 | AE-I01 | The silent school bell | 896×1200 | full | full-bleed plate, ch. 1 | 143 |
 | AE-I02 | The landing library | 1200×896 | half | inline, ch. 2 | 267 |
 | AE-I03 | Two fingers on a cheek | 896×1200 | full | full-bleed plate, ch. 5 | 143 |
-| AE-I04 | Letting someone else carry her | 1493×2000 | full | full-bleed plate, ch. 8 | 239 |
+| AE-I04 | Letting someone else carry her | 1493×2000 (v02) | full | full-bleed plate, ch. 8 | 239 |
 | AE-I05 | A hand on Katya’s chin | 1200×896 | half | inline, ch. 10 | 267 |
 | AE-I06 | Listening at the clinic | 896×1200 | full | full-bleed plate, ch. 12 | 143 |
 | AE-I07 | Asking before keeping a voice | 1200×896 | half | inline, ch. 13 | 267 |
 | AE-I08 | The recorder under the missing roof | 896×1200 | full | full-bleed plate, ch. 14 | 143 |
 | AE-I09 | Seven seconds of laughter | 2000×1493 | half | inline, ch. 15 | 444 |
 | AE-I10 | A person beyond the word missing | 896×1200 | full | full-bleed plate, ch. 18 | 143 |
-| AE-I11 | The village makes its own sound | 1200×896 | half | inline, ch. 20 | 267 |
+| AE-I11 | The village makes its own sound | 2000×1493 (v02) | half | inline, ch. 20 | 444 |
 | AE-I12 | The living hand | 896×1200 | full | full-bleed plate, ch. 21 | 143 |
-| AE-I13 | Help before the interview | 2000×1493 | half | inline, ch. 22 | 444 |
-| AE-I14 | A notebook entrusted with conditions | 1493×2000 | full | full-bleed plate, ch. 24 | 239 |
+| AE-I13 | Help before the interview | 2000×1493 (v02) | half | inline, ch. 22, after “Help Vira first” | 444 |
+| AE-I14 | A notebook entrusted with conditions | 1493×2000 (v02) | full | full-bleed plate, ch. 24 | 239 |
 | AE-I15 | The bell and the laugh | 896×1200 | full | full-bleed plate, epilogue | 143 |
 | AE-C01 | Front cover | 896×1200 | cover | front panel (paper extended at the top) | 146 |
 | AE-C04 | Back cover | 896×1200 | cover | back panel (paper extended at the top) | 146 |
@@ -55,29 +55,36 @@ the manuscript (section 3); those are worth regenerating before printing.
   own white 2 × 1.2 in box there; both are fine. The scan-edge strip on the left (40 px) is cropped.
 * Spine: slate blue from the palette, no scene added, title and author when the width allows (all six wraps do).
 
-## 3. Continuity findings (most important first)
+## 3. Continuity findings
 
-1. **AE-I13: the camera is not lowered.** The guide’s check says “camera lowered and off”. The operator holds the
-   camera up, pointing at Katya, and the scene is the opposite of the moment the text describes (Aïcha has the
-   camera turned off in front of Katya). The alt text describes what the picture shows.
-2. **AE-I13: a different shawl.** Katya carries Anastasiya in a dark red-and-black patterned shawl; everywhere else
-   the family shawl is the cream one with leaves and small stars.
-3. **AE-I14: baked-in lettering.** The receipt on the van’s tailgate reads “SIGNED BILINGUAL RECEIPT”. The guide
-   says no embedded wording and an unreadable receipt. Also Katya’s hair comes out loose under a beanie and no braid is visible, while the braid
-   identifies her in the other pictures.
-4. **AE-I04: a red star on Vira’s hat.** It reads as a Soviet-style red star, which is a loaded symbol in a book about
-   this war, and it is not in the brief (the shawl’s small stars are). Remove it.
-5. **AE-I11: Anastasiya appears unclothed** while she strikes the pot (six months, outdoors, June). A vest or a
-   diaper would match the other baby pictures and avoid questions from schools and retailers.
-6. **AE-I09 and AE-C04: the wooden bird.** The brief requires the left wing to be visibly shorter than the right.
-   At this resolution the wings look the same in both pictures.
-7. **Two rendering looks.** The set mixes a soft watercolour-and-pencil look (e.g. I06, I10) with a harder ink-line look
-   (e.g. I02, I09, I13), and the two versions of I10 and I12 differ from each other. Faces stay recognisable (Katya:
-   braid, gray-green eyes, olive coat; Ihor: dark tousled hair, navy sweater; Vira: gray bun; Aïcha: dark jacket),
-   but a single regeneration pass with one style prompt would unify the set and fix the resolution at the same time.
+**Fixed by the regenerated pictures (v02)**
+* **AE-I04:** the red star on Vira’s hat is gone (plain pom-pom hat). Katya’s hands are empty, Vira carries the baby in the
+  cream shawl with leaves, Ihor carries the bags, the evacuation line follows on the road.
+* **AE-I11:** Anastasiya is dressed (cream knit), and the picture is now 2000 × 1493 px (≈ 444 ppi inline, was 267).
+* **AE-I13:** Katya now carries Anastasiya in the cream shawl with leaves and stars, and the red notebook with the blackened corner.
+* **AE-I14:** Katya has her braid; the receipt is unreadable and the pouch waits on the step, as the brief asks.
+
+**Retouched at build time (non-destructive, logged in `art/overrides.json`)**
+* **AE-I14:** the regenerated picture has the asset id “AE-I14” printed on the notebook cover. The art-direction guide says asset
+  ids never appear inside an illustration, so the build paints those letters out (only the lettering pixels are repainted from the
+  surrounding cover). The v02 file itself is untouched. If you regenerate again, please ask for a plain cover.
+
+**Still open**
+1. **AE-I13: the camera is still raised.** The operator holds it up beside Aïcha, so the picture cannot show “the man lowered the
+   camera”. To make the text and picture agree, the picture now follows the line “Help Vira first” (Aïcha asking, medics preparing
+   the stretcher, camera still up) instead of the paragraph where the camera comes down. The brief’s own image check asks for a
+   lowered, switched-off camera; regenerate if you want that exact beat. The operator is also cut by the right edge.
+2. **AE-I09 and AE-C04: the wooden bird.** The brief requires the left wing to be visibly shorter than the right; at this
+   resolution the wings look the same in both pictures.
+3. **Two rendering looks.** The set mixes a soft watercolour-and-pencil look (e.g. I06, I10) with a harder ink-line look
+   (e.g. I02, I09, I13), and the two versions of I10 and I12 differ from each other. Faces stay recognisable (Katya: braid,
+   gray-green eyes, olive coat; Ihor: dark tousled hair, navy sweater; Vira: gray bun; Aïcha: dark jacket), but a single
+   regeneration pass with one style prompt would unify the set and fix the resolution at the same time.
+4. Small things worth a glance: a recorder (flute) lies on the crate in I11 and Ihor holds a small bell that the chapter does not
+   mention at that moment; the ambulances in I13 carry red crosses (plausible, not in the brief).
 
 Checked and matching the brief: I01 (closed gate, phone, notebook not shown), I02 (Oksana pregnant, crates under a
-blue sheet), I03 (Oksana alive, baby wrapped and supported, Vira with headlamp), I05 (baby asleep, small hand on
+blue sheet), I03 (Oksana alive, baby wrapped and supported, Vira with headlamp), I04 (transfer complete, hands empty), I05 (baby asleep, small hand on
 Katya’s chin, shared dessert), I06 (nurse guides the stethoscope), I07 (phone on the table, recorder not yet
 repaired), I08 (shoulders touching, recorder between them), I10 (green coat, no register title), I12 (Pavlo
 frozen, not trapped; notebook under a board), I15 (open gate, green notebook, one cane).

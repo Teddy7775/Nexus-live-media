@@ -84,6 +84,29 @@ def remove_fold(bgr: np.ndarray, x: int, line_half: int = 3, shadow_span: int = 
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
+def erase_marks(bgr: np.ndarray, boxes: list[dict]) -> np.ndarray:
+    """Remove stray lettering (e.g. a baked-in asset id) from a flat-ish surface.
+
+    Each box = {"box": [x, y, w, h] in source pixels, "polarity": "dark" | "light", "delta": 28, "grow": 3, "radius": 5}.
+    Only pixels inside the box that differ from their local surroundings by more than `delta` are repainted
+    (inpainting from the neighbouring surface), so the surface texture and anything not lettering stays untouched.
+    """
+    out = bgr.copy()
+    gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    local = cv2.GaussianBlur(gray, (0, 0), 9)
+    for b in boxes:
+        x, y, w, h = b["box"]
+        diff = (local - gray) if b.get("polarity", "dark") == "dark" else (gray - local)
+        mask = np.zeros(gray.shape, np.uint8)
+        sub = (diff[y:y + h, x:x + w] > b.get("delta", 28)).astype(np.uint8) * 255
+        mask[y:y + h, x:x + w] = sub
+        g = int(b.get("grow", 3))
+        if g:
+            mask = cv2.dilate(mask, np.ones((2 * g + 1, 2 * g + 1), np.uint8))
+        out = cv2.inpaint(out, mask, float(b.get("radius", 5)), cv2.INPAINT_TELEA)
+    return out
+
+
 def fade_bottom_to_white(bgr: np.ndarray, frac: float) -> np.ndarray:
     """Dissolve the bottom `frac` of the image into white paper (print vignette for letterboxed panoramas)."""
     img = bgr.astype(np.float32)
@@ -126,6 +149,9 @@ class Art:
             cfg = ov["remove_fold"]
             arr = remove_fold(arr, cfg["x"], cfg.get("line_half", 3), cfg.get("shadow_span", 70))
             notes.append(f"removed baked-in book-fold shadow and line at x={cfg['x']}")
+        if "erase" in ov:
+            arr = erase_marks(arr, ov["erase"])
+            notes.append("removed stray lettering (asset id) from the artwork")
         # web/ebook copy: all fixes except print-only vignettes
         web = self.out / f"{aid}.web.jpg"
         Image.fromarray(cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)).save(web, quality=93, subsampling=0, optimize=True)

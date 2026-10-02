@@ -94,6 +94,10 @@ ALT = {
             "Le cahier rouge, un oiseau de bois, un enregistreur et un châle plié reposent sur une surface usée, sous une zone dégagée pour le texte.",
             "El cuaderno rojo, un pájaro de madera, una grabadora y un chal doblado descansan sobre una superficie gastada, debajo de una zona despejada para el texto."),
 }
+# regenerated pictures: filename version (the earlier files stay in art/source for provenance)
+VERSION = {"AE-I04": 2, "AE-I11": 2, "AE-I13": 2, "AE-I14": 2}
+# AE-I13 shows Aïcha asking and the camera still raised, so it follows "Help Vira first" (before the camera is lowered)
+MOVE_TO_BLOCK = {"AE-I13": ("Twenty-Two", 21)}
 # anchors that are not the first sentence of the indexed paragraph
 OVERRIDE_IDX = {"AE-I09": 30}                       # the index says: after "Anastasiya laughed a second time."
 MANUAL = {"AE-I13": ("The man lowered the camera. She switched it off in front of me.",
@@ -138,7 +142,7 @@ for r in rows:
     if aid not in SCENE:
         continue
     kind = "cover" if aid.startswith("AE-C") else ("full" if aid in FULL else "half")
-    slot = {"kind": kind, "ratio": r["ratio"], "stem": f"{aid}_v01", "chapter": None, "story_date": r["date"] or None,
+    slot = {"kind": kind, "ratio": r["ratio"], "stem": f"{aid}_v{VERSION.get(aid, 1):02d}", "chapter": None, "story_date": r["date"] or None,
             "scene": dict(zip(("en", "fr", "es"), SCENE[aid])), "alt": dict(zip(("en", "fr", "es"), ALT[aid])),
             "continuity": r["notes"], "image_check": r["notes"]}
     if kind == "cover":
@@ -150,7 +154,9 @@ for r in rows:
         ex = typo.norm(r["excerpt"])
         idx = next(i for i, b in enumerate(section("en", key).blocks) if b.kind == "p" and ex in typo.norm(b.html))
         idx = OVERRIDE_IDX.get(aid, idx)
-        if aid in MANUAL:
+        if aid in MOVE_TO_BLOCK:
+            idx = MOVE_TO_BLOCK[aid][1]
+        if aid in MANUAL and aid not in MOVE_TO_BLOCK:
             slot["anchor"] = dict(zip(("en", "fr", "es"), MANUAL[aid]))
         else:
             slot["anchor"] = {l: anchor_for(l, key, idx, MANUAL_LANG.get((aid, l))) for l in ("en", "fr", "es")}
@@ -159,7 +165,8 @@ for r in rows:
 reg = {"version": 1, "book": "anastasiya-echo",
        "note": "Slot kinds and ratios come from the supplied illustration index and art-direction guide (AE-I01..AE-I15, AE-C01, AE-C04). "
                "'stem' is the filename stem; the build looks for art/final/<stem>.* first, then art/source/<stem>.*. "
-               "Alternates kept in art/source: AE-I10_v01_ALT.jpg and AE-I12_v01_ALT.jpg (square, 2000 px).",
+               "Alternates kept in art/source: AE-I10_v01_ALT.jpg and AE-I12_v01_ALT.jpg (square, 2000 px). "
+               "AE-I04, I11, I13, I14 were regenerated (v02); the v01 files are kept.",
        "slots": slots}
 (B / "art" / "register.json").write_text(json.dumps(reg, ensure_ascii=False, indent=2), encoding="utf-8")
 print(len(slots), "slots written")

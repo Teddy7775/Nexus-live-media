@@ -1,7 +1,7 @@
 {
   "version": 1,
   "book": "anastasiya-echo",
-  "note": "Slot kinds and ratios come from the supplied illustration index and art-direction guide (AE-I01..AE-I15, AE-C01, AE-C04). 'stem' is the filename stem; the build looks for art/final/<stem>.* first, then art/source/<stem>.*. Alternates kept in art/source: AE-I10_v01_ALT.jpg and AE-I12_v01_ALT.jpg (square, 2000 px).",
+  "note": "Slot kinds and ratios come from the supplied illustration index and art-direction guide (AE-I01..AE-I15, AE-C01, AE-C04). 'stem' is the filename stem; the build looks for art/final/<stem>.* first, then art/source/<stem>.*. Alternates kept in art/source: AE-I10_v01_ALT.jpg and AE-I12_v01_ALT.jpg (square, 2000 px). AE-I04, I11, I13, I14 were regenerated (v02); the v01 files are kept.",
   "slots": {
     "AE-I01": {
       "kind": "full",
@@ -78,7 +78,7 @@
     "AE-I04": {
       "kind": "full",
       "ratio": "2:3",
-      "stem": "AE-I04_v01",
+      "stem": "AE-I04_v02",
       "chapter": "ch-08",
       "story_date": "December 16 2024",
       "scene": {
@@ -246,7 +246,7 @@
     "AE-I11": {
       "kind": "half",
       "ratio": "4:3",
-      "stem": "AE-I11_v01",
+      "stem": "AE-I11_v02",
       "chapter": "ch-20",
       "story_date": "June 5 2025 before the alert",
       "scene": {
@@ -294,7 +294,7 @@
     "AE-I13": {
       "kind": "half",
       "ratio": "4:3",
-      "stem": "AE-I13_v01",
+      "stem": "AE-I13_v02",
       "chapter": "ch-22",
       "story_date": "June 6 2025 at dawn",
       "scene": {
@@ -310,15 +310,15 @@
       "continuity": "Aïcha porte encore sa veste bleu foncé et ses cheveux attachés. Caméra baissée et voyant éteint. Vira vivante sur une civière; blessure non graphique.",
       "image_check": "Aïcha porte encore sa veste bleu foncé et ses cheveux attachés. Caméra baissée et voyant éteint. Vira vivante sur une civière; blessure non graphique.",
       "anchor": {
-        "en": "The man lowered the camera. She switched it off in front of me.",
-        "fr": "L’homme a abaissé la caméra. Elle l’a éteinte devant moi.",
-        "es": "El hombre bajó la cámara. Ella la apagó delante de mí."
+        "en": "“Help Vira first,” I answered.",
+        "fr": "« D’abord, aidez Vira », ai-je répondu.",
+        "es": "—Primero ayuden a Vira —contesté."
       }
     },
     "AE-I14": {
       "kind": "full",
       "ratio": "2:3",
-      "stem": "AE-I14_v01",
+      "stem": "AE-I14_v02",
       "chapter": "ch-24",
       "story_date": "June 7 2025",
       "scene": {
