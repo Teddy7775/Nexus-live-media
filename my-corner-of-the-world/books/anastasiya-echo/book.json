@@ -1,0 +1,196 @@
+{
+  "slug": "anastasiya-echo",
+  "volume": 2,
+  "status": "ready",
+  "narrator": {
+    "name": "Kateryna “Katya” Kovalchuk",
+    "age": 14
+  },
+  "place": {
+    "en": "Northeast Ukraine",
+    "fr": "Nord-est de l’Ukraine",
+    "es": "Noreste de Ucrania"
+  },
+  "story_dates": {
+    "from": "2024-09-02",
+    "to": "2025-09-01"
+  },
+  "age_range": [
+    13,
+    18
+  ],
+  "age_label": {
+    "en": "13 and up",
+    "fr": "13 ans et plus",
+    "es": "A partir de 13 años"
+  },
+  "year": 2026,
+  "titles": {
+    "en": {
+      "title": "Anastasiya’s Echo",
+      "subtitle": "Katya’s Notebook"
+    },
+    "fr": {
+      "title": "L’Écho d’Anastasiya",
+      "subtitle": "Le cahier de Katya"
+    },
+    "es": {
+      "title": "El eco de Anastasiya",
+      "subtitle": "El cuaderno de Katya"
+    }
+  },
+  "descriptors": {
+    "en": "Katya’s Notebook · Ukraine",
+    "fr": "Le cahier de Katya · Ukraine",
+    "es": "El cuaderno de Katya · Ucrania"
+  },
+  "url_slugs": {
+    "en": "anastasiyas-echo-katyas-notebook",
+    "fr": "lecho-danastasiya-le-cahier-de-katya",
+    "es": "el-eco-de-anastasiya-el-cuaderno-de-katya"
+  },
+  "taglines": {
+    "en": "A sister can love without disappearing.",
+    "fr": "Une sœur peut aimer sans disparaître.",
+    "es": "Una hermana puede querer sin desaparecer."
+  },
+  "blurbs": {
+    "en": [
+      "On the first day of school, Katya irons her white blouse and walks to the gate, even though nobody knows if the school will open. At eight o’clock, the bell doesn’t ring. She records the silence and starts a red notebook for the three men of her family, who are all away.",
+      "One night in November, a bridge falls and everything changes. Katya is fourteen, and suddenly someone else’s whole world depends on her hands. As the year goes on, she learns to accept help, to listen as well as to count, and to ask before she keeps anyone’s story.",
+      "A novel about war seen from a kitchen table, a cellar and a school without a bell. About grief, responsibility, and the right of every person to decide how their own story is told."
+    ],
+    "fr": [
+      "Le jour de la rentrée, Katya repasse sa chemise blanche et marche jusqu’à la grille, même si personne ne sait si l’école ouvrira. À huit heures, la cloche ne sonne pas. Elle enregistre le silence et commence un cahier rouge destiné aux trois hommes de sa famille, tous loin d’elle.",
+      "Une nuit de novembre, un pont s’effondre et tout bascule. Katya a quatorze ans, et soudain le monde entier de quelqu’un d’autre dépend de ses mains. Au fil de l’année, elle apprend à accepter de l’aide, à écouter autant qu’à compter, et à demander avant de garder l’histoire de quiconque.",
+      "Un roman sur la guerre vue d’une table de cuisine, d’une cave et d’une école sans cloche. Sur le deuil, la responsabilité et le droit de chacun de décider comment son histoire est racontée."
+    ],
+    "es": [
+      "El primer día de clases, Katya plancha su camisa blanca y camina hasta la reja de la escuela, aunque nadie sabe si va a abrir. A las ocho, la campana no suena. Graba el silencio y empieza un cuaderno rojo dirigido a los tres hombres de su familia, que están todos lejos.",
+      "Una noche de noviembre cae un puente y todo cambia. Katya tiene catorce años, y de pronto el mundo entero de otra persona depende de sus manos. A lo largo del año aprende a aceptar ayuda, a escuchar además de contar y a preguntar antes de quedarse con la historia de alguien.",
+      "Una novela sobre la guerra vista desde la mesa de una cocina, un sótano y una escuela sin campana. Sobre el duelo, la responsabilidad y el derecho de cada persona a decidir cómo se cuenta su propia historia."
+    ]
+  },
+  "short_descriptions": {
+    "en": "A fourteen-year-old records the sounds of a school year at war and keeps a red notebook for her family. A novel in notebook form about care, grief and who gets to tell a story, for readers 13 and up.",
+    "fr": "Une adolescente de quatorze ans enregistre les sons d’une année scolaire en guerre et tient un cahier rouge pour sa famille. Un roman en forme de cahier sur le soin, le deuil et le droit de raconter, pour les 13 ans et plus.",
+    "es": "Una adolescente de catorce años graba los sonidos de un año escolar en guerra y escribe un cuaderno rojo para su familia. Una novela en forma de cuaderno sobre el cuidado, el duelo y quién tiene derecho a contar una historia, para lectores desde los 13 años."
+  },
+  "keywords": {
+    "en": [
+      "young adult novel",
+      "Ukraine",
+      "war and children",
+      "sisters",
+      "grief",
+      "diary novel",
+      "media literacy"
+    ],
+    "fr": [
+      "roman jeunesse",
+      "Ukraine",
+      "enfants et guerre",
+      "sœurs",
+      "deuil",
+      "journal intime",
+      "éducation aux médias"
+    ],
+    "es": [
+      "novela juvenil",
+      "Ucrania",
+      "niños y guerra",
+      "hermanas",
+      "duelo",
+      "diario",
+      "educación mediática"
+    ]
+  },
+  "palette": {
+    "paper": "#F0E8D9",
+    "plaster": "#9FB0BC",
+    "petrol": "#4F6273",
+    "indigo": "#2F3C48",
+    "kesariya": "#A84F47",
+    "ember": "#7E3630",
+    "pale": "#D8CAB2",
+    "stain": "#756352",
+    "green": "#66785C",
+    "amber": "#D4AF73"
+  },
+  "chapter_swatches": {},
+  "editions": [
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
+  ],
+  "isbn": {
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
+  },
+  "print": {
+    "trim_in": [
+      6,
+      9
+    ],
+    "bleed_in": 0.125,
+    "bleed_mode": "all",
+    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "cream",
+    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
+    "body_pt": 11.5,
+    "leading": 1.5
+  },
+  "reader": {
+    "access": "full",
+    "sample_chapters": 3
+  },
+  "parser": {
+    "tail": false,
+    "sound_lines": true
+  },
+  "design": {
+    "hand": false,
+    "sound_lines": true,
+    "nb_cards": true,
+    "orn": "bell"
+  },
+  "question": {
+    "en": "How do you care for someone without disappearing?",
+    "fr": "Comment prendre soin de quelqu’un sans disparaître ?",
+    "es": "¿Cómo se cuida a alguien sin desaparecer?"
+  },
+  "site": {
+    "gallery": [
+      "AE-I01",
+      "AE-I02",
+      "AE-I04",
+      "AE-I07",
+      "AE-I09"
+    ]
+  },
+  "buy_links": {}
+}

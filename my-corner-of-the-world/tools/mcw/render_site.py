@@ -407,7 +407,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
             nav = (f"{s.number}. " if s.number else "") + s.title
             sections.append({"id": s.id, "nav": nav, "html": C.guide_section_body(s)})
         self.page(lang, "guide.html.j2",
-                  {"title": title, "book_url": book_url, "intro": C.T(guide.intro), "facts": facts_html, "sections": sections},
+                  {"title": title, "book_url": book_url, "intro": C.T(guide.intro), "before": [C.T(b) for b in guide.before], "facts": facts_html, "sections": sections},
                   lambda l: self.path(l, self.seg(l, "books"), bs(l), self.seg(l, "guide")),
                   f"{lang}/{self.seg(lang, 'books')}/{bs(lang)}/{self.seg(lang, 'guide')}/index.html",
                   f"{t['guide']['title']} · {title}", t["guide"]["spoiler"], "books", og_image=og_abs)

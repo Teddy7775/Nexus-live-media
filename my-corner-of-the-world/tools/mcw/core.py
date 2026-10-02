@@ -38,7 +38,12 @@ class Book:
         return self._md_path("guide", lang).read_text(encoding="utf-8")
 
     def manuscript(self, lang: str) -> Manuscript:
-        return parse_manuscript(self.manuscript_text(lang), lang)
+        return parse_manuscript(self.manuscript_text(lang), lang, self.cfg.get("parser"))
+
+    @property
+    def design(self) -> dict:
+        """Per-book typographic switches (book.json "design"); empty for Volume 1."""
+        return self.cfg.get("design", {})
 
     def guide(self, lang: str) -> Guide:
         return parse_guide(self.guide_text(lang), lang)

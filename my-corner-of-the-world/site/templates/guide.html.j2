@@ -5,6 +5,8 @@
   <h1>{{ t.guide.title }}</h1>
   <p class="lead">{{ intro|safe }}</p>
   <p class="warn">{{ t.guide.spoiler }}</p>
+  {% for b in before %}<p class="care">{{ b|safe }}</p>
+  {% endfor %}
   <div class="guide-layout mt">
     <nav class="guide-nav" aria-label="{{ t.guide.on_page }}"><ol>{% for s in sections %}<li><a href="#{{ s.id }}">{{ s.nav }}</a></li>{% endfor %}</ol></nav>
     <div class="guide-body" lang="{{ L }}">{{ facts|safe }}{% for s in sections %}<h2 id="{{ s.id }}">{{ s.nav }}</h2>{{ s.html|safe }}{% endfor %}</div>

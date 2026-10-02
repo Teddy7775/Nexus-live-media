@@ -187,7 +187,8 @@ def _classify_block(md, btoks) -> Block:
                 i = j
             i += 1
         start = first.attrGet("start") if kind == "ol" else None
-        return Block(kind, items=items, meta={"start": int(start) if start else 1})
+        nb = kind == "ul" and bool(items) and all(i.lstrip().startswith(("<em>", "<strong>")) for i in items)
+        return Block(kind, items=items, meta={"start": int(start) if start else 1, "nb": nb})
     if first.type == "table_open":
         return _table_block(md, btoks)
     if first.type == "heading_open":
@@ -253,8 +254,10 @@ def _merge_blocks(blocks: list[Block]) -> list[Block]:
                 lines.append(blocks[j].html)
                 j += 1
             if j < len(blocks) and blocks[j].kind in ("ul", "ol") and len(lines) == 1:
-                out.append(Block("card", lines[0], items=blocks[j].items,
-                                 meta={"list": blocks[j].kind, "start": blocks[j].meta.get("start", 1)}))
+                its = blocks[j].items
+                nb = blocks[j].kind == "ul" and bool(its) and all(i.lstrip().startswith(("<em>", "<strong>")) for i in its)
+                out.append(Block("card", lines[0], items=its,
+                                 meta={"list": blocks[j].kind, "start": blocks[j].meta.get("start", 1), "nb": nb}))
                 i = j + 1
                 continue
             if len(lines) > 1:
@@ -296,7 +299,19 @@ def _split_tail(blocks: list[Block]) -> tuple[list[Block], list[Block]]:
     return blocks[:start], blocks[start:]
 
 
-def parse_manuscript(text: str, lang: str) -> Manuscript:
+def _sound_block(b: Block) -> Block:
+    """'Sound lost: the eight o’clock bell.' -> label + text (split at the first colon)."""
+    t = re.sub(r"^<em>|</em>$", "", b.html.strip())
+    m = re.match(r"^(.*?)\s*:\s*(.*)$", t, re.S)
+    if not m:
+        return Block("sound", t, meta={"label": "", "text": t})
+    return Block("sound", t, meta={"label": strip_tags(m.group(1)).strip(), "text": m.group(2).strip()})
+
+
+def parse_manuscript(text: str, lang: str, opts: dict | None = None) -> Manuscript:
+    """opts (book.json "parser"): tail=False keeps closing notebook blocks as ordinary blocks;
+    sound_lines=True turns the italic line under a chapter's date into a "sound" block."""
+    opts = opts or {}
     md = make_md()
     toks = md.parse(text)
     top = _slice_blocks(toks)
@@ -319,7 +334,12 @@ def parse_manuscript(text: str, lang: str) -> Manuscript:
                 if blocks and blocks[0].kind == "dateline":
                     cur.date = strip_tags(blocks[0].html)
                     blocks = blocks[1:]
-                prose, tail = _split_tail(blocks)
+                if opts.get("sound_lines") and blocks and blocks[0].kind == "note":
+                    blocks = [_sound_block(blocks[0])] + blocks[1:]
+                if opts.get("tail", True):
+                    prose, tail = _split_tail(blocks)
+                else:
+                    prose, tail = blocks, []
                 cur.blocks = prose + ([Block("tail", items=tail)] if tail else [])
             else:
                 cur.blocks = blocks
@@ -396,6 +416,8 @@ def parse_manuscript(text: str, lang: str) -> Manuscript:
     if ep_blocks and ep_blocks[0].kind == "dateline":
         epilogue.date = strip_tags(ep_blocks[0].html)
         ep_blocks = ep_blocks[1:]
+    if opts.get("sound_lines") and ep_blocks and ep_blocks[0].kind == "note":
+        ep_blocks = [_sound_block(ep_blocks[0])] + ep_blocks[1:]
     epilogue.blocks = ep_blocks
 
     sections = [s for s in sections if s.kind != "skip"]
@@ -414,6 +436,7 @@ class Guide:
     subtitle: str
     intro: str
     sections: list[Section]
+    before: list[str] = field(default_factory=list)   # content note(s) printed between the contents list and section 1
 
 
 def parse_guide(text: str, lang: str) -> Guide:
@@ -424,6 +447,7 @@ def parse_guide(text: str, lang: str) -> Guide:
     cur: Section | None = None
     h2n = 0
     em_seen = 0
+    before: list[str] = []
     for btoks in top:
         first = btoks[0]
         if first.type == "heading_open":
@@ -461,10 +485,12 @@ def parse_guide(text: str, lang: str) -> Guide:
                 sections.append(Section("guide-facts", "facts", blocks=[_classify_block(md, btoks)]))
             continue
         if cur.kind == "skip":
+            if first.type == "paragraph_open":      # e.g. "Before you read. This novel deals with ..."
+                before.append(_inline_html(md, btoks[1]))
             continue
         cur.blocks.append(_classify_block(md, btoks))
     for s in sections:
         if s.kind in ("guide-section",):
             s.blocks = _merge_blocks(s.blocks)
     sections = [s for s in sections if s.kind != "skip"]
-    return Guide(lang, title, subtitle, intro, sections)
+    return Guide(lang, title, subtitle, intro, sections, before)

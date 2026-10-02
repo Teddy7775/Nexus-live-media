@@ -446,7 +446,8 @@ class PrintBuilder:
         out = [self.mark("guide", "r") + f'<section class="guide-title" id="guide"><div class="lab">{esc(self.series["names"][self.lang])}</div>'
                f'<div class="big">{esc(S["guide"])}</div>'
                f'<div class="sub">{self.T(g.intro) if g.intro else ""}</div>'
-               f'<div class="warn">{esc(S["spoiler"])}</div></section>']
+               f'<div class="warn">{esc(S["spoiler"])}</div>'
+               + "".join(f'<div class="care">{self.T(x)}</div>' for x in g.before) + '</section>']
         body = ['<section class="guide">']
         first = True
         for s in g.sections:

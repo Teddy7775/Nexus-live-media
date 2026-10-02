@@ -222,7 +222,8 @@ class EpubBuilder:
             intro = (f'<section epub:type="bodymatter" class="guide"><header class="opener"><div class="lab">{x(series["names"][lang])}</div>'
                      f'<h1>{x(S["guide"])}</h1></header>'
                      + (f'<p class="noind"><em>{C.T(g.intro)}</em></p>' if g.intro else "")
-                     + f'<p class="warn">{x(S["spoiler"])}</p></section>')
+                     + f'<p class="warn">{x(S["spoiler"])}</p>'
+                     + "".join(f'<p class="care">{C.T(b)}</p>' for b in g.before) + '</section>')
             self.write("guide.xhtml", self.doc(S["guide"], intro))
             self.toc.append((1, S["guide"], "guide.xhtml"))
             self.add("guide", "guide.xhtml", "application/xhtml+xml", spine=True)
