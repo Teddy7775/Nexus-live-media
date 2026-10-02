@@ -34,8 +34,17 @@ class Common:
             attrs += f' start="{start}"'
         return f"<{tag}{attrs}>" + "".join(f"<li>{self.T(i)}</li>" for i in items) + f"</{tag}>"
 
+    def sound_html(self, sec: Section) -> str:
+        """The italic 'Sound lost: …' line printed in the chapter opener (books with design.sound_lines)."""
+        if sec.blocks and sec.blocks[0].kind == "sound":
+            m = sec.blocks[0].meta
+            return f'<div class="sound"><span class="k">{self.T(esc(m["label"]))}</span><span class="t">{self.T(m["text"])}</span></div>'
+        return ""
+
     def block(self, b: Block, sec: Section | None = None) -> str:
         k = b.kind
+        if k == "sound":
+            return ""
         if k == "p":
             return f"<p>{self.T(b.html)}</p>"
         if k == "note":
@@ -51,12 +60,14 @@ class Common:
         if k == "card":
             title = strip_tags(b.html).strip()
             rules = b.meta.get("list") == "ol" and title.upper() == title
-            return (f'<div class="card"><p class="ct">{self.T(b.html)}</p>'
+            nb = self.book.design.get("nb_cards") and b.meta.get("nb")
+            return (f'<div class="card{" nb" if nb else ""}"><p class="ct">{self.T(b.html)}</p>'
                     + self._list(b.items, b.meta.get("list", "ul"), b.meta.get("start", 1), "rules" if rules else "") + "</div>")
         if k == "ol":
             return self._list(b.items, "ol", b.meta.get("start", 1), "rules")
         if k == "ul":
-            return f'<div class="card">{self._list(b.items, "ul")}</div>'
+            nb = self.book.design.get("nb_cards") and b.meta.get("nb")
+            return f'<div class="card{" nb" if nb else ""}">{self._list(b.items, "ul")}</div>'
         if k == "tail":
             sw = self.book.cfg.get("chapter_swatches", {}).get(sec.id) if sec else None
             parts = []

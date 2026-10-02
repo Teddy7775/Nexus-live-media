@@ -394,7 +394,7 @@ Ces activités ne demandent jamais aux élèves de partager des expériences per
 
 * Vira est une voisine, pas la grand-mère de Katya. Ihor est l’ami de Katya.
 
-* Le sort de Papa et celui de Mykhailo ne sont pas résolus. Résistez à l’envie de les résoudre pour les élèves.
+* Le sort de Papa et celui de Mykhailo, le frère de Daryna, ne sont pas résolus. Résistez à l’envie de les résoudre pour les élèves.
 
 ### **Présenter la guerre**
 

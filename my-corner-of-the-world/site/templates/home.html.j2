@@ -6,11 +6,10 @@
     <h1>{{ t.home.title }}</h1>
     <p class="lead">{{ t.home.lead }}</p>
     <div class="actions">
-      <a class="btn btn-primary" href="{{ feat.read_url }}">{{ t.home.cta_read }}</a>
-      <a class="btn btn-ghost" href="{{ u.books }}">{{ t.home.cta_books }}</a>
+      <a class="btn btn-primary" href="{{ u.books }}">{{ t.home.cta_books }}</a>
     </div>
   </div>
-  <a class="cover" href="{{ feat.url }}" aria-label="{{ feat.title }}">{{ m.picture(feat.cover, feat.title ~ ': ' ~ feat.subtitle, '(min-width: 52rem) 24rem, 70vw', eager=True) }}</a>
+  <div class="covers n{{ covers|length }}">{% for c in covers %}<a class="cover" href="{{ c.url }}" aria-label="{{ c.title }}">{{ m.picture(c.cover, c.title ~ ': ' ~ c.subtitle, '(min-width: 52rem) 15rem, 40vw', eager=(loop.first)) }}</a>{% endfor %}</div>
 </div></section>
 <section class="block"><div class="wrap">
   <h2 class="center">{{ t.home.how_title }}</h2>

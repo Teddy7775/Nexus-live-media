@@ -78,6 +78,32 @@ a{color:#315768}
 """
 
 
+V1_PAL = {"kesariya": "#C66B32", "plaster": "#C88E82", "petrol": "#315768", "indigo": "#35445D", "pale": "#DDA16C", "ember": "#A13F30"}
+
+CSS_DESIGN = """
+.opener .sound{margin:1em 1.4em 0;text-align:center}
+.opener .sound .k{display:block;font:800 .62em "Nunito Sans",sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#C66B32}
+.opener .sound .t{display:block;font-style:italic;color:#35445D;font-size:.95em;margin-top:.3em;text-indent:0}
+.card.nb{border-left:0;border-radius:2px;background:#fbf7ee;padding:.3em .8em .5em 1.5em;border:1px solid #DDA16C;border-left:3px solid #C66B32}
+.card.nb ul,.card.nb ol{list-style:none;padding:0;margin:.1em 0}
+.card.nb li{margin:.12em 0;text-indent:0;text-align:left}
+.partpage .per{font-style:italic;color:#315768;margin-top:.8em}
+.guide .care,p.care{border-left:3px solid #C66B32;background:#f6efe3;padding:.55em .9em;margin:1em 0;text-indent:0;text-align:left;font-size:.9em}
+"""
+CSS_NOHAND = """
+.opener .date,.dateline{font:italic 400 1em Literata,serif;color:#315768}
+.note,.tail p,.card ul,.card ol,ol.rules{font:italic 400 .98em Literata,serif;color:#315768}
+.card.nb ul,.card.nb ol{color:#34302b}
+"""
+
+
+def css_for(book: Book) -> str:
+    css = CSS + CSS_DESIGN + (CSS_NOHAND if not book.design.get("hand", True) else "")
+    for key, v1 in V1_PAL.items():
+        css = css.replace(v1, book.palette[key]).replace(v1.lower(), book.palette[key])
+    return css
+
+
 def x(s):  # XML-safe text
     return esc(s)
 
@@ -143,7 +169,7 @@ class EpubBuilder:
         C = Common(bk, lang, fig)
 
         # css + fonts
-        self.write("css/style.css", CSS)
+        self.write("css/style.css", css_for(bk))
         self.add("css", "css/style.css", "text/css")
         for f in EPUB_FONTS:
             shutil.copyfile(FONTS / f, self.root / "OEBPS" / "fonts" / f)
@@ -201,13 +227,16 @@ class EpubBuilder:
                 self.add(sec.id, fn, "application/xhtml+xml", spine=True)
                 continue
             if sec.kind == "chapter":
-                head = (f'<header class="opener"><div class="lab">{x(strip_tags(sec.label))}</div><div class="num">{sec.number}</div>'
-                        f'<h1>{x(sec.title)}</h1>' + (f'<div class="date">{x(sec.date)}</div>' if sec.date else "") + "</header>")
+                num = f'<div class="num">{sec.number}</div>' if bk.design.get("opener_num", True) else ""
+                head = (f'<header class="opener"><div class="lab">{x(strip_tags(sec.label))}</div>{num}'
+                        f'<h1>{x(sec.title)}</h1>' + (f'<div class="date">{x(sec.date)}</div>' if sec.date else "")
+                        + C.sound_html(sec) + "</header>")
                 etype = "chapter"
                 lvl = 2
             else:
                 head = (f'<header class="opener">' + (f'<div class="lab">{x(strip_tags(sec.label))}</div>' if sec.label else "")
-                        + f'<h1>{x(sec.title)}</h1>' + (f'<div class="date">{x(sec.date)}</div>' if sec.date else "") + "</header>")
+                        + f'<h1>{x(sec.title)}</h1>' + (f'<div class="date">{x(sec.date)}</div>' if sec.date else "")
+                        + C.sound_html(sec) + "</header>")
                 etype = {"prologue": "prologue", "epilogue": "epilogue", "glossary": "glossary", "note": "afterword"}[sec.kind]
                 lvl = 1
             cls = " glossary" if sec.kind == "glossary" else ""

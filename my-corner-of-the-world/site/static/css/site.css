@@ -62,7 +62,7 @@ p{margin:0 0 1em}
 /* buttons, badges */
 .btn{display:inline-flex;align-items:center;gap:.5rem;font:700 1rem/1 var(--sans);padding:.95rem 1.4rem;border-radius:999px;text-decoration:none;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
-.btn-primary{background:#AD531D;color:#fff}.btn-primary:hover{background:#8f3f0f}
+.btn-primary{background:var(--btn,#AD531D);color:#fff}.btn-primary:hover{background:var(--btn-h,#8f3f0f)}
 .btn-ghost{border-color:var(--indigo);color:var(--indigo);background:transparent}[data-theme="dark"] .btn-ghost{border-color:#9fb3d1;color:#cfe0f7}
 .btn-quiet{background:var(--bg2);color:var(--ink)}
 .badge{display:inline-block;font:800 .7rem/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:.45rem .7rem;border-radius:999px;background:var(--bg2);color:var(--accent-ink)}
@@ -141,7 +141,7 @@ textarea{min-height:9rem;resize:vertical}
 .prose .card .ct{font:800 .78rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 .4em}
 .prose .card ul,.prose .card ol{margin:.2em 0;padding-left:1.4em;font:600 1.35rem/1.25 var(--hand)}
 .prose ol.rules{counter-reset:r;list-style:none;padding:0;margin:1em 0}.prose ol.rules li{counter-increment:r;position:relative;padding-left:2.4rem;margin:.4em 0;font:600 1.3rem/1.25 var(--hand)}
-.prose ol.rules li::before{content:counter(r);position:absolute;left:0;top:.15em;width:1.7rem;height:1.7rem;border-radius:50%;background:#AD531D;color:#fff;font:800 .85rem/1.7rem var(--sans);text-align:center}
+.prose ol.rules li::before{content:counter(r);position:absolute;left:0;top:.15em;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--btn,#AD531D);color:#fff;font:800 .85rem/1.7rem var(--sans);text-align:center}
 .prose .tail{margin:2.2em 0 .5em;padding:.9em 1.2em;border:2px dashed var(--plaster);border-radius:.8rem;background:var(--bg2)}
 .prose .tail p{margin:.25em 0;font:600 1.35rem/1.25 var(--hand);text-indent:0}.prose .tail p::first-letter{all:unset}
 .prose .tail p strong{font:800 .72rem var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-right:.4em}
@@ -172,3 +172,27 @@ textarea{min-height:9rem;resize:vertical}
 .lang-choice{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));margin-top:2rem}.lang-choice a{display:block;text-align:center;padding:1.6rem 1rem;border-radius:1rem;background:var(--card);border:2px solid var(--line);text-decoration:none;color:var(--ink);font:700 1.3rem var(--serif);box-shadow:var(--shadow)}.lang-choice a:hover{border-color:var(--kes)}
 .center{text-align:center}.mt{margin-top:2rem}
 @media print{.site-head,.site-foot,.reader-bar,.pager,.skip{display:none!important}body{background:#fff;color:#000;font-size:11pt}.prose{font-size:11pt}.prose figure.illus img{box-shadow:none}}
+
+/* ---- books with a "sound" line per chapter and notebook-page cards (e.g. Volume 2) ---- */
+.chapter .opener .sound{margin:1.1rem auto 0;max-width:22rem;text-align:center}
+.chapter .opener .sound .k{display:block;font:800 .72rem var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--accent-ink)}
+.chapter .opener .sound .t{display:block;font-style:italic;color:var(--head);margin-top:.3rem}
+.prose .card.nb{--ln:1.75rem;position:relative;margin:1.6em 0;padding:0 1rem .15rem 2.1rem;background-color:var(--bg2);border:1px solid var(--line);border-radius:.4rem;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--ln) - 1px),color-mix(in srgb,var(--link) 22%,transparent) calc(var(--ln) - 1px),color-mix(in srgb,var(--link) 22%,transparent) var(--ln))}
+.prose .card.nb::before{content:"";position:absolute;left:1.15rem;top:0;bottom:0;width:2px;background:var(--accent);opacity:.65}
+.prose .card.nb .ct{font:800 .7rem/var(--ln) var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--accent-ink);margin:0}
+.prose .card.nb ul{list-style:none;margin:0;padding:0;font:italic 400 .96em/var(--ln) var(--serif)}
+.prose .card.nb li{margin:0;padding:0;text-indent:0}
+.prose .card.nb li strong{font-style:normal}
+.care{background:var(--bg2);border-left:4px solid var(--accent);border-radius:.3rem;padding:.8rem 1rem;color:var(--ink)}
+.partline{font-style:italic;color:var(--link)}
+
+/* hero with several covers */
+.hero .covers{display:flex;justify-content:center;align-items:center;gap:0;padding:1rem 0}
+.hero .covers .cover{width:min(46%,15rem);margin:0 -1.1rem;transform:rotate(-3deg) translateY(.6rem)}
+.hero .covers .cover:nth-child(2){transform:rotate(2.5deg) translateY(-.6rem);z-index:2}
+.hero .covers .cover:nth-child(3){transform:rotate(-1.5deg) translateY(.8rem);z-index:1}
+.hero .covers.n1 .cover{width:min(100%,24rem);margin:0;transform:rotate(1.5deg)}
+.hero .covers .cover:hover{transform:rotate(0) translateY(-.3rem);z-index:5}
+@media (max-width:52rem){.hero .covers{order:-1}.hero .covers .cover{width:min(44%,12rem)}}
+.parents-book + .parents-book{border-top:1px solid var(--line);margin-top:2.5rem;padding-top:.5rem}

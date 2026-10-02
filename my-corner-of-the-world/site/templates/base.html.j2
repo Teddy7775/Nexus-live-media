@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ L }}">
+<html lang="{{ L }}"{% if page.book %} data-book="{{ page.book }}"{% endif %}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -21,6 +21,7 @@
 <link rel="preload" as="font" type="font/woff2" href="{{ base }}/assets/fonts/literata-latin-400-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="{{ base }}/assets/fonts/nunito-sans-latin-700-normal.woff2" crossorigin>
 <link rel="stylesheet" href="{{ base }}/assets/css/site.css?v={{ ver }}">
+<link rel="stylesheet" href="{{ base }}/assets/css/books.css?v={{ ver }}">
 <script>(function(){try{var d=document.documentElement,t=localStorage.getItem('mcw:theme');if(t)d.setAttribute('data-theme',t);var s=parseFloat(localStorage.getItem('mcw:size'));if(s)d.style.setProperty('--reader-size',s+'rem')}catch(e){}})()</script>
 {% if page.jsonld %}<script type="application/ld+json">{{ page.jsonld|safe }}</script>{% endif %}
 </head>

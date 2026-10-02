@@ -55,6 +55,12 @@ ORN_SVG = ('<svg class="orn" viewBox="0 0 120 34" xmlns="http://www.w3.org/2000/
            '<path d="M60 3 L60 31 M48 17 L72 17" stroke="{c}" stroke-width=".8"/>'
            '<path d="M55 21 q5 -9 5 -3 q3 -4 5 3 q-5 4 -10 0z" fill="{k}"/></svg>')
 
+BELL_SVG = ('<svg class="orn" viewBox="0 0 120 34" xmlns="http://www.w3.org/2000/svg">'
+            '<line x1="2" y1="17" x2="46" y2="17" stroke="{c}" stroke-width="1.2"/>'
+            '<line x1="74" y1="17" x2="118" y2="17" stroke="{c}" stroke-width="1.2"/>'
+            '<path d="M60 4 c-1.6 0 -2.6 1 -2.6 2.4 C52.4 8 50.6 12.2 50.6 18 v4.6 l-3.4 3.8 h25.6 l-3.4 -3.8 V18 c0 -5.8 -1.8 -10 -6.8 -11.6 C62.6 5 61.6 4 60 4z" fill="none" stroke="{c}" stroke-width="1.4"/>'
+            '<circle cx="60" cy="29.2" r="2.1" fill="{k}"/></svg>')
+
 COLOR_LABELS = ("color of the day", "couleur du jour", "color del día")
 
 
@@ -108,6 +114,7 @@ def css_str(s: str) -> str:
 class PrintBuilder:
     def __init__(self, book: Book, lang: str, edition: str, mode: str = "proof"):
         self.book, self.lang, self.edition, self.mode = book, lang, edition, mode
+        self.design = book.design
         self.guide_on = edition == "guide"
         self.ms: Manuscript = book.manuscript(lang)
         self.guide = book.guide(lang) if self.guide_on else None
@@ -132,12 +139,15 @@ class PrintBuilder:
         # anchor paragraph (never before it), so the text page before a plate is not left nearly empty.
         self.plate_pos: dict[str, int] = {}       # art id -> index of the block the plate follows
         self.flow_mode = False                    # True while rendering the text-only "flow" pass
-        self.flow_cands: dict[str, tuple[str, int, list[int]]] = {}
+        self.flow_cands: dict[str, tuple[str, int, list[int], int]] = {}
         self.flow_xy: dict[str, tuple[int, float]] = {}
         self._flow_ids: list[str] = []
         self._flow_seen: list[str] = []
         self.out_dir = BUILD / book.slug / "print" / f"{lang}-{edition}"
         self.out_dir.mkdir(parents=True, exist_ok=True)
+
+    def orn_svg(self, c: str, k: str) -> str:
+        return (BELL_SVG if self.design.get("orn") == "bell" else ORN_SVG).format(c=c, k=k)
 
     # ---------- helpers ---------------------------------------------------
     def T(self, html: str) -> str:
@@ -272,15 +282,20 @@ class PrintBuilder:
             return '<div class="poster">' + "".join(f"<div>{self.T(l)}</div>" for l in b.items) + "</div>"
         if k == "label":
             return f"<p>{self.T(b.html)}</p>"
+        if k == "sound":
+            return ""                                 # printed inside the chapter opener
         if k == "card":
             title = strip_tags(b.html).strip()
             rules = b.meta.get("list") == "ol" and title.upper() == title
             lst = self.render_list(b.items, b.meta.get("list", "ul"), b.meta.get("start", 1), "rules" if rules else "")
-            return f'<div class="card"><div class="ct">{self.T(b.html)}</div>{lst}</div>'
+            nb = self.design.get("nb_cards") and b.meta.get("nb")
+            cls = "card nb" + (" long" if len(b.items) > 13 else "") if nb else "card"
+            return f'<div class="{cls}"><div class="ct">{self.T(b.html)}</div>{lst}</div>'
         if k == "ol":
             return self.render_list(b.items, "ol", b.meta.get("start", 1), "rules")
         if k == "ul":
-            return f'<div class="card">{self.render_list(b.items, "ul")}</div>'
+            cls = "card nb" if self.design.get("nb_cards") and b.meta.get("nb") else "card"
+            return f'<div class="{cls}">{self.render_list(b.items, "ul")}</div>'
         if k == "tail":
             return self.render_tail(b, sec)
         if k == "table":
@@ -308,7 +323,7 @@ class PrintBuilder:
         cls = ' class="kv"' if kv else ""
         t = f"<table{cls}>"
         if head:
-            t += "<thead><tr>" + "".join(f"<th>{self.T(c)}</th>" for c in head) + "</tr></thead>"
+            t += "<thead><tr>" + "".join(f"<th>{typo.apply(c, self.lang, hyphenate=False)}</th>" for c in head) + "</tr></thead>"
         t += "<tbody>" + "".join("<tr>" + "".join(f"<td>{self.T(c)}</td>" for c in r) + "</tr>" for r in rows) + "</tbody></table>"
         return t
 
@@ -321,15 +336,21 @@ class PrintBuilder:
         head = {"id": sec.id, "pg": pg, "head_css": css_str(sec.title)}
         label = esc(strip_tags(sec.label)) if sec.label else ""
         title = self.T(esc(sec.title))
-        orn = ORN_SVG.format(c=self.book.palette["plaster"], k=self.book.palette["kesariya"])
+        orn = self.orn_svg(self.book.palette["plaster"], self.book.palette["kesariya"])
+        sound = ""
+        if sec.blocks and sec.blocks[0].kind == "sound":
+            m = sec.blocks[0].meta
+            sound = (f'<div class="sound"><span class="k">{self.T(esc(m["label"]))}</span>'
+                     f'<span class="t">{self.T(m["text"])}</span></div>')
         if sec.kind == "chapter":
-            op = (f'<header class="opener"><div class="lab">{label}</div><div class="num">{sec.number}</div>'
-                  f'<div class="ttl">{title}</div>' + (f'<div class="date">{esc(sec.date)}</div>' if sec.date else "")
-                  + f"{orn}</header>")
+            num = f'<div class="num">{sec.number}</div>' if self.design.get("opener_num", True) else ""
+            op = (f'<header class="opener"><div class="lab">{label}</div>{num}'
+                  f'<div class="ttl">{title}</div>' + (f'<div class="date">{self.T(esc(sec.date))}</div>' if sec.date else "")
+                  + f"{orn}{sound}</header>")
         elif sec.kind in ("prologue", "epilogue", "glossary", "note"):
             op = (f'<header class="opener plain">' + (f'<div class="lab">{label}</div>' if label else "")
-                  + f'<div class="ttl">{title}</div>' + (f'<div class="date">{esc(sec.date)}</div>' if sec.date else "")
-                  + f"{orn}</header>")
+                  + f'<div class="ttl">{title}</div>' + (f'<div class="date">{self.T(esc(sec.date))}</div>' if sec.date else "")
+                  + f"{orn}{sound}</header>")
         else:
             op = ""
         # where do illustrations go?
@@ -339,8 +360,11 @@ class PrintBuilder:
             idx = self.locate(sec, aid, slot)
             if self.is_page_art(aid, slot):
                 if self.flow_mode:      # text-only pass: measure where the blocks after the anchor end
-                    cands = [i for i in range(idx, min(idx + 70, len(sec.blocks))) if sec.blocks[i].kind == "p"]
-                    self.flow_cands[aid] = (sec.id, idx, cands)
+                    stop = len(sec.blocks)
+                    if self.design.get("plate_stop_at_notebook"):      # a plate never floats past a notebook page
+                        stop = next((i for i in range(idx + 1, len(sec.blocks)) if sec.blocks[i].kind in ("card", "ul", "notice", "poster")), stop)
+                    cands = [i for i in range(idx, min(idx + 70, len(sec.blocks))) if sec.blocks[i].kind in ("p", "card", "ul", "notice")]
+                    self.flow_cands[aid] = (sec.id, idx, cands, stop)
                     for i in cands:
                         flow_marks[i] = f"fe-{aid}-{i}"
                     continue
@@ -353,9 +377,13 @@ class PrintBuilder:
         body, seg_open = [], False
         for i, b in enumerate(sec.blocks):
             blk = self.render_block(b, sec, first_after_plate=after_plate)
-            if i in flow_marks and blk.endswith("</p>"):
-                self._flow_seen.append(flow_marks[i])
-                blk = blk[:-4] + f'<a id="{flow_marks[i]}" style="display:inline-block;width:0;height:0"></a></p>'
+            if i in flow_marks:
+                mk = f'<a id="{flow_marks[i]}" style="display:inline-block;width:0;height:0"></a>'
+                for tail in ("</li></ul></div>", "</p>", "</div>"):          # end of the last line of the block
+                    if blk.endswith(tail):
+                        blk = blk[:-len(tail)] + mk + tail
+                        self._flow_seen.append(flow_marks[i])
+                        break
             body.append(blk)
             after_plate = False
             for art_html in inserts.get(i, []):
@@ -365,8 +393,9 @@ class PrintBuilder:
                         body.append("</div>")
                         seg_open = False
                     body.append(art_html)
-                    body.append('<div class="seg">')
-                    seg_open = True
+                    if i + 1 < len(sec.blocks):          # nothing after the plate: no empty block (it would make a blank page)
+                        body.append('<div class="seg">')
+                        seg_open = True
                     after_plate = True
                 else:
                     body.append(art_html)
@@ -378,11 +407,14 @@ class PrintBuilder:
         return html, head
 
     def render_part(self, sec: Section, chapters: list[Section]) -> str:
-        orn = ORN_SVG.format(c=self.book.palette["kesariya"], k=self.book.palette["ember"])
+        orn = self.orn_svg(self.book.palette["kesariya"], self.book.palette["ember"])
         nums = [c.number for c in chapters if c.part_index == sec.number]
         rng = self.S["part_chapters"].format(a=min(nums), b=max(nums)) if nums else ""
+        per = ""
+        if sec.blocks and sec.blocks[0].kind in ("dateline", "note") and self.design.get("part_period"):
+            per = f'<div class="per">{self.T(strip_tags(sec.blocks[0].html))}</div>'
         return (self.mark(sec.id, "v") + f'<section class="partpage" id="{sec.id}"><div class="lab">{esc(strip_tags(sec.label))}</div>'
-                f'<div class="big">{self.T(esc(sec.title))}</div>{orn}<div class="rng">{rng}</div></section>')
+                f'<div class="big">{self.T(esc(sec.title))}</div>{orn}{per}<div class="rng">{rng}</div></section>')
 
     # ---------- front matter -------------------------------------------------
     def front_matter(self, toc_html: str) -> str:
@@ -390,7 +422,7 @@ class PrintBuilder:
         series = esc(self.series["names"][lang].upper())
         title = esc(bk.title(lang))
         sub = esc(bk.subtitle(lang))
-        orn = ORN_SVG.format(c=bk.palette["plaster"], k=bk.palette["kesariya"])
+        orn = self.orn_svg(bk.palette["plaster"], bk.palette["kesariya"])
         pub = self.series["publisher"]
         publisher = esc(pub["name"]) if pub["name"] else self.todo(S["placeholder_publisher"])
         holder = esc(pub.get("copyright_holder") or "") or self.author()
@@ -437,13 +469,15 @@ class PrintBuilder:
         if self.guide_on:
             rows.append(f'<div class="part">&nbsp;</div>' + row("guide", "", S["guide"], "plain"))
         rows.append(row("endpage", "", S["series_page"], "plain"))
-        return self.mark("toc", "r") + f'<section class="toc" id="toc"><h2>{esc(S["contents"])}</h2>{"".join(rows)}</section>'
+        dense = " dense" if len(rows) > 28 else ""
+        return self.mark("toc", "r") + f'<section class="toc{dense}" id="toc"><h2>{esc(S["contents"])}</h2>{"".join(rows)}</section>'
 
     # ---------- guide ---------------------------------------------------------
     def render_guide(self) -> str:
         g = self.guide
         S = self.S
-        out = [self.mark("guide", "r") + f'<section class="guide-title" id="guide"><div class="lab">{esc(self.series["names"][self.lang])}</div>'
+        care = " has-care" if g.before else ""
+        out = [self.mark("guide", "r") + f'<section class="guide-title{care}" id="guide"><div class="lab">{esc(self.series["names"][self.lang])}</div>'
                f'<div class="big">{esc(S["guide"])}</div>'
                f'<div class="sub">{self.T(g.intro) if g.intro else ""}</div>'
                f'<div class="warn">{esc(S["spoiler"])}</div>'
@@ -516,7 +550,8 @@ class PrintBuilder:
             m_top=round(G.b + G.top, 4), m_bot=round(G.b + G.bottom, 4),
             m_out_r=round(G.b_out + G.outer, 4), m_in_r=round(G.b_in + G.inner, 4),
             m_in_l=round(G.b_in + G.inner, 4), m_out_l=round(G.b_out + G.outer, 4),
-            opener_top=1.25, chapters=heads, book_title_css=css_str(self.book.title(self.lang).upper()))
+            opener_top=1.25, chapters=heads, book_title_css=css_str(self.book.title(self.lang).upper()),
+            design=self.design, hand=self.design.get("hand", True))
         doc = (f'<!doctype html><html lang="{self.lang}"><head><meta charset="utf-8">'
                f'<title>{esc(self.book.title(self.lang))}</title><style>{css}</style></head><body>{front}{"".join(pieces)}</body></html>')
         return doc, heads
@@ -572,7 +607,7 @@ class PrintBuilder:
 
     def plate_candidates(self, aid: str) -> list[tuple[int, int, float]]:
         """(block index, end page, fill of that page) for every block the plate could follow."""
-        _, _, cands = self.flow_cands[aid]
+        _, _, cands, _ = self.flow_cands[aid]
         out = []
         for i in cands:
             k = self.flow_xy.get(f"fe-{aid}-{i}")
@@ -580,8 +615,10 @@ class PrintBuilder:
                 out.append((i, k[0], self.fill_of(k[1])))
         return out
 
-    def pick_on_page(self, aid: str, page: int):
-        on = [c for c in self.plate_candidates(aid) if c[1] == page]
+    def pick_on_page(self, aid: str, page: int, near_only: bool = True):
+        """Fullest candidate that ends on `page`; near_only keeps the plate before the next notebook page."""
+        stop = self.flow_cands[aid][3]
+        on = [c for c in self.plate_candidates(aid) if c[1] == page and (c[0] < stop or not near_only)]
         return max(on, key=lambda c: (c[2], c[0])) if on else None
 
     def plan_plates(self) -> None:
@@ -600,7 +637,7 @@ class PrintBuilder:
         self.render_pdf(html, flow)
         self.flow_xy = self.read_dests_xy(flow)
         self.flow_mode = False
-        for aid, (_, idx, _) in self.flow_cands.items():
+        for aid, (_, idx, _, _) in self.flow_cands.items():
             cs = self.plate_candidates(aid)
             if not cs:
                 self.plate_pos[aid] = idx
@@ -613,6 +650,10 @@ class PrintBuilder:
             nxt = self.pick_on_page(aid, pa + 1)
             if nxt and nxt[2] >= 0.82:
                 self.plate_pos[aid] = nxt[0]
+                continue
+            far = self.pick_on_page(aid, pa, near_only=False)   # last resort: float past a notebook page
+            if far and far[2] >= 0.70 and (not best or best[2] < 0.5):
+                self.plate_pos[aid] = far[0]
             else:
                 self.plate_pos[aid] = best[0] if best else idx
 
@@ -661,7 +702,7 @@ class PrintBuilder:
         css = env.get_template("print.css.j2").render(
             fonts=patched_fonts_dir().resolve().as_uri(), pal=self.book.palette, body_pt=11, leading=1.5, PW=G.PW, PH=G.PH,
             text_h=G.text_h, m_top=0, m_bot=0, m_out_r=0, m_in_r=0, m_in_l=0, m_out_l=0, opener_top=1, chapters=[],
-            book_title_css="")
+            book_title_css="", design=self.design, hand=self.design.get("hand", True))
         pages = []
         book_title = esc(self.book.title(self.lang))
         for d in info:

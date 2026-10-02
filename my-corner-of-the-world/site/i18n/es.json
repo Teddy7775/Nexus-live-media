@@ -20,11 +20,11 @@
   "skip": "Saltar al contenido"
  },
  "home": {
-  "kicker": "Una colección para lectores de 9 a 13 años",
+  "kicker": "Novelas en forma de cuaderno para lectores curiosos, desde los 9 años",
   "title": "Cuatro jóvenes narradores. Cuatro rincones del mundo.",
   "lead": "Novelas en forma de cuaderno sobre los lugares de donde venimos y las decisiones que nos hacen quienes somos. Cada libro se puede leer por separado.",
   "cta_read": "Leer el volumen 1 en línea",
-  "cta_books": "Explorar la colección",
+  "cta_books": "Explorar los libros",
   "how_title": "Lee a tu manera",
   "how": [
    {
@@ -112,18 +112,16 @@
  },
  "parents": {
   "title": "Para familias y docentes",
-  "lead": "Qué esperar del libro, cómo leerlo con lectores jóvenes y cómo trata este sitio tu privacidad.",
+  "lead": "Qué esperar de cada libro, cómo leerlo con lectores jóvenes y cómo trata este sitio su privacidad.",
   "from_guide": "De la guía de descubrimiento",
   "privacy_title": "Privacidad, en palabras sencillas",
-  "privacy": "Este sitio no usa cookies, publicidad ni herramientas de análisis. Tu posición de lectura y tus preferencias de pantalla se guardan solo en tu navegador y nunca se nos envían. A los niños nunca se les pide información personal; los formularios de este sitio son para madres, padres, docentes y bibliotecarios.",
-  "safety_title": "Una nota sobre la seguridad con cometas",
-  "safety": "El libro muestra situaciones peligrosas a propósito, y también muestra a personas adultas que las manejan. Lee la sección de seguridad de la guía de descubrimiento antes de cualquier actividad con cometas y nunca copies lo que hacen los personajes en la azotea."
+  "privacy": "Este sitio no usa cookies, publicidad ni herramientas de análisis. Tu posición de lectura y tus preferencias de pantalla se guardan solo en tu navegador y nunca se nos envían. A los niños nunca se les pide información personal; los formularios de este sitio son para madres, padres, docentes y bibliotecarios."
  },
  "about": {
   "title": "Acerca de la colección",
   "p1": "Mi rincón del mundo sigue a cuatro jóvenes narradores ficticios en cuatro países de tres continentes. Cada libro se puede leer por separado, y entre ellos se hablan de maneras sorprendentes.",
   "p2": "Cada volumen está escrito como un cuaderno: fechas, listas, cosas dichas y cosas calladas. Las historias son inventadas; los lugares, oficios, fiestas y peligros que describen son reales, y cada libro termina con una nota que separa unos de otros.",
-  "p3": "Los libros están escritos para lectores de 9 a 13 años y se pueden compartir con niños más pequeños y con lectores mayores.",
+  "p3": "Cada libro indica su edad recomendada: unos están escritos para lectores de 9 a 13 años, otros para lectores a partir de los 13. Los más pequeños pueden disfrutarlos con un adulto, y los lectores mayores también son bienvenidos.",
   "trio_title": "Una idea, cuatro preguntas",
   "author_title": "La autoría"
  },
@@ -152,7 +150,7 @@
   "hosted": "Este sitio está alojado en Hostinger."
  },
  "foot": {
-  "tagline": "Hecho con cuidado para lectores curiosos de 9 a 13 años.",
+  "tagline": "Hecho con cuidado para jóvenes lectores curiosos.",
   "copyright": "© {year} {holder}",
   "rights": "Todos los derechos reservados."
  },

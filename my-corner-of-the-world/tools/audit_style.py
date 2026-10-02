@@ -112,11 +112,15 @@ def audit(path: Path, lang: str):
 
 
 def main():
-    base = Path(__file__).resolve().parents[1] / "books" / "ananya-stolen-flame" / "manuscript"
+    slug = next((a for a in sys.argv[1:] if not a.startswith("--")), "ananya-stolen-flame")
+    base = Path(__file__).resolve().parents[1] / "books" / slug / "manuscript"
     rows = {}
     for lang in ("en", "fr", "es"):
-        before = audit(base / "original" / f"{lang}.md", lang)
         edited = base / f"{lang}.md"
+        try:
+            before = audit(base / "original" / f"{lang}.md", lang)
+        except IndexError:          # raw word-processor export (Volume 2): only the normalized master is parseable
+            before = audit(edited, lang)
         after = audit(edited, lang) if edited.exists() else None
         rows[lang] = {"before": before, "after": after}
     if "--json" in sys.argv:

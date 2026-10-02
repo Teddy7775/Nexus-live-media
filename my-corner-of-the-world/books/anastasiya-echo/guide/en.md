@@ -394,7 +394,7 @@ These activities never ask students to share painful personal experiences. Every
 
 * Vira is a neighbor, not Katya’s grandmother. Ihor is Katya’s friend.
 
-* Papa’s fate and Mykhailo’s fate are not resolved. Resist the urge to resolve them for students.
+* Papa’s fate and the fate of Daryna’s brother, Mykhailo, are not resolved. Resist the urge to resolve them for students.
 
 ### **Framing the War**
 

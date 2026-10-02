@@ -4,7 +4,8 @@
   "status": "ready",
   "narrator": {
     "name": "Kateryna “Katya” Kovalchuk",
-    "age": 14
+    "age": 14,
+    "short": "Katya"
   },
   "place": {
     "en": "Northeast Ukraine",
@@ -176,7 +177,10 @@
     "hand": false,
     "sound_lines": true,
     "nb_cards": true,
-    "orn": "bell"
+    "orn": "bell",
+    "part_period": true,
+    "plate_stop_at_notebook": true,
+    "opener_num": false
   },
   "question": {
     "en": "How do you care for someone without disappearing?",
@@ -192,5 +196,74 @@
       "AE-I09"
     ]
   },
-  "buy_links": {}
+  "buy_links": {},
+  "cover": {
+    "style": "paper",
+    "spine_color": "petrol",
+    "show_volume": true,
+    "title_pt": {
+      "en": 40,
+      "fr": 38,
+      "es": 40
+    },
+    "title_lines": {
+      "en": [
+        "Anastasiya’s",
+        "Echo"
+      ],
+      "fr": [
+        "L’Écho",
+        "d’Anastasiya"
+      ],
+      "es": [
+        "El eco de",
+        "Anastasiya"
+      ]
+    },
+    "age": {
+      "en": "Young Adult · Ages 13 and up",
+      "fr": "Grands lecteurs · à partir de 13 ans",
+      "es": "Juvenil · a partir de 13 años"
+    },
+    "front": {
+      "fit": "width",
+      "anchor": "bottom"
+    },
+    "back": {
+      "fit": "width",
+      "anchor": "bottom",
+      "crop": [
+        40,
+        0
+      ],
+      "barcode_in_art": true,
+      "barcode_box_in": {
+        "right": 0.295,
+        "bottom": 0.32,
+        "w": 1.75,
+        "h": 1.1
+      },
+      "text_pt": 10.1,
+      "leading": 1.42
+    }
+  },
+  "age_note": {
+    "en": "For ages 13 and up",
+    "fr": "Grands lecteurs, à partir de 13 ans",
+    "es": "A partir de 13 años"
+  },
+  "parents_note": {
+    "en": {
+      "title": "A note on difficult content",
+      "text": "This novel is for readers 13 and up. It deals with the death of a parent, an emergency birth, a gravely ill baby, strikes on homes and shelters, a wounded brother and a father who is still missing. Nothing is graphic, and the book is full of humor, friendship and care. Read the table “Content to prepare for” in the Discovery Guide first, and decide with your young reader whether the moment is right."
+    },
+    "fr": {
+      "title": "À propos des sujets difficiles",
+      "text": "Ce roman s’adresse aux lecteurs de 13 ans et plus. Il aborde la mort d’un parent, un accouchement d’urgence, un bébé gravement malade, des frappes sur des maisons et des abris, un frère blessé et un père toujours disparu. Rien n’est décrit de façon graphique, et le livre est plein d’humour, d’amitié et de soin. Lisez d’abord le tableau « Contenus à préparer » du guide de découverte, et décidez avec votre jeune lecteur si le moment est le bon."
+    },
+    "es": {
+      "title": "Sobre los temas difíciles",
+      "text": "Esta novela es para lectores a partir de 13 años. Trata la muerte de una madre, un parto de emergencia, una bebé gravemente enferma, ataques contra casas y refugios, un hermano herido y un padre que sigue desaparecido. Nada es explícito, y el libro está lleno de humor, amistad y cuidado. Lean primero la tabla «Capítulos para los que conviene prepararse» de la guía de descubrimiento, y decidan con su joven lector si es el momento."
+    }
+  }
 }

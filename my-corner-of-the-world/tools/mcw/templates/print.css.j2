@@ -67,6 +67,9 @@ em{ font-style:italic; }
 .toc .row .dots{ flex:1; border-bottom:1.1pt dotted #b9a995; transform:translateY(-.25em); }
 .toc .row .pg{ flex:none; width:2em; text-align:right; font:600 9pt "Nunito Sans"; color:var(--stain); }
 .toc .row.plain .n{ visibility:hidden; }
+.toc.dense h2{ margin:.15in 0 .16in; }
+.toc.dense .part{ margin:.7em 0 .12em; }
+.toc.dense .row{ font-size:9.3pt; line-height:1.28; }
 
 /* ---------- parts & chapter openers -------------------------------------- */
 .partpage{ break-before: page; height:{{ text_h }}in; position:relative; text-align:center; padding-top:2.35in; }
@@ -83,7 +86,8 @@ em{ font-style:italic; }
 .opener .lab{ font:800 8.8pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
 .opener .num{ font:600 40pt/1 "Literata"; color:var(--plaster); margin:.12in 0 .02in; }
 .opener .ttl{ font:600 22pt/1.14 "Literata"; color:var(--indigo); margin:.08in .1in .0; }
-.opener .date{ font:600 15.5pt/1.2 "Caveat"; color:var(--petrol); margin-top:.16in; }
+{% if hand %}.opener .date{ font:600 15.5pt/1.2 "Caveat"; color:var(--petrol); margin-top:.16in; }
+{% else %}.opener .date{ font:italic 400 11.4pt/1.25 "Literata"; letter-spacing:.015em; color:var(--petrol); margin-top:.15in; }{% endif %}
 .opener .orn{ width:1.2in; height:.3in; margin:.2in auto 0; }
 .opener.plain .ttl{ margin-top:.16in; }
 .opener + p, .opener + .seg > p:first-child{ text-indent:0; }
@@ -101,19 +105,48 @@ em{ font-style:italic; }
 .poster div + div{ margin-top:.25em; font-weight:600; font-size:9.4pt; color:var(--ember); }
 .card{ margin:.95em .2em; padding:.6em .9em .7em; background:#f8f1e4; border-left:2.2pt solid var(--kes); break-inside:avoid; }
 .card .ct{ font:700 8.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--kes); margin-bottom:.3em; }
-.card ul,.card ol{ margin:.1em 0 0; padding-left:1.3em; font:400 15.5pt/1.18 "Caveat"; color:#3b2f2a; }
+.card ul,.card ol{ margin:.1em 0 0; padding-left:1.3em; {% if hand %}font:400 15.5pt/1.18 "Caveat"{% else %}font:italic 400 10.4pt/1.35 "Literata"{% endif %}; color:#3b2f2a; }
 .card li{ margin:.04em 0; padding-left:.1em; }
 ol.rules{ margin:.6em .6em; padding:0; list-style:none; counter-reset:r var(--start,0); }
 ol.rules li{ counter-increment:r; position:relative; padding:.12em 0 .12em 2.2em; font:400 13pt/1.2 "Caveat"; text-indent:0; break-inside:avoid; }
 ol.rules li::before{ content:counter(r); position:absolute; left:.2em; top:.2em; width:1.35em; height:1.35em; border-radius:50%; background:var(--kes); color:#fff; font:700 8.4pt/1.35em "Nunito Sans"; text-align:center; }
-.note{ text-indent:0; margin:.7em 1.1em; padding:.1em 0 .1em .9em; border-left:1.6pt solid var(--pale); font:400 15pt/1.2 "Caveat"; color:var(--petrol); text-align:left; break-inside:avoid; }
+{% if hand %}.note{ text-indent:0; margin:.7em 1.1em; padding:.1em 0 .1em .9em; border-left:1.6pt solid var(--pale); font:400 15pt/1.2 "Caveat"; color:var(--petrol); text-align:left; break-inside:avoid; }
 .dateline{ text-indent:0; margin:1.3em 0 .7em; text-align:center; font:600 15.5pt/1.2 "Caveat"; color:var(--petrol); break-after:avoid; }
+{% else %}.note{ text-indent:0; margin:.7em 1.1em; padding:.05em 0 .05em .9em; border-left:1.6pt solid var(--pale); font:italic 400 10.6pt/1.4 "Literata"; color:var(--petrol); text-align:left; break-inside:avoid; }
+.dateline{ text-indent:0; margin:1.3em 0 .7em; text-align:center; font:italic 400 11.4pt/1.25 "Literata"; color:var(--petrol); break-after:avoid; }{% endif %}
 .tail{ margin:1.5em .2em 0; padding:.55em .95em .6em; border:1pt dashed var(--plaster); background:#fbf5ea; break-inside:avoid; }
 .tail p{ text-indent:0; text-align:left; font:400 14.5pt/1.2 "Caveat"; color:#3b2f2a; margin:.12em 0; hyphens:manual; }
 .tail p strong{ font:800 7.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--kes); margin-right:.35em; }
 .tail .sw{ display:inline-block; width:.8em; height:.8em; border-radius:50%; border:.7pt solid #0003; vertical-align:-.08em; margin-right:.4em; }
 .tail .card{ margin:.2em 0 .1em; background:transparent; border:none; padding:0; }
 .tail .card .ct{ color:var(--kes); }
+
+{% if design.sound_lines %}
+/* ---------- the sound that opens each chapter ----------------------------- */
+.opener .sound{ margin:.2in .9in 0; text-align:center; }
+.opener .sound .k{ display:block; font:800 7.6pt "Nunito Sans"; letter-spacing:.24em; text-transform:uppercase; color:var(--kes); margin-bottom:.35em; }
+.opener .sound .t{ display:block; font:italic 400 10.8pt/1.4 "Literata"; color:var(--indigo); }
+.opener{ margin-bottom:.4in; }
+.partpage .per{ margin-top:.28in; font:italic 400 11.4pt "Literata"; color:var(--petrol); }
+{% endif %}
+{% if design.nb_cards %}
+/* ---------- notebook pages: ruled paper with a red margin line ------------ */
+.card.nb{ --nbl:14.6pt; position:relative; margin:1.05em .15em; padding:0 .75em .25em 1.5em; border-left:0; border-radius:1.5pt;
+  background-color:#fbf7ee; box-shadow:inset 0 0 0 .5pt var(--pale);
+  background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--nbl) - .55pt), rgba(79,98,115,.2) calc(var(--nbl) - .55pt), rgba(79,98,115,.2) var(--nbl)); }
+.card.nb::before{ content:""; position:absolute; left:.8em; top:0; bottom:0; width:.8pt; background:var(--kes); opacity:.65; }
+.card.nb .ct{ font:800 7.6pt/14.6pt "Nunito Sans"; letter-spacing:.17em; text-transform:uppercase; color:var(--kes); margin:0; padding-top:.1em; }
+.card.nb ul,.card.nb ol{ list-style:none; margin:0; padding:0; font:italic 400 10.2pt/14.6pt "Literata"; color:#34302b; }
+.card.nb li{ margin:0; padding:0; text-indent:0; text-align:left; hyphens:manual; orphans:2; widows:2; }
+.card.nb li strong{ font-style:normal; font-weight:600; color:var(--indigo); }
+.card.nb.long{ break-inside:auto; }
+.card.nb .ct{ break-after:avoid; }
+.card.nb li:first-child{ break-after:avoid; }
+.card.nb li:last-child{ break-before:avoid; }
+{% endif %}
+.guide-title .care{ margin:.2in .3in 0; padding:.6em 1em; border-left:2.4pt solid var(--kes); background:#f6efe3; font:400 8.9pt/1.45 "Literata"; color:#3b342e; text-align:left; }
+.guide-title.has-care{ padding-top:1.25in; }
+.guide-title.has-care .warn{ margin-top:.35in; }
 
 /* ---------- illustrations ------------------------------------------------- */
 figure.inline{ margin:1.15em 0; break-inside:avoid; text-align:center; }
@@ -161,3 +194,6 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .guide a{ color:var(--petrol); text-decoration:none; overflow-wrap:anywhere; }
 .guide .src li{ font-size:8.6pt; line-height:1.35; }
 .guide .gloss td:nth-child(2){ font-size:10pt; white-space:nowrap; }
+.guide table.gloss{ table-layout:fixed; }
+.guide table.gloss th:nth-child(1){ width:25%; } .guide table.gloss th:nth-child(2){ width:28%; } .guide table.gloss th:nth-child(3){ width:47%; }
+.guide table.gloss td:nth-child(2){ white-space:normal; font-size:9.2pt; }

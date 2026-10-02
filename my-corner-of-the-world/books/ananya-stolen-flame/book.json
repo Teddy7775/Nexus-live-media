@@ -4,7 +4,8 @@
   "status": "published",
   "narrator": {
     "name": "Ananya Sharma",
-    "age": 12
+    "age": 12,
+    "short": "Ananya"
   },
   "place": {
     "en": "Jaipur, Rajasthan, India",
@@ -173,5 +174,27 @@
       "AN-I07"
     ]
   },
-  "buy_links": {}
+  "buy_links": {},
+  "parents_note": {
+    "en": {
+      "title": "A note on kite safety",
+      "text": "The book shows dangerous situations on purpose, and also shows adults handling them. Please read the safety section of the Discovery Guide before any kite-flying activity, and never copy what the characters do on the roof."
+    },
+    "fr": {
+      "title": "Un mot sur la sécurité des cerfs-volants",
+      "text": "Le livre montre des situations dangereuses à dessein, et montre aussi des adultes qui les gèrent. Lisez la partie sécurité du guide de découverte avant toute activité de cerf-volant, et ne reproduisez jamais ce que font les personnages sur le toit."
+    },
+    "es": {
+      "title": "Una nota sobre la seguridad con cometas",
+      "text": "El libro muestra situaciones peligrosas a propósito, y también muestra a personas adultas que las manejan. Lee la sección de seguridad de la guía de descubrimiento antes de cualquier actividad con cometas y nunca copies lo que hacen los personajes en la azotea."
+    }
+  },
+  "age_label": {
+    "en": "9–13",
+    "fr": "9–13 ans",
+    "es": "9–13 años"
+  },
+  "checks": {
+    "lies": true
+  }
 }

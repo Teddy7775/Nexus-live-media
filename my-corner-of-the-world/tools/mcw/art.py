@@ -138,5 +138,35 @@ class Art:
         self._cache[aid] = af
         return af
 
+    def panel_fit(self, aid: str, panel_w_in: float, panel_h_in: float, anchor: str = "bottom",
+                  crop: tuple[int, int] = (0, 0)) -> tuple[Path, int, int]:
+        """Fit the image to the panel's width and make it exactly as tall as the panel.
+
+        Too short: the missing rows are added at the side opposite `anchor` by mirroring the image's own edge
+        (the paper / sky texture continues; nothing is invented). Too tall: the surplus is cropped there.
+        `crop` removes (left, right) pixels first, e.g. a scan edge. Returns (file, width_px, height_px).
+        """
+        af = self.get(aid)
+        im = Image.open(af.web).convert("RGB")
+        w, h = im.size
+        l, r = crop
+        im = im.crop((l, 0, w - r, h))
+        w = im.width
+        need = round(w * panel_h_in / panel_w_in)
+        arr = np.array(im)
+        if need > h:
+            add = need - h
+            if anchor == "bottom":         # image sits at the bottom; extend the top
+                ext = np.concatenate([arr[:min(add, h - 1)][::-1]] * (add // max(1, min(add, h - 1)) + 1), axis=0)[:add]
+                arr = np.concatenate([ext, arr], axis=0)
+            else:
+                ext = np.concatenate([arr[-min(add, h - 1):][::-1]] * (add // max(1, min(add, h - 1)) + 1), axis=0)[:add]
+                arr = np.concatenate([arr, ext], axis=0)
+        elif need < h:
+            arr = arr[h - need:] if anchor == "bottom" else arr[:need]
+        out = self.out / f"{aid}.panel.jpg"
+        Image.fromarray(arr).save(out, quality=94, subsampling=0, optimize=True)
+        return out, arr.shape[1], arr.shape[0]
+
     def all_ids(self):
         return list(self.book.register["slots"].keys())

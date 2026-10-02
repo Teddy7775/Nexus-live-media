@@ -88,12 +88,71 @@ class SiteBuilder:
         d = next((a["href"] for a in out if a["lang"] == self.P.series["default_language"]), None)
         return out, d
 
+    # per-book colours: every volume brings its palette to its own pages (book page, reader, guide)
+    @staticmethod
+    def _rgb(h):
+        h = h.lstrip("#")
+        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+    @classmethod
+    def _lum(cls, h):
+        f = lambda c: c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+        r, g, b = (f(v / 255) for v in cls._rgb(h))
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+    @classmethod
+    def _contrast(cls, a, b):
+        la, lb = sorted((cls._lum(a), cls._lum(b)), reverse=True)
+        return (la + 0.05) / (lb + 0.05)
+
+    @classmethod
+    def _mix(cls, a, b, t):
+        ra, rb = cls._rgb(a), cls._rgb(b)
+        return "#%02X%02X%02X" % tuple(round(x * (1 - t) + y * t) for x, y in zip(ra, rb))
+
+    @classmethod
+    def _ensure(cls, color, bg, minimum, toward):
+        """Move `color` toward `toward` (black or white) until it reaches `minimum` contrast on `bg`."""
+        for i in range(0, 21):
+            c = cls._mix(color, toward, i / 20)
+            if cls._contrast(c, bg) >= minimum:
+                return c
+        return toward
+
+    def write_books_css(self):
+        rules = []
+        for slug, b in self.P.books.items():
+            pal = b.palette
+            light_bg, dark_bg = "#FBF6EC", "#16181D"
+            kes = pal["kesariya"]
+            ink = self._ensure(pal["ember"], light_bg, 6.5, "#000000")
+            link = self._ensure(pal["petrol"], light_bg, 5.5, "#000000")
+            btn = self._ensure(kes, "#FFFFFF", 5.0, "#000000")
+            btn_h = self._mix(btn, "#000000", 0.2)
+            light = (f"--kes:{kes};--accent:{kes};--accent-ink:{ink};--head:{pal['indigo']};--link:{link};"
+                     f"--hand-ink:{link};--plaster:{pal['plaster']};--btn:{btn};--btn-h:{btn_h}")
+            acc_d = self._ensure(self._mix(kes, "#FFFFFF", 0.25), dark_bg, 5.0, "#FFFFFF")
+            ink_d = self._ensure(self._mix(kes, "#FFFFFF", 0.5), dark_bg, 7.0, "#FFFFFF")
+            link_d = self._ensure(self._mix(pal["petrol"], "#FFFFFF", 0.62), dark_bg, 7.0, "#FFFFFF")
+            dark = f"--accent:{acc_d};--accent-ink:{ink_d};--link:{link_d};--hand-ink:{link_d};--btn:{btn};--btn-h:{btn_h}"
+            rules.append(f'html[data-book="{slug}"]{{{light}}}')
+            if not b.design.get("hand", True):      # sober italic serif instead of the handwriting face
+                sel = f'html[data-book="{slug}"]'
+                rules.append(f'{sel} .tagline{{font:italic 400 1.3rem/1.3 var(--serif)}}'
+                             f'{sel} .chapter .opener .date,{sel} .prose .dateline{{font:italic 400 1.15rem var(--serif)}}'
+                             f'{sel} .prose .note{{font:italic 400 1.05rem/1.5 var(--serif)}}'
+                             f'{sel} .toc-list .d{{font:italic 400 1rem var(--serif)}}')
+            rules.append(f'html[data-book="{slug}"][data-theme="dark"]{{{dark}}}')
+            rules.append(f'@media (prefers-color-scheme:dark){{html[data-book="{slug}"]:not([data-theme]){{{dark}}}}}')
+        self.write("assets/css/books.css", "/* generated from each book's palette (books/<slug>/book.json) */\n" + "\n".join(rules) + "\n")
+
     def page(self, lang: str, template: str, ctx: dict, fn, rel_out: str, title: str, desc: str, nav_current: str = "",
              og_image: str | None = None, jsonld: dict | None = None, og_type: str = "website", noindex: bool = False,
              sitemap: bool = True):
         alts, alts_default = self.alts(fn)
         here = fn(lang)
         page = {"title": title, "description": desc, "canonical": self.abs(here), "og_image": og_image, "og_type": og_type,
+                "book": ctx.get("slug"),
                 "jsonld": json.dumps(jsonld, ensure_ascii=False) if jsonld else None, "noindex": noindex}
         t = self.tx[lang]
         series = self.P.series
@@ -122,6 +181,7 @@ class SiteBuilder:
         (api / "private").mkdir(exist_ok=True)
         shutil.copyfile(SITE / "php" / "htaccess.private", api / "private" / ".htaccess")
         (api / "private" / "index.html").write_text("", encoding="utf-8")
+        self.write_books_css()
 
     def img_set(self, src: Path, name: str, rel_dir: str, widths=(800, 1400), jpg_w=1400) -> dict:
         d = self.out / "assets" / "img" / rel_dir
@@ -189,8 +249,8 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         for b in sorted(self.P.books.values(), key=lambda b: b.cfg["volume"]):
             n = b.cfg["narrator"]
             out.append({"live": True, "volume": b.cfg["volume"], "title": f'{b.title(lang)}: {b.subtitle(lang)}',
-                        "narrator": f'{n["name"].split()[0]}, {n["age"]}{suffix}', "where": f'{b.cfg["place"][lang]} · 2024–2025',
-                        "question": b.cfg["question"][lang], "accent": b.palette["kesariya"], "age_note": "",
+                        "narrator": f'{n.get("short") or n["name"].split()[0]}, {n["age"]}{suffix}', "where": f'{b.cfg["place"][lang]} · {b.cfg["story_dates"]["from"][:4]}–{b.cfg["story_dates"]["to"][:4]}',
+                        "question": b.cfg["question"][lang], "accent": b.palette["kesariya"], "age_note": b.cfg.get("age_note", {}).get(lang, ""),
                         "url": self.path(lang, self.seg(lang, "books"), self.book_slug(b, lang))})
         for u in self.P.series.get("upcoming", []):
             if not u.get("visible"):
@@ -264,12 +324,17 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         feat_book = books[0]
         feat_vol = vols[0]
         cov = self.img_set(self.cover_png(feat_book, lang), f"cover-{lang}-story", feat_book.slug, widths=(480, 800), jpg_w=800)
+        covers = []
+        for b, v in zip(books, vols):
+            c = cov if b is feat_book else self.img_set(self.cover_png(b, lang), f"cover-{lang}-story", b.slug, widths=(480, 800), jpg_w=800)
+            covers.append({"cover": c, "url": v["url"], "title": b.title(lang), "subtitle": b.subtitle(lang)})
         og = {b.slug: self.og_card(b, lang) for b in books}
         og_abs = lambda b: (self.site_url + og[b.slug]) if self.site_url else None
         read0 = self.path(lang, self.seg(lang, "books"), self.book_slug(feat_book, lang), self.seg(lang, "read"))
         # ---- home
         self.page(lang, "home.html.j2",
                   {"feat": {"read_url": read0, "url": feat_vol["url"], "title": feat_book.title(lang), "subtitle": feat_book.subtitle(lang), "cover": cov},
+                   "covers": covers,
                    "volumes": vols},
                   lambda l: self.path(l), f"{lang}/index.html", series["names"][lang] + " · " + t["home"]["title"], t["home"]["lead"],
                   og_image=og_abs(feat_book),
@@ -293,12 +358,18 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
                   f'{t["legal"]["title"]} · {series["names"][lang]}', t["legal"]["privacy"][:150], "", noindex=False)
         for book in books:
             self.build_book_pages(book, lang, og_abs(book), og[book.slug])
-        # parents page uses the first book's guide, section 11
-        g = feat_book.guide(lang)
-        C = Common(feat_book, lang, lambda *_: "")
-        s11 = next((s for s in g.sections if s.number == 11), None)
-        guide_url = self.path(lang, self.seg(lang, "books"), self.book_slug(feat_book, lang), self.seg(lang, "guide"))
-        self.page(lang, "parents.html.j2", {"guide_html": C.guide_section_body(s11) if s11 else "", "guide_url": guide_url},
+        # parents page: one block per book (its "for teachers and parents" guide section + its own content note)
+        pblocks = []
+        for b in books:
+            g = b.guide(lang)
+            Cb = Common(b, lang, lambda *_: "")
+            sec = next((x for x in g.sections if x.number and re.search(r"teachers and parents|enseignants|maestros", x.title, re.I)), None)
+            note = b.cfg.get("parents_note", {}).get(lang)
+            pblocks.append({"title": f"{b.title(lang)}: {b.subtitle(lang)}", "note": note,
+                            "html": Cb.guide_section_body(sec) if sec else "",
+                            "guide_url": self.path(lang, self.seg(lang, "books"), self.book_slug(b, lang), self.seg(lang, "guide")),
+                            "slug": b.slug})
+        self.page(lang, "parents.html.j2", {"blocks": pblocks},
                   lambda l: self.path(l, self.seg(l, "parents")), f"{lang}/{self.seg(lang, 'parents')}/index.html",
                   f'{t["parents"]["title"]} · {series["names"][lang]}', t["parents"]["lead"], "parents")
 
@@ -355,7 +426,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
                   {"slug": slug, "cover": cov, "title": title, "subtitle": sub, "tagline": book.cfg["taglines"][lang],
                    "blurb": book.cfg["blurbs"][lang], "volume": book.cfg["volume"], "read_url": read_url, "guide_url": guide_url,
                    "place": place, "time_range": time_range, "form_text": form_text,
-                   "lang_name": series["language_names"][lang], "characters": self._characters(guide), "gallery": gallery,
+                   "lang_name": series["language_names"][lang], "age_value": book.cfg.get("age_label", {}).get(lang) or t["book"]["age_value"], "characters": self._characters(guide), "gallery": gallery,
                    "editions": editions, "ts": ts},
                   lambda l: self.path(l, self.seg(l, "books"), bs(l)), f"{lang}/{self.seg(lang, 'books')}/{bs(lang)}/index.html",
                   f"{title}: {sub} · {series['names'][lang]}", book.cfg["short_descriptions"][lang], "books", og_image=og_abs,
@@ -390,7 +461,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
             sample_end = access != "full" and nxt is None and s != readable[-1]
             desc = re.sub(r"\s+", " ", strip_tags(next((b.html for b in s.blocks if b.kind == "p"), "")))[:155]
             self.page(lang, "chapter.html.j2",
-                      {"sec": s, "slug": slug, "body": body, "toc_url": read_url, "book_url": book_url, "guide_url": guide_url,
+                      {"sec": s, "slug": slug, "sound": C.sound_html(s), "body": body, "toc_url": read_url, "book_url": book_url, "guide_url": guide_url,
                        "part_line": f'{strip_tags(part.label)} · {part.title}' if part else "", "sample_end": sample_end,
                        "prev": {"url": sec_url(lang, prev.id), "title": prev.title} if prev else None,
                        "next": {"url": sec_url(lang, nxt.id), "title": nxt.title} if nxt else None},
@@ -407,7 +478,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
             nav = (f"{s.number}. " if s.number else "") + s.title
             sections.append({"id": s.id, "nav": nav, "html": C.guide_section_body(s)})
         self.page(lang, "guide.html.j2",
-                  {"title": title, "book_url": book_url, "intro": C.T(guide.intro), "before": [C.T(b) for b in guide.before], "facts": facts_html, "sections": sections},
+                  {"slug": slug, "title": title, "book_url": book_url, "intro": C.T(guide.intro), "before": [C.T(b) for b in guide.before], "facts": facts_html, "sections": sections},
                   lambda l: self.path(l, self.seg(l, "books"), bs(l), self.seg(l, "guide")),
                   f"{lang}/{self.seg(lang, 'books')}/{bs(lang)}/{self.seg(lang, 'guide')}/index.html",
                   f"{t['guide']['title']} · {title}", t["guide"]["spoiler"], "books", og_image=og_abs)

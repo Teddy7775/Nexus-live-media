@@ -394,7 +394,7 @@ Estas actividades nunca les piden a los alumnos que compartan experiencias perso
 
 * Vira es una vecina, no la abuela de Katya. Ihor es amigo de Katya.
 
-* Lo que les pasó a Papá y a Mykhailo no se resuelve. Resistan la tentación de resolverlo por los alumnos.
+* Lo que les pasó a Papá y a Mykhailo, el hermano de Daryna, no se resuelve. Resistan la tentación de resolverlo por los alumnos.
 
 ### **Cómo presentar la guerra**
 

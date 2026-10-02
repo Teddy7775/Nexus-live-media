@@ -20,11 +20,11 @@
   "skip": "Skip to content"
  },
  "home": {
-  "kicker": "A middle-grade collection for readers aged 9 to 13",
+  "kicker": "Notebook novels for curious readers, from 9 and up",
   "title": "Four young narrators. Four corners of the world.",
   "lead": "Notebook novels about the places we come from and the choices that make us who we are. Each book can be read on its own.",
   "cta_read": "Read Volume 1 online",
-  "cta_books": "Explore the collection",
+  "cta_books": "Explore the books",
   "how_title": "Read it your way",
   "how": [
    {
@@ -112,18 +112,16 @@
  },
  "parents": {
   "title": "For parents and teachers",
-  "lead": "What to expect from the book, how to read it with young readers, and how this site treats your privacy.",
+  "lead": "What to expect from each book, how to read it with young readers, and how this site treats your privacy.",
   "from_guide": "From the Discovery Guide",
   "privacy_title": "Privacy, in plain words",
-  "privacy": "This website does not use cookies, advertising or analytics. Your reading position and display choices are stored only in your own browser and are never sent to us. Children are never asked for personal information; the forms on this site are for parents, teachers and librarians.",
-  "safety_title": "A note on kite safety",
-  "safety": "The book shows dangerous situations on purpose, and also shows adults handling them. Please read the safety section of the Discovery Guide before any kite-flying activity, and never copy what the characters do on the roof."
+  "privacy": "This website does not use cookies, advertising or analytics. Your reading position and display choices are stored only in your own browser and are never sent to us. Children are never asked for personal information; the forms on this site are for parents, teachers and librarians."
  },
  "about": {
   "title": "About the collection",
   "p1": "My Corner of the World follows four fictional young narrators in four countries on three continents. Each book can be read on its own, and they speak to each other in surprising ways.",
   "p2": "Every volume is written as a notebook: dates, lists, things said and things held back. The stories are invented; the places, trades, festivals and dangers they describe are real, and each book ends with a note that separates the two.",
-  "p3": "The books are written for readers aged 9 to 13 and can be shared with younger children and with older readers.",
+  "p3": "Each book shows its own age range: some are written for readers aged 9 to 13, others for readers 13 and up. Younger children can enjoy them with an adult, and older readers are welcome too.",
   "trio_title": "One idea, four questions",
   "author_title": "The author"
  },
@@ -152,7 +150,7 @@
   "hosted": "This site is hosted by Hostinger."
  },
  "foot": {
-  "tagline": "Made with care for curious readers aged 9 to 13.",
+  "tagline": "Made with care for curious young readers.",
   "copyright": "© {year} {holder}",
   "rights": "All rights reserved."
  },

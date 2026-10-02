@@ -20,11 +20,11 @@
   "skip": "Aller au contenu"
  },
  "home": {
-  "kicker": "Une collection pour les 9–13 ans",
+  "kicker": "Des romans-carnets pour lecteurs curieux, à partir de 9 ans",
   "title": "Quatre jeunes narrateurs. Quatre coins du monde.",
   "lead": "Des romans en forme de carnet sur les lieux d’où l’on vient et sur les choix qui font ce que l’on devient. Chaque livre peut se lire seul.",
   "cta_read": "Lire le tome 1 en ligne",
-  "cta_books": "Découvrir la collection",
+  "cta_books": "Découvrir les livres",
   "how_title": "Lisez à votre façon",
   "how": [
    {
@@ -112,18 +112,16 @@
  },
  "parents": {
   "title": "Pour les parents et les enseignants",
-  "lead": "Ce qu’il faut savoir sur le livre, comment le lire avec de jeunes lecteurs, et comment ce site protège votre vie privée.",
+  "lead": "Ce qu’il faut savoir de chaque livre, comment le lire avec de jeunes lecteurs, et comment ce site traite votre vie privée.",
   "from_guide": "Extrait du guide de découverte",
   "privacy_title": "Vie privée, en clair",
-  "privacy": "Ce site n’utilise ni cookies, ni publicité, ni outil d’analyse. Votre position de lecture et vos choix d’affichage sont enregistrés uniquement dans votre navigateur et ne nous sont jamais transmis. On ne demande jamais d’informations personnelles aux enfants ; les formulaires de ce site s’adressent aux parents, enseignants et bibliothécaires.",
-  "safety_title": "Un mot sur la sécurité des cerfs-volants",
-  "safety": "Le livre montre des situations dangereuses à dessein, et montre aussi des adultes qui les gèrent. Lisez la partie sécurité du guide de découverte avant toute activité de cerf-volant, et ne reproduisez jamais ce que font les personnages sur le toit."
+  "privacy": "Ce site n’utilise ni cookies, ni publicité, ni outil d’analyse. Votre position de lecture et vos choix d’affichage sont enregistrés uniquement dans votre navigateur et ne nous sont jamais transmis. On ne demande jamais d’informations personnelles aux enfants ; les formulaires de ce site s’adressent aux parents, enseignants et bibliothécaires."
  },
  "about": {
   "title": "À propos de la collection",
   "p1": "Mon coin du monde suit quatre jeunes narrateurs fictifs dans quatre pays, sur trois continents. Chaque livre peut se lire seul, et ils se répondent de façon surprenante.",
   "p2": "Chaque tome est écrit comme un carnet : des dates, des listes, des choses dites et des choses tues. Les histoires sont inventées ; les lieux, les métiers, les fêtes et les dangers qu’elles décrivent sont réels, et chaque livre se termine par une note qui distingue l’un de l’autre.",
-  "p3": "Les livres s’adressent aux lecteurs de 9 à 13 ans et peuvent se partager avec de plus jeunes enfants comme avec de plus grands lecteurs.",
+  "p3": "Chaque livre indique son âge conseillé : certains s’adressent aux 9–13 ans, d’autres aux lecteurs de 13 ans et plus. Les plus jeunes peuvent les lire avec un adulte, et les plus grands y sont les bienvenus.",
   "trio_title": "Une idée, quatre questions",
   "author_title": "L’auteur"
  },
@@ -152,7 +150,7 @@
   "hosted": "Ce site est hébergé par Hostinger."
  },
  "foot": {
-  "tagline": "Fait avec soin pour les lecteurs curieux de 9 à 13 ans.",
+  "tagline": "Fait avec soin pour les jeunes lecteurs curieux.",
   "copyright": "© {year} {holder}",
   "rights": "Tous droits réservés."
  },
