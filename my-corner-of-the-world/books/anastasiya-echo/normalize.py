@@ -2,7 +2,7 @@
 
 The supplied manuscripts are word-processor exports whose headings are plain paragraphs
 (`PART ONE`, `CHAPTER ONE`, bold titles, italic dates). The build expects the canonical
-shape used by Volume 1:
+shape used by Ananya’s Notebook:
 
     # **Title**                       front matter
     ## Contents                       (ignored, regenerated)
@@ -48,6 +48,9 @@ LANGS = {
         part_label=lambda m: f"{m.group(1)} PARTE", chapter_label=lambda m: f"CAPÍTULO {m.group(1)}",
         part_titles=None),
 }
+
+NOTE = ("structure normalized to the canonical layout, no wording changed (title block, contents list and the French “Révision éditoriale proposée” "
+        "line are replaced by the generated title page and contents; “...” → “…”; notebook pages and timetables become titled lists)")
 
 BOLD_ONLY = re.compile(r"^\*\*([^*\n]+)\*\*\s*$")
 ITALIC_ONLY = re.compile(r"^\*(?!\*)([^\n]+?)\*\s*$")

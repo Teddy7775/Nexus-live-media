@@ -46,7 +46,14 @@ def pdf_facts(path: Path):
             continue
         if "/Type /FontDescriptor" in t or "/Type/FontDescriptor" in t:
             emb.append(("/FontFile" in t))
-    return {"pages": len(d), "w_in": r0.width / 72, "h_in": r0.height / 72, "n_fonts": len(emb), "all_embedded": all(emb) if emb else False,
+    sizes = {}
+    for i in range(min(8, len(d) - 1), min(24, len(d))):         # body text size on early story pages (Chromium shrinks everything if anything overflows)
+        for b in d[i].get_text("dict")["blocks"]:
+            for l in (b["lines"] if b["type"] == 0 else []):
+                for s in l["spans"]:
+                    sizes[round(s["size"], 1)] = sizes.get(round(s["size"], 1), 0) + len(s["text"])
+    body_pt = max(sizes, key=sizes.get) if sizes else None
+    return {"body_pt": body_pt, "pages": len(d), "w_in": r0.width / 72, "h_in": r0.height / 72, "n_fonts": len(emb), "all_embedded": all(emb) if emb else False,
             "min_ppi": None if min_ppi == 9999 else round(min_ppi), "low_pages": sorted(set(low))[:12], "blank": blank,
             "toc": len(d.get_toc()), "size_mb": round(path.stat().st_size / 1e6, 1), "meta_title": d.metadata.get("title", "")}
 
@@ -65,16 +72,18 @@ def main():
         exp_w = pr["trim_in"][0] + pr["bleed_in"] * (2 if mode == "all" else 1)
         exp_h = pr["trim_in"][1] + 2 * pr["bleed_in"]
         out += [f"## {slug}", "", f"Page size expected for bleed mode `{mode}`: **{exp_w:.3f} × {exp_h:.3f} in**.", "",
-                "### Interiors", "", "| Edition | Pages | Size (in) | Even | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |", "|---|---|---|---|---|---|---|---|---|"]
+                "### Interiors", "", "| Edition | Pages | Size (in) | Even | Body pt | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |", "|---|---|---|---|---|---|---|---|---|---|"]
         for lang in P.langs:
             for ed in ("story", "guide"):
                 f = ROOT / "release" / slug / "print" / f"{lang}-{ed}" / f"{slug}_{lang}_{ed}_interior.pdf"
                 if not f.exists():
-                    out.append(f"| {lang}-{ed} | missing | | | | | | | |")
+                    out.append(f"| {lang}-{ed} | missing | | | | | | | | |")
                     continue
                 x = pdf_facts(f)
                 ok_size = abs(x["w_in"] - exp_w) < 0.01 and abs(x["h_in"] - exp_h) < 0.01
+                ok_pt = x["body_pt"] is not None and abs(x["body_pt"] - pr["body_pt"]) < 0.2
                 out.append(f"| {lang}-{ed} | {x['pages']} | {x['w_in']:.3f} × {x['h_in']:.3f} {'✓' if ok_size else '✗'} | {'✓' if x['pages'] % 2 == 0 else '✗'} | "
+                           f"{x['body_pt']} {'✓' if ok_pt else '✗ shrunk?'} | "
                            f"{x['n_fonts']} {'✓' if x['all_embedded'] else '✗'} | {x['toc']} | {x['min_ppi']} | {x['blank']} | {x['size_mb']} |")
         out += ["", "Blank pages are intentional (verso after the half-title, recto/verso balancing before part pages, final page when the count had to be rounded to an even number).", "",
                 "### Cover wraps", "", "| Edition | Wrap (in) | Expected (in) | Spine (in) | Lowest image ppi |", "|---|---|---|---|---|"]

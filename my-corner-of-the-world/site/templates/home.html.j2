@@ -1,6 +1,6 @@
 {% extends "base.html.j2" %}{% import "_macros.j2" as m %}
 {% block main %}
-<section class="hero"><div class="wrap">
+<section class="hero"><div class="wrap hero-n{{ covers|length }}">
   <div>
     <p class="kicker">{{ t.home.kicker }}</p>
     <h1>{{ t.home.title }}</h1>

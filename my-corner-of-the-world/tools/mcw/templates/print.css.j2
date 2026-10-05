@@ -14,10 +14,13 @@
 @font-face{font-family:"Caveat";font-weight:700;src:url("{{ fonts }}/caveat-latin-700-normal.woff2") format("woff2");}
 @font-face{font-family:"Noto Sans Devanagari";font-weight:400;src:url("{{ fonts }}/noto-sans-devanagari-devanagari-400-normal.woff2") format("woff2");}
 @font-face{font-family:"Noto Sans Devanagari";font-weight:600;src:url("{{ fonts }}/noto-sans-devanagari-devanagari-600-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Khmer";font-weight:400;src:url("{{ fonts }}/noto-sans-khmer-khmer-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Khmer";font-weight:600;src:url("{{ fonts }}/noto-sans-khmer-khmer-600-normal.woff2") format("woff2");}
 
 :root{
   --paper:{{ pal.paper }}; --plaster:{{ pal.plaster }}; --petrol:{{ pal.petrol }}; --indigo:{{ pal.indigo }};
   --kes:{{ pal.kesariya }}; --ember:{{ pal.ember }}; --pale:{{ pal.pale }}; --stain:{{ pal.stain }};
+  --pen:{{ pal.pen or pal.petrol }}; --pink:{{ pal.pink or pal.kesariya }};
   --ink:#241f1c;
   --body:{{ body_pt }}pt; --lead:{{ leading }};
 }
@@ -38,6 +41,7 @@ body{ margin:0; font-size: var(--body); line-height: var(--lead); font-variant-n
 p{ margin:0; text-indent:1.35em; text-align:justify; orphans:2; widows:2; overflow-wrap: break-word; }
 h1,h2,h3,h4{ font-weight:600; margin:0; }
 .deva{ font-family:"Noto Sans Devanagari","Literata",sans-serif; font-size:.92em; }
+.khmer{ font-family:"Noto Sans Khmer","Literata",sans-serif; font-size:.9em; line-height:1; }
 em{ font-style:italic; }
 
 /* ---------- front matter ---------------------------------------------------- */
@@ -163,7 +167,7 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 /* ---------- glossary / notes ---------------------------------------------- */
 .glossary p{ text-indent:0; text-align:left; margin:0 0 .5em; font-size:10.4pt; line-height:1.42; hyphens:manual; }
 .glossary p strong{ font:700 9.6pt "Nunito Sans"; color:var(--indigo); }
-.note-page p{ text-indent:0; margin:0 0 .75em; }
+.note-page p{ text-indent:0; margin:0 0 .75em; font-size:10.4pt; line-height:1.42; }
 .endpage{ break-before: page; text-align:center; padding-top:2.2in; }
 .endpage h3{ font:700 9pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); margin-bottom:.4in; }
 .endpage .it{ margin:.2in 0; font-size:10.8pt; line-height:1.4; }
@@ -197,3 +201,42 @@ figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text
 .guide table.gloss{ table-layout:fixed; }
 .guide table.gloss th:nth-child(1){ width:25%; } .guide table.gloss th:nth-child(2){ width:28%; } .guide table.gloss th:nth-child(3){ width:47%; }
 .guide table.gloss td:nth-child(2){ white-space:normal; font-size:9.2pt; }
+.guide table.gloss4 th:nth-child(1){ width:21%; } .guide table.gloss4 th:nth-child(2){ width:20%; } .guide table.gloss4 th:nth-child(3){ width:37%; } .guide table.gloss4 th:nth-child(4){ width:22%; }
+.guide table.gloss4 td:nth-child(2){ font-size:9.4pt; line-height:1.5; }
+
+{% if design.notice_hand %}
+/* ---------- lines written in the notebook (bold on their own line in the manuscript) -------- */
+.notice.hand{ border:0; padding:.1em .5em; margin:.95em 1.1em; font:600 17.5pt/1.16 "Caveat"; letter-spacing:0; text-transform:none; color:var(--pen); }
+.notice.hand::before{ content:""; display:block; width:.55in; border-top:1.1pt solid var(--pink); margin:0 auto .28em; opacity:.9; }
+{% endif %}
+{% if design.guide_cards_break %}
+.guide .card{ break-inside:auto; }
+.guide .card .ct{ break-after:avoid; }
+.guide .card li{ break-inside:avoid; }
+{% endif %}
+/* ---------- web addresses printed after link text in the guide ---------------------------- */
+.guide .url{ font:400 7.6pt/1.3 "Nunito Sans"; color:var(--stain); overflow-wrap:anywhere; word-break:break-all; }
+.guide p .url::before,.guide li .url::before{ content:" ("; } .guide p .url::after,.guide li .url::after{ content:")"; }
+.guide ul.src{ list-style:none; padding-left:0; }
+.guide ul.src li{ margin:.34em 0; padding-left:.9em; position:relative; font-size:9pt; line-height:1.3; }
+.guide ul.src li::before{ content:""; position:absolute; left:0; top:.55em; width:.32em; height:.32em; border-radius:50%; background:var(--pale); }
+.guide ul.src a{ color:var(--indigo); font-weight:600; }
+.guide ul.src .url{ display:block; margin-top:.05em; }
+.guide ul.src .url::before,.guide ul.src .url::after{ content:none; }
+
+/* ---------- headings never break mid-word and balance their lines -------------------------- */
+.opener .ttl,.partpage .big,.guide-title .big,.titlepage .ttl,.halftitle .ttl{ text-wrap:balance; hyphens:none; }
+{% if design.copyfit %}
+/* ---------- copy-fitting: tracking nudges for chapters that would end on a runt page ---------- */
+.chapter.tt1 p,.chapter.tt1 li{ letter-spacing:-.004em; } .chapter.tt2 p,.chapter.tt2 li{ letter-spacing:-.008em; } .chapter.tt3 p,.chapter.tt3 li{ letter-spacing:-.012em; }
+.chapter.lo1 p,.chapter.lo1 li{ letter-spacing:.005em; } .chapter.lo2 p,.chapter.lo2 li{ letter-spacing:.010em; }
+.chapter.vt{ line-height:1.475; } .chapter.vl{ line-height:1.535; }
+.chapter.glossary.vt p,.chapter.note-page.vt p{ line-height:1.40; } .chapter.glossary.vl p,.chapter.note-page.vl p{ line-height:1.47; }
+.guide.vt{ line-height:1.385; } .guide.vl{ line-height:1.47; }
+.guide.tt1 p,.guide.tt1 li{ letter-spacing:-.004em; } .guide.tt2 p,.guide.tt2 li{ letter-spacing:-.008em; } .guide.tt3 p,.guide.tt3 li{ letter-spacing:-.012em; }
+.guide.lo1 p,.guide.lo1 li{ letter-spacing:.005em; } .guide.lo2 p,.guide.lo2 li{ letter-spacing:.010em; }
+{% endif %}
+{% if design.text_pretty %}
+p{ text-wrap:pretty; }
+{% endif %}
+

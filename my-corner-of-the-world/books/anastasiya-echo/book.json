@@ -1,7 +1,7 @@
 {
   "slug": "anastasiya-echo",
-  "volume": 2,
-  "status": "ready",
+  "volume": 4,
+  "status": "proof",
   "narrator": {
     "name": "Kateryna “Katya” Kovalchuk",
     "age": 14,
@@ -181,7 +181,8 @@
     "part_period": true,
     "plate_stop_at_notebook": true,
     "opener_num": false,
-    "guide_flow": true
+    "guide_flow": true,
+    "copyfit": true
   },
   "question": {
     "en": "How do you care for someone without disappearing?",

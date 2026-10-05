@@ -18,7 +18,7 @@ from .render_print import STR as PSTR
 FONTS = ROOT / "assets" / "fonts"
 EPUB_FONTS = ["literata-latin-400-normal.woff2", "literata-latin-400-italic.woff2", "literata-latin-600-normal.woff2",
               "nunito-sans-latin-700-normal.woff2", "caveat-latin-600-normal.woff2",
-              "noto-sans-devanagari-devanagari-400-normal.woff2"]
+              "noto-sans-devanagari-devanagari-400-normal.woff2", "noto-sans-khmer-khmer-400-normal.woff2"]
 
 A11Y = {
     "en": "Reflowable text with alternative text for every illustration, a linked table of contents and logical reading order.",
@@ -33,11 +33,13 @@ CSS = """
 @font-face{font-family:"Nunito Sans";font-weight:700;src:url("../fonts/nunito-sans-latin-700-normal.woff2")}
 @font-face{font-family:"Caveat";font-weight:600;src:url("../fonts/caveat-latin-600-normal.woff2")}
 @font-face{font-family:"Noto Sans Devanagari";font-weight:400;src:url("../fonts/noto-sans-devanagari-devanagari-400-normal.woff2")}
+@font-face{font-family:"Noto Sans Khmer";font-weight:400;src:url("../fonts/noto-sans-khmer-khmer-400-normal.woff2")}
 html{font-family:"Literata",Georgia,serif}
 body{margin:0;padding:0 .2em;line-height:1.55;color:#241f1c}
 p{margin:0;text-indent:1.3em;text-align:justify;hyphens:auto;-epub-hyphens:auto;orphans:2;widows:2}
 h1,h2,h3{font-weight:600;line-height:1.15;color:#35445D;page-break-after:avoid;break-after:avoid}
 .deva{font-family:"Noto Sans Devanagari",sans-serif;font-size:.92em}
+.khmer{font-family:"Noto Sans Khmer",sans-serif;font-size:.9em}
 .opener{text-align:center;margin:3em 0 2em;page-break-before:always}
 .opener .lab{font:700 .7em "Nunito Sans",sans-serif;letter-spacing:.28em;text-transform:uppercase;color:#C66B32}
 .opener .num{font-size:2.6em;color:#C88E82;line-height:1;margin:.15em 0}
@@ -90,6 +92,10 @@ CSS_DESIGN = """
 .partpage .per{font-style:italic;color:#315768;margin-top:.8em}
 .guide .care,p.care{border-left:3px solid #C66B32;background:#f6efe3;padding:.55em .9em;margin:1em 0;text-indent:0;text-align:left;font-size:.9em}
 """
+CSS_NOTICE_HAND = """
+.notice.hand{border:0;padding:.1em .5em;margin:.9em 1em;font:600 1.25em "Caveat",cursive;letter-spacing:0;text-transform:none;color:#3E566F}
+.notice.hand:before{content:"";display:block;width:3em;border-top:1px solid #C87A91;margin:0 auto .3em}
+"""
 CSS_NOHAND = """
 .opener .date,.dateline{font:italic 400 1em Literata,serif;color:#315768}
 .note,.tail p,.card ul,.card ol,ol.rules{font:italic 400 .98em Literata,serif;color:#315768}
@@ -99,6 +105,8 @@ CSS_NOHAND = """
 
 def css_for(book: Book) -> str:
     css = CSS + CSS_DESIGN + (CSS_NOHAND if not book.design.get("hand", True) else "")
+    if book.design.get("notice_hand"):
+        css += CSS_NOTICE_HAND.replace("#3E566F", book.palette.get("pen", book.palette["petrol"])).replace("#C87A91", book.palette.get("pink", book.palette["kesariya"]))
     for key, v1 in V1_PAL.items():
         css = css.replace(v1, book.palette[key]).replace(v1.lower(), book.palette[key])
     return css
@@ -272,11 +280,8 @@ class EpubBuilder:
                 self.add(fn.replace(".xhtml", ""), fn, "application/xhtml+xml", spine=True)
 
         # series page
-        items = [f'<p style="text-indent:0;text-align:center"><em>{x(b.title(lang))}: {x(b.subtitle(lang))}</em></p>'
-                 for b in sorted(self.P.books.values(), key=lambda b: b.cfg["volume"])]
-        for u in series["upcoming"]:
-            if u.get("visible"):
-                items.append(f'<p style="text-indent:0;text-align:center"><em>{x(u["titles"][lang])}</em></p>')
+        items = [f'<p style="text-indent:0;text-align:center"><em>{x(e["book"].title(lang) + ": " + e["book"].subtitle(lang) if e["book"] else e["upcoming"]["titles"][lang])}</em></p>'
+                 for e in self.P.catalog()]
         sp = (f'<section epub:type="backmatter"><header class="opener"><h1>{x(S["series_page"])}</h1></header>'
               f'<p style="text-indent:0;text-align:center">{x(series["descriptions"][lang])}</p>' + "".join(items) + "</section>")
         self.write("series.xhtml", self.doc(S["series_page"], sp, "backmatter"))

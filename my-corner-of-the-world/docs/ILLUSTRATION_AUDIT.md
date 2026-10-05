@@ -1,4 +1,4 @@
-# Illustration audit — Volume 1 (*Ananya’s Notebook: The Stolen Flame*)
+# Illustration audit — Volume 3 (*Ananya’s Notebook: The Stolen Flame*)
 
 Audited against `Ananya_Illustration_Prompts_and_Art_Direction_EN.docx` and
 `Ananya_Registre_Illustrations.xlsx` (copies in `books/ananya-stolen-flame/docs/source/`).

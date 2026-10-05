@@ -129,12 +129,15 @@ class SiteBuilder:
             link = self._ensure(pal["petrol"], light_bg, 5.5, "#000000")
             btn = self._ensure(kes, "#FFFFFF", 5.0, "#000000")
             btn_h = self._mix(btn, "#000000", 0.2)
+            pen = self._ensure(pal.get("pen", pal["petrol"]), light_bg, 5.5, "#000000")
+            pink = pal.get("pink", kes)
             light = (f"--kes:{kes};--accent:{kes};--accent-ink:{ink};--head:{pal['indigo']};--link:{link};"
-                     f"--hand-ink:{link};--plaster:{pal['plaster']};--btn:{btn};--btn-h:{btn_h}")
+                     f"--hand-ink:{link};--pen:{pen};--pink:{pink};--plaster:{pal['plaster']};--btn:{btn};--btn-h:{btn_h}")
             acc_d = self._ensure(self._mix(kes, "#FFFFFF", 0.25), dark_bg, 5.0, "#FFFFFF")
             ink_d = self._ensure(self._mix(kes, "#FFFFFF", 0.5), dark_bg, 7.0, "#FFFFFF")
             link_d = self._ensure(self._mix(pal["petrol"], "#FFFFFF", 0.62), dark_bg, 7.0, "#FFFFFF")
-            dark = f"--accent:{acc_d};--accent-ink:{ink_d};--link:{link_d};--hand-ink:{link_d};--btn:{btn};--btn-h:{btn_h}"
+            pen_d = self._ensure(self._mix(pal.get("pen", pal["petrol"]), "#FFFFFF", 0.62), dark_bg, 7.0, "#FFFFFF")
+            dark = f"--accent:{acc_d};--accent-ink:{ink_d};--link:{link_d};--hand-ink:{link_d};--pen:{pen_d};--btn:{btn};--btn-h:{btn_h}"
             rules.append(f'html[data-book="{slug}"]{{{light}}}')
             if not b.design.get("hand", True):      # sober italic serif instead of the handwriting face
                 sel = f'html[data-book="{slug}"]'
@@ -244,20 +247,23 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
 
     # ---------------------------------------------------------------- data
     def volumes(self, lang: str) -> list[dict]:
+        """Every volume in series order (live books and announced titles); live entries carry their slug."""
         suffix = {"en": "", "fr": " ans", "es": " años"}[lang]
         out = []
-        for b in sorted(self.P.books.values(), key=lambda b: b.cfg["volume"]):
-            n = b.cfg["narrator"]
-            out.append({"live": True, "volume": b.cfg["volume"], "title": f'{b.title(lang)}: {b.subtitle(lang)}',
-                        "narrator": f'{n.get("short") or n["name"].split()[0]}, {n["age"]}{suffix}', "where": f'{b.cfg["place"][lang]} · {b.cfg["story_dates"]["from"][:4]}–{b.cfg["story_dates"]["to"][:4]}',
-                        "question": b.cfg["question"][lang], "accent": b.palette["kesariya"], "age_note": b.cfg.get("age_note", {}).get(lang, ""),
-                        "url": self.path(lang, self.seg(lang, "books"), self.book_slug(b, lang))})
-        for u in self.P.series.get("upcoming", []):
-            if not u.get("visible"):
-                continue
-            nm = re.sub(r"(\d+)$", lambda m: m.group(1) + suffix, u["narrator"])
-            out.append({"live": False, "volume": None, "title": u["titles"][lang], "narrator": nm, "where": u["where"][lang],
-                        "question": u["question"][lang], "accent": u["accent"], "age_note": (u.get("age_note") or {}).get(lang, ""), "url": ""})
+        for e in self.P.catalog():
+            b, u = e["book"], e["upcoming"]
+            if b:
+                n = b.cfg["narrator"]
+                y0, y1 = b.cfg["story_dates"]["from"][:4], b.cfg["story_dates"]["to"][:4]
+                out.append({"live": True, "slug": b.slug, "volume": b.cfg["volume"], "title": f'{b.title(lang)}: {b.subtitle(lang)}',
+                            "narrator": f'{n.get("short") or n["name"].split()[0]}, {n["age"]}{suffix}',
+                            "where": f'{b.cfg["place"][lang]} · {y0 if y0 == y1 else y0 + "–" + y1}',
+                            "question": b.cfg["question"][lang], "accent": b.palette["kesariya"], "age_note": b.cfg.get("age_note", {}).get(lang, ""),
+                            "url": self.path(lang, self.seg(lang, "books"), self.book_slug(b, lang))})
+            else:
+                nm = re.sub(r"(\d+)$", lambda m: m.group(1) + suffix, u["narrator"])
+                out.append({"live": False, "slug": None, "volume": u.get("volume"), "title": u["titles"][lang], "narrator": nm, "where": u["where"][lang],
+                            "question": u["question"][lang], "accent": u["accent"], "age_note": (u.get("age_note") or {}).get(lang, ""), "url": ""})
         return out
 
     @staticmethod
@@ -321,11 +327,12 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         series = P.series
         books = sorted(P.books.values(), key=lambda b: b.cfg["volume"])
         vols = self.volumes(lang)
-        feat_book = books[0]
-        feat_vol = vols[0]
+        feat_book = P.featured
+        feat_vol = next(v for v in vols if v["slug"] == feat_book.slug)
         cov = self.img_set(self.cover_png(feat_book, lang), f"cover-{lang}-story", feat_book.slug, widths=(480, 800), jpg_w=800)
         covers = []
-        for b, v in zip(books, vols):
+        for b in books:
+            v = next(v for v in vols if v["slug"] == b.slug)
             c = cov if b is feat_book else self.img_set(self.cover_png(b, lang), f"cover-{lang}-story", b.slug, widths=(480, 800), jpg_w=800)
             covers.append({"cover": c, "url": v["url"], "title": b.title(lang), "subtitle": b.subtitle(lang)})
         og = {b.slug: self.og_card(b, lang) for b in books}
@@ -487,7 +494,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
     def build_root(self):
         P = self.P
         series = P.series
-        book = next(iter(P.books.values()))
+        book = P.featured
         cover = self.img_set(self.cover_png(book, series["default_language"]), "cover-root", book.slug, widths=(480,), jpg_w=480)
         pic = (f'<picture><source type="image/webp" srcset="{cover["webp"]}"><img src="{cover["src"]}" width="{cover["w"]}" height="{cover["h"]}" '
                f'alt="" style="border-radius:6px 12px 12px 6px"></picture>')
@@ -516,6 +523,8 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         self.write(".htaccess", self.htaccess())
         self.write("README-DEPLOY.txt",
                    "Upload the CONTENTS of this folder to public_html on Hostinger.\n"
+                   "(If you work from the two zip files in release/: extract my-corner-of-the-world_public_html.zip and then\n"
+                   " my-corner-of-the-world_downloads.zip into the same folder; the second one holds the EPUB downloads.)\n"
                    "Then copy api/config.sample.php to api/config.php and fill it in (owner email, mail_from).\n"
                    "Full instructions: my-corner-of-the-world/README.md\n")
 
@@ -572,12 +581,16 @@ AddType font/woff2 .woff2
 """
 
     def make_zip(self) -> Path:
+        """Two archives, each under GitHub's 100 MB file limit: the site itself, and the EPUB downloads (unzip both into the same folder)."""
         out = RELEASE / f"{self.P.series['id']}_public_html.zip"
+        dl = RELEASE / f"{self.P.series['id']}_downloads.zip"
         out.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z, zipfile.ZipFile(dl, "w", zipfile.ZIP_STORED) as zd:
             for p in sorted(self.out.rglob("*")):
                 if p.is_file() and p.name != "config.php" and "subscribers.csv" not in p.name:
-                    z.write(p, p.relative_to(self.out).as_posix())
+                    rel = p.relative_to(self.out).as_posix()
+                    (zd if rel.startswith("downloads/") else z).write(p, rel)
+        self.downloads_zip = dl
         return out
 
 
@@ -587,5 +600,6 @@ def build_site(P: Project):
     n = sum(1 for _ in sb.out.rglob("*.html"))
     print(f"[site] {n} HTML pages, {len(sb.pages)} in sitemap -> {sb.out}")
     print(f"[site] deploy zip: {z} ({z.stat().st_size // 1024} KB)")
+    print(f"[site] downloads zip (EPUBs, extract into the same folder): {sb.downloads_zip} ({sb.downloads_zip.stat().st_size // 1024} KB)")
     for w in sb.warnings:
         print("   !", w)

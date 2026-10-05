@@ -1,0 +1,405 @@
+{
+  "version": 1,
+  "book": "sokha-road-to-the-bell",
+  "note": "Slot kinds, chapters and anchors follow Sokha_Art_Direction_and_Scene_Plan_EN.docx and Sokha_Illustration_Index.csv (SK-I01..SK-I15, SK-C01, SK-C04). 'stem' is the filename stem; the build looks for art/final/<stem>.* first, then art/source/<stem>.*. 'stop' (optional) is the paragraph a full-page plate should not move past unless its page would otherwise stay mostly empty; 'early' (optional) lets a plate stand at the page turn just before its anchor paragraph when that paragraph starts a page; 'scale' (optional) shrinks an inline picture. The four character sheets, the earlier cover option and the file catalogue were not supplied as files and are not part of the book.",
+  "slots": {
+    "SK-I01": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I01_v01",
+      "chapter": "prologue",
+      "story_date": "2025-04-13",
+      "scene": {
+        "en": "The ribbon and the stolen corner",
+        "fr": "Le ruban et le coin volé",
+        "es": "La cinta y la esquina robada"
+      },
+      "alt": {
+        "en": "Sokha reads his notebook cross-legged under the stilt house while his sister Maly ties the pink ribbon on her wooden crutch; a hen runs off with a scrap of paper in her beak.",
+        "fr": "Sokha lit son carnet, assis en tailleur sous la maison sur pilotis, pendant que sa sœur Maly noue le ruban rose de sa béquille en bois ; une poule s’enfuit avec un bout de papier dans le bec.",
+        "es": "Sokha lee su cuaderno sentado con las piernas cruzadas bajo la casa sobre pilotes, mientras su hermana Maly ata la cinta rosa de su muleta de madera; una gallina se escapa con un trozo de papel en el pico."
+      },
+      "continuity": "Wooden crutch stored on Maly’s right, pink ribbon tied, Maly ties it herself; no blue pen yet, no metal crutch.",
+      "anchor": {
+        "en": "She held the end of the ribbon in her teeth, pulled, and retied the knot all by herself.",
+        "fr": "Elle a coincé le bout du ruban entre ses dents, tiré dessus et refait le nœud toute seule.",
+        "es": "Sujetó la punta de la cinta con los dientes, jaló y rehízo el nudo ella solita."
+      }
+    },
+    "SK-I02": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I02_v01",
+      "chapter": "ch-02",
+      "story_date": "2025-04-15",
+      "scene": {
+        "en": "The ball beyond the playing ground",
+        "fr": "Le ballon hors du terrain",
+        "es": "El balón más allá de la cancha"
+      },
+      "alt": {
+        "en": "Three boys stand still on the dusty playing ground under a tree while a football lies in the tall grass at the edge of the field; one of them holds out an arm to stop the others.",
+        "fr": "Trois garçons restent immobiles sur le terrain poussiéreux, sous un arbre, tandis qu’un ballon repose dans l’herbe haute au bord du terrain ; l’un d’eux tend le bras pour retenir les autres.",
+        "es": "Tres niños se quedan quietos en la cancha polvorienta, bajo un árbol, mientras un balón descansa en la hierba alta a la orilla; uno de ellos extiende el brazo para detener a los demás."
+      },
+      "continuity": "Maly outside the frame, no crutch; every child stays on the known playing ground; no visible ordnance, no invented barrier.",
+      "anchor": {
+        "en": "Everyone froze.",
+        "fr": "Tout le monde s’est figé.",
+        "es": "Todos nos quedamos quietos."
+      }
+    },
+    "SK-I03": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I03_v01",
+      "chapter": "ch-03",
+      "story_date": "2025-04-16",
+      "scene": {
+        "en": "A place inside",
+        "fr": "Une place à l’intérieur",
+        "es": "Un lugar adentro"
+      },
+      "alt": {
+        "en": "In the borrowed classroom, Maly sits down inside the circle of children on the mat while Neak Kru Lina kneels by the blackboard; Maly’s wooden crutch, with its pink ribbon, leans against the wall.",
+        "fr": "Dans la salle prêtée, Maly s’assoit à l’intérieur du cercle d’enfants sur la natte, pendant que Neak Kru Lina est agenouillée près du tableau ; la béquille en bois de Maly, avec son ruban rose, est appuyée contre le mur.",
+        "es": "En el salón prestado, Maly se sienta dentro del círculo de niños sobre la estera, mientras Neak Kru Lina está arrodillada junto al pizarrón; la muleta de madera de Maly, con su cinta rosa, está apoyada en la pared."
+      },
+      "continuity": "Wooden crutch stored on the right, pink ribbon tied; the borrowed old room, no bell on the doorpost yet.",
+      "anchor": {
+        "en": "The only thing she asked me to help with was leaning her crutch against the wall.",
+        "fr": "Elle ne m’a demandé de l’aide que pour poser sa béquille contre le mur.",
+        "es": "Lo único que me pidió fue que le ayudara a recargar la muleta contra la pared."
+      }
+    },
+    "SK-I04": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I04_v01",
+      "chapter": "ch-06",
+      "story_date": "2025-04-21",
+      "scene": {
+        "en": "The room holds its breath",
+        "fr": "La salle retient son souffle",
+        "es": "El salón contiene el aliento"
+      },
+      "alt": {
+        "en": "Schoolchildren sit close together on a mat, listening, while Neak Kru Lina stands in the doorway with the little bicycle bell in her hand.",
+        "fr": "Des élèves sont serrés les uns contre les autres sur une natte et écoutent, tandis que Neak Kru Lina se tient à la porte, la petite cloche de vélo à la main.",
+        "es": "Los alumnos están sentados muy juntos sobre una estera, atentos, mientras Neak Kru Lina está de pie en la puerta con la campanilla de bicicleta en la mano."
+      },
+      "continuity": "Maly absent, no crutch; small portable bicycle bell, never a temple bell; no visible explosion.",
+      "anchor": {
+        "en": "From the doorway, Lina called to the adult in the house next door without sending any students outside.",
+        "fr": "Lina a appelé depuis la porte l’adulte qui se trouvait dans la maison voisine, sans faire sortir les élèves.",
+        "es": "Desde la puerta, Lina llamó al adulto que estaba en la casa de al lado, sin hacer salir a los alumnos."
+      }
+    },
+    "SK-I05": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I05_v01",
+      "chapter": "ch-08",
+      "story_date": "2025-04-25",
+      "scene": {
+        "en": "The fork in the road",
+        "fr": "Le croisement",
+        "es": "La bifurcación"
+      },
+      "alt": {
+        "en": "Sokha, carrying two school bags, and Maly, leaning on her wooden crutch, stand at a fork in the dirt road; a red-and-white rope closes the right-hand path and the left one leads on around the fields.",
+        "fr": "Sokha, chargé de deux sacs d’école, et Maly, appuyée sur sa béquille en bois, se tiennent à un croisement du chemin de terre ; une corde rouge et blanche ferme le chemin de droite, celui de gauche contourne les champs.",
+        "es": "Sokha, con dos mochilas escolares, y Maly, apoyada en su muleta de madera, están en una bifurcación del camino de tierra; una cuerda roja y blanca cierra la vereda de la derecha y la de la izquierda rodea los campos."
+      },
+      "continuity": "Wooden crutch in use on the right, pink ribbon tied; left branch approved, right branch closed, nobody crosses; Sokha carries the bags.",
+      "anchor": {
+        "en": "We stood at the fork while class went on without us.",
+        "fr": "Nous sommes restés au croisement pendant que la classe continuait sans nous.",
+        "es": "Nos quedamos parados en la bifurcación mientras la clase seguía sin nosotros."
+      }
+    },
+    "SK-I06": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I06_v01",
+      "chapter": "ch-09",
+      "story_date": "2025-04-26",
+      "scene": {
+        "en": "The change made without asking",
+        "fr": "Le changement fait sans demander",
+        "es": "El cambio hecho sin preguntar"
+      },
+      "alt": {
+        "en": "At night, Sokha kneels beside Maly, who is asleep on a woven mat, after fitting a blue fabric cover on the top of her wooden crutch; moonlight comes through the window.",
+        "fr": "La nuit, Sokha est agenouillé près de Maly, endormie sur une natte tressée, après avoir enfilé une housse de tissu bleu sur le haut de sa béquille en bois ; la lune éclaire la fenêtre.",
+        "es": "De noche, Sokha está arrodillado junto a Maly, que duerme sobre una estera tejida, después de ponerle una funda de tela azul a la parte de arriba de su muleta de madera; la luna entra por la ventana."
+      },
+      "continuity": "Night; wooden crutch on the right of sleeping Maly, pink ribbon plus the blue cover (first appearance, not a clinical adaptation).",
+      "anchor": {
+        "en": "I put the cover on the crutch, then lay back down with my heart going too fast.",
+        "fr": "J’ai installé la housse sur la béquille, puis je me suis recouché avec le cœur trop rapide.",
+        "es": "Le puse la funda a la muleta y volví a acostarme con el corazón demasiado acelerado."
+      }
+    },
+    "SK-I07": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I07_v01",
+      "chapter": "ch-10",
+      "story_date": "2025-04-27",
+      "scene": {
+        "en": "The crooked blue cover",
+        "fr": "La housse bleue de travers",
+        "es": "La funda azul torcida"
+      },
+      "alt": {
+        "en": "In the yard, Maly leans against a wooden post on her own while her crutch lies on the ground with the blue cover crooked and the pink ribbon still tied; Sokha stands a few steps away.",
+        "fr": "Dans la cour, Maly s’appuie seule contre un poteau en bois, sa béquille posée par terre avec la housse bleue de travers et le ruban rose toujours noué ; Sokha se tient à quelques pas.",
+        "es": "En el patio, Maly se apoya sola contra un poste de madera mientras su muleta yace en el suelo con la funda azul torcida y la cinta rosa todavía atada; Sokha está de pie a unos pasos."
+      },
+      "continuity": "Wooden crutch on the ground on the right, pink ribbon still tied, blue cover crooked; Maly already stable at the post; Mae not in frame.",
+      "anchor": {
+        "en": "She pulled herself up on her own, leaning against the post.",
+        "fr": "Elle s’est redressée seule, appuyée contre le poteau.",
+        "es": "Se enderezó sola, apoyada contra el poste."
+      },
+      "stop": {
+        "en": "Mae appeared at the top of the stairs.",
+        "fr": "Mae est apparue en haut de l’escalier.",
+        "es": "Mae apareció arriba de la escalera."
+      }
+    },
+    "SK-I08": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I08_v01",
+      "chapter": "ch-11",
+      "story_date": "2025-04-28",
+      "scene": {
+        "en": "Maly speaks at the meeting",
+        "fr": "Maly prend la parole à la réunion",
+        "es": "Maly habla en la reunión"
+      },
+      "alt": {
+        "en": "At the village meeting under the big tree, Maly reads from her open notebook to the circle of neighbors, with Mae, Sokha and Vannak beside her and her wooden crutch resting against a tree root.",
+        "fr": "À la réunion du village sous le grand arbre, Maly lit dans son cahier ouvert devant le cercle de voisins, avec Mae, Sokha et Vannak à ses côtés et sa béquille en bois posée contre une racine.",
+        "es": "En la reunión del pueblo bajo el árbol grande, Maly lee de su cuaderno abierto ante el círculo de vecinos, con Mae, Sokha y Vannak a su lado y su muleta de madera apoyada en una raíz."
+      },
+      "continuity": "Wooden crutch stored on the right, no ribbon visible, no blue cover; Maly inside the circle; no podium, applause or rescue pose.",
+      "anchor": {
+        "en": "I don’t want to be carried like a sack. I also don’t want people to pretend the road is easy.",
+        "fr": "Je ne veux pas qu’on me porte comme un sac.",
+        "es": "No quiero que me carguen como si fuera un costal."
+      }
+    },
+    "SK-I09": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I09_v01",
+      "chapter": "ch-12",
+      "story_date": "2025-04-30",
+      "scene": {
+        "en": "Making the Book of Steps",
+        "fr": "Fabriquer le Carnet des pas",
+        "es": "Hacer el Libro de los pasos"
+      },
+      "alt": {
+        "en": "Neighbors and children sit on a woven mat under a stilt house, bent over a hand-drawn map of the road; Maly writes in her notebook beside her wooden crutch while the others point out the stops.",
+        "fr": "Sous une maison sur pilotis, voisins et enfants sont assis sur une natte autour d’un plan du chemin dessiné à la main ; Maly écrit dans son carnet près de sa béquille en bois pendant que les autres montrent les haltes.",
+        "es": "Bajo una casa sobre pilotes, vecinos y niños se sientan en una estera alrededor de un mapa del camino dibujado a mano; Maly escribe en su cuaderno junto a su muleta de madera mientras los demás señalan las paradas."
+      },
+      "continuity": "Wooden crutch stored on the right, ribbon not yet retied, no blue cover; map labels would be added by the designer.",
+      "anchor": {
+        "en": "She wrote on the cover: Book of Steps.",
+        "fr": "Elle a écrit sur la couverture : Carnet des pas.",
+        "es": "En la portada escribió: El libro de los pasos."
+      }
+    },
+    "SK-I10": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I10_v01",
+      "chapter": "ch-13",
+      "story_date": "2025-05-03",
+      "scene": {
+        "en": "The choice belongs to Maly",
+        "fr": "Le choix appartient à Maly",
+        "es": "La decisión es de Maly"
+      },
+      "alt": {
+        "en": "In the health center, Ms. Sreyneang asks Maly what she thinks of the new adjustable metal crutch; Maly stands with it while Mae and Sokha listen, and the pink ribbon waits on the table.",
+        "fr": "Au centre de santé, Madame Sreyneang demande à Maly ce qu’elle pense de la nouvelle béquille en métal réglable ; Maly se tient debout avec elle, Mae et Sokha écoutent, et le ruban rose attend sur la table.",
+        "es": "En el centro de salud, la señora Sreyneang le pregunta a Maly qué piensa de la nueva muleta de metal ajustable; Maly está de pie con ella, Mae y Sokha escuchan, y la cinta rosa espera sobre la mesa."
+      },
+      "continuity": "Metal crutch in use on the right, ribbon detached on the table; exactly one visible crutch; no prosthesis, no promised cure.",
+      "anchor": {
+        "en": "What do you think?” Ms. Sreyneang asked Maly.",
+        "fr": "Qu’en penses-tu ? a demandé Madame Sreyneang à Maly.",
+        "es": "¿Tú qué piensas? —le preguntó la señora Sreyneang a Maly."
+      },
+      "stop": {
+        "en": "They went out together. The ground in front of the center wasn’t flat.",
+        "fr": "Elles sont sorties ensemble. Le sol devant le centre n’était pas plat.",
+        "es": "Salieron juntas. El suelo frente al centro no era plano."
+      },
+      "early": true
+    },
+    "SK-I11": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I11_v01",
+      "chapter": "ch-14",
+      "story_date": "2025-05-05",
+      "scene": {
+        "en": "A room arranged with the children",
+        "fr": "Une salle aménagée avec les enfants",
+        "es": "Un salón arreglado con los niños"
+      },
+      "alt": {
+        "en": "In Uncle Sarath’s house, Sokha and Vannak unroll mats for the new classroom with Neak Kru Lina while Maly, on her metal crutch, stands by the doorpost where the little bell is clamped and Sarath looks on.",
+        "fr": "Dans la maison de l’oncle Sarath, Sokha et Vannak déroulent des nattes pour la nouvelle classe avec Neak Kru Lina, tandis que Maly, sur sa béquille en métal, se tient près du poteau de la porte où la petite cloche est fixée et que Sarath les regarde.",
+        "es": "En la casa del tío Sarath, Sokha y Vannak extienden las esteras del salón nuevo con Neak Kru Lina, mientras Maly, con su muleta de metal, está junto al poste de la puerta donde está sujeta la campanilla y Sarath los mira."
+      },
+      "continuity": "Metal crutch in use on the right, pink ribbon retied; bell clamped, not rung; teal shirt, no blue hair strip yet.",
+      "anchor": {
+        "en": "Sarath fastened the little bell with a strong clamp.",
+        "fr": "Sarath a fixé la petite cloche avec une attache solide.",
+        "es": "Sarath sujetó la campanilla con una abrazadera firme."
+      }
+    },
+    "SK-I12": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I12_v01",
+      "chapter": "ch-15",
+      "story_date": "2025-05-07",
+      "scene": {
+        "en": "The notebook handed over closed",
+        "fr": "Le cahier remis fermé",
+        "es": "El cuaderno entregado cerrado"
+      },
+      "alt": {
+        "en": "During the rainstorm in the old classroom, Maly hands her closed notebook to Sokha, who holds a plastic bag to keep both notebooks dry; basins catch the water dripping through the roof.",
+        "fr": "Pendant l’orage dans l’ancienne salle, Maly tend son cahier fermé à Sokha, qui tient un sac en plastique pour garder les deux cahiers au sec ; des bassines recueillent l’eau qui passe à travers le toit.",
+        "es": "Durante la tormenta en el salón viejo, Maly le entrega su cuaderno cerrado a Sokha, que sostiene una bolsa de plástico para mantener secos los dos cuadernos; unas palanganas recogen el agua que gotea del techo."
+      },
+      "continuity": "Metal crutch in use on the right, pink ribbon tied; Maly passes the book with her LEFT hand; old room, no bicycle bell there.",
+      "anchor": {
+        "en": "She handed it to me, closed.",
+        "fr": "Elle me l’a tendu, fermé.",
+        "es": "Me lo dio, cerrado."
+      },
+      "stop": {
+        "en": "I slid both notebooks into the bag and tied three knots.",
+        "fr": "J’ai glissé les deux cahiers dans le sac et fait trois nœuds.",
+        "es": "Metí los dos cuadernos en la bolsa y le hice tres nudos."
+      }
+    },
+    "SK-I13": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I13_v01",
+      "chapter": "ch-16",
+      "story_date": "2025-05-09",
+      "scene": {
+        "en": "A break where one is needed",
+        "fr": "Une pause là où il en faut une",
+        "es": "Un descanso donde hace falta"
+      },
+      "alt": {
+        "en": "On the muddy road to the new classroom, Maly sits on an upturned bucket for a break while Mae rubs her shoulder and the other children wait; a little boy draws squares in the mud with a stick.",
+        "fr": "Sur la route boueuse vers la nouvelle salle, Maly s’assoit sur un seau retourné pour faire une pause, tandis que Mae lui masse l’épaule et que les autres enfants attendent ; un petit dessine des carrés dans la boue avec un bâton.",
+        "es": "En el camino lodoso hacia el salón nuevo, Maly se sienta en un balde boca abajo para descansar mientras Mae le soba el hombro y los demás niños esperan; un chiquito dibuja cuadros en el lodo con un palo."
+      },
+      "continuity": "Metal crutch stored on the right while Maly sits; pink ribbon tied; yellow shirt and blue hair strip begin here; Sarath absent; no carrying.",
+      "anchor": {
+        "en": "Mae gently rubbed Maly’s shoulder after asking her if she could.",
+        "fr": "Mae a massé doucement l’épaule de Maly après lui avoir demandé la permission.",
+        "es": "Mae le sobó despacito el hombro a Maly, después de preguntarle si podía."
+      }
+    },
+    "SK-I14": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "SK-I14_v01",
+      "chapter": "ch-16",
+      "story_date": "2025-05-09",
+      "scene": {
+        "en": "The bell finds everyone",
+        "fr": "La cloche trouve tout le monde",
+        "es": "La campana encuentra a todos"
+      },
+      "alt": {
+        "en": "In the new classroom, Maly rings the little bell on the doorpost with her free hand, her metal crutch under her arm and her pink ribbon tied, while the children and families behind her smile.",
+        "fr": "Dans la nouvelle salle, Maly fait sonner de sa main libre la petite cloche fixée au poteau de la porte, sa béquille en métal sous le bras et son ruban rose noué, tandis que les enfants et les familles derrière elle sourient.",
+        "es": "En el salón nuevo, Maly hace sonar con la mano libre la campanilla del poste de la puerta, con su muleta de metal bajo el brazo y su cinta rosa atada, mientras los niños y las familias sonríen detrás de ella."
+      },
+      "continuity": "Metal crutch in use on the right, LEFT hand rings the bell, pink ribbon tied; crutch viewer-left, bell viewer-right; one intact leg, one crutch.",
+      "anchor": {
+        "en": "The sound filled the room, jumped out the windows, and ran down the stairs.",
+        "fr": "Le son a rempli la pièce, sauté par les fenêtres et descendu l’escalier.",
+        "es": "El sonido llenó el cuarto, saltó por las ventanas y bajó corriendo la escalera."
+      }
+    },
+    "SK-I15": {
+      "kind": "half",
+      "ratio": "4:3",
+      "stem": "SK-I15_v01",
+      "chapter": "epilogue",
+      "story_date": "2025-05-11",
+      "scene": {
+        "en": "A page in two voices",
+        "fr": "Une page à deux voix",
+        "es": "Una página a dos voces"
+      },
+      "alt": {
+        "en": "While it rains, Sokha and Maly sit side by side on the steps under the stilt house; Maly writes in the notebook with the blue pen, Mae sorts beans behind them and Maly’s crutch rests beside her.",
+        "fr": "Pendant que la pluie tombe, Sokha et Maly sont assis côte à côte sur les marches de la maison sur pilotis ; Maly écrit dans le carnet avec le stylo bleu, Mae trie des haricots derrière eux et la béquille de Maly est posée à côté d’elle.",
+        "es": "Mientras llueve, Sokha y Maly están sentados lado a lado en los escalones de la casa sobre pilotes; Maly escribe en el cuaderno con el bolígrafo azul, Mae selecciona frijoles detrás de ellos y la muleta de Maly descansa a su lado."
+      },
+      "continuity": "Metal crutch stored on the right, pink ribbon attached; Maly writes by choice; no miraculous recovery.",
+      "anchor": {
+        "en": "Maly draws two little lines around it.",
+        "fr": "Maly ajoute deux traits autour.",
+        "es": "Maly le agrega dos rayitas alrededor."
+      },
+      "scale": 0.8
+    },
+    "SK-C01": {
+      "kind": "cover",
+      "ratio": "2:3",
+      "stem": "SK-C01_v01",
+      "side": "front",
+      "chapter": null,
+      "story_date": null,
+      "scene": {
+        "en": "Front cover",
+        "fr": "Première de couverture",
+        "es": "Portada"
+      },
+      "alt": {
+        "en": "Sokha, with his school bag, and Maly, with her metal crutch and pink ribbon, walk side by side on a village road and exchange a smile.",
+        "fr": "Sokha, son cartable à l’épaule, et Maly, avec sa béquille en métal et son ruban rose, marchent côte à côte sur un chemin du village en échangeant un sourire.",
+        "es": "Sokha, con su mochila, y Maly, con su muleta de metal y su cinta rosa, caminan lado a lado por un camino del pueblo y se sonríen."
+      }
+    },
+    "SK-C04": {
+      "kind": "cover",
+      "ratio": "2:3",
+      "stem": "SK-C04_v01",
+      "side": "back",
+      "chapter": null,
+      "story_date": null,
+      "scene": {
+        "en": "Back cover",
+        "fr": "Quatrième de couverture",
+        "es": "Contraportada"
+      },
+      "alt": {
+        "en": "Two closed notebooks, a blue pen and a small red feather rest on a wooden step beside a clay jar, with rain-washed greenery beyond and quiet paper above.",
+        "fr": "Deux cahiers fermés, un stylo bleu et une petite plume rouge reposent sur une marche en bois près d’une jarre en terre, avec une verdure détrempée par la pluie au fond et une zone de papier dégagée au-dessus.",
+        "es": "Dos cuadernos cerrados, un bolígrafo azul y una pequeña pluma roja descansan sobre un escalón de madera junto a una tinaja de barro, con vegetación bañada por la lluvia al fondo y papel despejado arriba."
+      }
+    }
+  }
+}

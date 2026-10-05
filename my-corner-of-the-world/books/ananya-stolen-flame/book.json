@@ -1,7 +1,7 @@
 {
   "slug": "ananya-stolen-flame",
-  "volume": 1,
-  "status": "published",
+  "volume": 3,
+  "status": "proof",
   "narrator": {
     "name": "Ananya Sharma",
     "age": 12,
@@ -194,10 +194,16 @@
     "fr": "9–13 ans",
     "es": "9–13 años"
   },
+  "age_note": {
+    "en": "For ages 9–13",
+    "fr": "Pour les 9–13 ans",
+    "es": "Para lectores de 9 a 13 años"
+  },
   "checks": {
     "lies": true
   },
   "design": {
-    "guide_flow": true
+    "guide_flow": true,
+    "copyfit": true
   }
 }

@@ -52,7 +52,8 @@ class Common:
         if k == "dateline":
             return f'<p class="dateline">{self.T(b.html)}</p>'
         if k == "notice":
-            return f'<p class="notice">{self.T(b.html)}</p>'
+            hand = self.book.design.get("notice_hand") and sec is not None and sec.kind in ("chapter", "epilogue", "prologue")
+            return f'<p class="notice{" hand" if hand else ""}">{self.T(b.html)}</p>'
         if k == "poster":
             return '<div class="poster">' + "".join(f"<p>{self.T(l)}</p>" for l in b.items) + "</div>"
         if k == "label":

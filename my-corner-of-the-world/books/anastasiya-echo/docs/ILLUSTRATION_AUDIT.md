@@ -1,4 +1,4 @@
-# Illustration audit — Volume 2 (*Anastasiya’s Echo: Katya’s Notebook*)
+# Illustration audit — Volume 4 (*Anastasiya’s Echo: Katya’s Notebook*)
 
 Checked against `Anastasiya_Art_Direction_EN.docx`, `Anastasiya_Illustration_Dossier_EN_Source.docx`
 and `Anastasiya_Illustration_Index_ID.csv` (copies in `docs/source/`). Register used by the build:

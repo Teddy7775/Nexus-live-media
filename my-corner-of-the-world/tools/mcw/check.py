@@ -39,7 +39,7 @@ def check_book(P: Project, book: Book) -> tuple[list[str], list[str]]:
             a = typo.norm(slot["anchor"][lang])
             if not any(a in typo.norm(b.html) for b in _paras(sec)):
                 errors.append(f"[{lang}] anchor for {aid} not found in {slot['chapter']}")
-    # 4) key facts that must agree in all three versions (Volume 1: the number of lies in chapter 2)
+    # 4) key facts that must agree in all three versions (Ananya’s Notebook: the number of lies in chapter 2)
     for lang, ms in (mss.items() if book.cfg.get("checks", {}).get("lies") else []):
         ch2 = [s for s in ms.sections if s.id == "ch-02"][0]
         first = strip_tags(_paras(ch2)[0].html)

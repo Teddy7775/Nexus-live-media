@@ -4,8 +4,8 @@
       after dialogue dashes.
 * en: no line break after Mr./Mrs./Ms./Dr., or inside initials like "A. S."
 * es: protects the dialogue dash (— at paragraph start) and inverted marks.
-* all: Devanagari runs are wrapped in <span class="deva" lang="hi"> so a font
-       with the right glyphs is applied; optional soft hyphens for print.
+* all: Devanagari runs are wrapped in <span class="deva" lang="hi"> and Khmer runs in
+       <span class="khmer" lang="km"> so a font with the right glyphs is applied; optional soft hyphens for print.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ NNBSP = "\u00a0"  # narrow nbsp (U+202F) is missing from the bundled fonts; use 
 SHY = "\u00ad"
 TAG_SPLIT = re.compile(r"(<[^>]+>)")
 DEVA = re.compile(r"([\u0900-\u097F]+(?:[\s\u00a0]+[\u0900-\u097F]+)*)")
+KHMER = re.compile(r"([\u1780-\u17FF\u19E0-\u19FF]+(?:[\s\u00a0]+[\u1780-\u17FF\u19E0-\u19FF]+)*)")
 
 _PYPHEN_LANG = {"en": "en_US", "fr": "fr", "es": "es"}
 
@@ -29,6 +30,12 @@ def _dic(lang: str):
 
 
 def _fr(t: str) -> str:
+    t = re.sub(r"(&(?:#\d+|#x[0-9a-fA-F]+|[A-Za-z]+));", "\\1\x01", t)      # mask the ; that ends an HTML entity (&amp;)
+    t = _fr_rules(t)
+    return t.replace("\x01", ";")
+
+
+def _fr_rules(t: str) -> str:
     # « text »  ->  «<nbsp>text<nbsp>»
     t = re.sub(r"«\s*", "«" + NBSP, t)
     t = re.sub(r"\s*»", NBSP + "»", t)
@@ -91,6 +98,7 @@ def apply(html: str, lang: str, hyphenate: bool = False) -> str:
         if hyphenate:
             t = _hyphenate(t, lang)
         t = DEVA.sub(r'<span class="deva" lang="hi">\1</span>', t)
+        t = KHMER.sub(r'<span class="khmer" lang="km">\1</span>', t)
         out.append(t)
     return "".join(out)
 

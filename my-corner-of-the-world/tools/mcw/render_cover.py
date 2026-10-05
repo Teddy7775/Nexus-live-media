@@ -20,11 +20,11 @@ PAPER = {"white": 0.002252, "cream": 0.0025, "premium_color": 0.002347}
 
 STR = {
     "en": {"ages": "Ages 9–13", "guide_pill": "Includes the Discovery Guide", "series": "My Corner of the World",
-           "vol": "Volume 1", "ph_author": "[AUTHOR NAME]", "ph_pub": "[PUBLISHER]"},
+           "ph_author": "[AUTHOR NAME]", "ph_pub": "[PUBLISHER]"},
     "fr": {"ages": "Pour les 9–13 ans", "guide_pill": "Avec le guide de découverte", "series": "Mon coin du monde",
-           "vol": "Tome 1", "ph_author": "[NOM DE L’AUTEUR]", "ph_pub": "[ÉDITEUR]"},
+           "ph_author": "[NOM DE L’AUTEUR]", "ph_pub": "[ÉDITEUR]"},
     "es": {"ages": "Para lectores de 9 a 13 años", "guide_pill": "Con guía de descubrimiento", "series": "Mi rincón del mundo",
-           "vol": "Volumen 1", "ph_author": "[NOMBRE DEL AUTOR]", "ph_pub": "[EDITORIAL]"},
+           "ph_author": "[NOMBRE DEL AUTOR]", "ph_pub": "[EDITORIAL]"},
 }
 
 
@@ -64,6 +64,11 @@ class CoverBuilder:
             if sl["kind"] == "cover" and sl.get("side") == side:
                 return aid
         return next(a for a in slots if a.endswith("C01" if side == "front" else "C04"))
+
+    def back_opt(self, key: str, default):
+        """cover.back option; may be one value or a {lang: value} map (translations differ in length)."""
+        v = self.cfg.get("back", {}).get(key, default)
+        return v.get(self.lang, default) if isinstance(v, dict) else v
 
     def vol_label(self) -> str:
         if self.cfg.get("show_volume", True) is False:
@@ -169,7 +174,7 @@ class CoverBuilder:
         return f'''<div class="back" style="width:{bw:.4f}in">
   {img}
   <div class="btxt" style="left:{self.b + 0.55:.3f}in;right:0.55in;top:{self.b + 0.55:.3f}in">
-    <div class="bser">{esc(S["series"].upper())}{(" · " + esc(self.vol_label())) if self.vol_label() else ""}</div>
+    <div class="bser">{esc(S["series"].upper())}{(" · " + esc(self.vol_label().upper())) if self.vol_label() else ""}</div>
     <div class="btag">{tag}</div>
     {paras}
     <div class="bages">{esc(self.age_label())}</div>
@@ -202,7 +207,7 @@ class CoverBuilder:
         pal = self.book.palette
         css = f'.bfoot.r{{left:auto;text-align:right}} .bcbox{{position:absolute;outline:.5pt dashed #e6007e}}'
         if self.paper:
-            css += (f'.title,.sub{{text-shadow:none}} .author{{color:{pal["indigo"]};bottom:{self.b + 0.2:.3f}in;font-size:10.5pt}}'
+            css += (f'.title,.sub{{text-shadow:none}} .author{{color:{pal["indigo"]};bottom:{self.b + 0.32:.3f}in;font-size:10.5pt}}'
                     f'.pill.in-flow{{position:static;display:inline-block;margin-top:.26in}}'
                     f'.bfoot,.bpub{{color:{pal["indigo"]};text-shadow:none}}')
         return css
@@ -234,7 +239,7 @@ class CoverBuilder:
 .sp-orn{{position:absolute;left:50%;margin-left:-.1in;bottom:.5in;width:.2in;height:.2in}}
 .btxt{{position:absolute;color:{pal["indigo"]}}}
 .btag{{font:italic 400 15pt/1.25 "Literata";color:{pal["ember"]};margin-bottom:.22in}}
-.btxt p{{margin:0 0 .13in;font:400 {self.cfg.get("back", {}).get("text_pt", 10.6)}pt/{self.cfg.get("back", {}).get("leading", 1.5)} "Literata";color:#2b2a35}}
+.btxt p{{margin:0 0 .13in;font:400 {self.back_opt("text_pt", 10.6)}pt/{self.back_opt("leading", 1.5)} "Literata";color:#2b2a35}}
 .bages{{margin-top:.2in;font:800 7.8pt "Nunito Sans";letter-spacing:.2em;text-transform:uppercase;color:{pal["petrol"]}}}
 .bfoot{{position:absolute;color:#fff}} .bser{{font:800 7.4pt "Nunito Sans";letter-spacing:.2em;color:{pal["ember"]};margin-bottom:.16in}} .bpub{{font:700 7.8pt "Nunito Sans";letter-spacing:.06em;color:#fff;text-shadow:0 0 .08in rgba(0,0,0,.6)}}
 .barcode{{position:absolute;width:2in;height:1.2in;background:#fff}}

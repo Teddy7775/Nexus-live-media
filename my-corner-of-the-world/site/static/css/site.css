@@ -9,6 +9,8 @@
 @font-face{font-family:"Nunito Sans";font-weight:800;font-display:swap;src:url("../fonts/nunito-sans-latin-800-normal.woff2") format("woff2")}
 @font-face{font-family:"Caveat";font-weight:600;font-display:swap;src:url("../fonts/caveat-latin-600-normal.woff2") format("woff2")}
 @font-face{font-family:"Noto Sans Devanagari";font-weight:400;font-display:swap;src:url("../fonts/noto-sans-devanagari-devanagari-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans Khmer";font-weight:400;font-display:swap;src:url("../fonts/noto-sans-khmer-khmer-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans Khmer";font-weight:600;font-display:swap;src:url("../fonts/noto-sans-khmer-khmer-600-normal.woff2") format("woff2")}
 
 :root{
   --paper:#F2E7D2; --plaster:#C88E82; --petrol:#315768; --indigo:#35445D; --kes:#C66B32; --ember:#A13F30; --pale:#DDA16C; --stain:#805F4D;
@@ -39,6 +41,7 @@ p{margin:0 0 1em}
 .kicker{font:800 .74rem/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 .9rem}
 .lead{font-size:1.2rem;color:var(--muted);max-width:40rem}
 .deva{font-family:"Noto Sans Devanagari",sans-serif;font-size:.92em}
+.khmer{font-family:"Noto Sans Khmer",sans-serif;font-size:.9em;line-height:1}
 
 /* header / footer */
 .site-head{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line)}
@@ -136,6 +139,8 @@ textarea{min-height:9rem;resize:vertical}
 .prose .note{margin:1em 0 1em 1rem;padding-left:1rem;border-left:3px solid var(--pale);font:600 1.4rem/1.25 var(--hand);color:var(--hand-ink)}[data-theme="dark"] .prose .note{color:#a9cfe0}
 .prose .dateline{text-align:center;font:600 1.5rem var(--hand);color:var(--hand-ink);margin:2em 0 1em}
 .prose .notice{text-align:center;margin:1.4em 0;padding:.7em 1em;border-block:2px solid var(--pale);font:800 .86rem/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--head)}
+.prose .notice.hand{border:0;padding:.2em 1em;margin:1.2em 0;font:600 1.7rem/1.2 var(--hand);letter-spacing:0;text-transform:none;color:var(--pen,var(--hand-ink))}
+.prose .notice.hand::before{content:"";display:block;width:3.2rem;border-top:2px solid var(--pink,var(--kes));margin:0 auto .45rem}
 .prose .poster{margin:1.4em auto;max-width:28rem;padding:1em 1.2em;border:2px double var(--indigo);text-align:center}.prose .poster p{margin:.2em 0;font:800 .88rem/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--head)}.prose .poster p+p{color:var(--ember);font-weight:700}
 .prose .card{margin:1.4em 0;padding:.9em 1.2em;background:var(--bg2);border:0;border-left:4px solid var(--kes);border-radius:.2rem .8rem .8rem .2rem;box-shadow:none}
 .prose .card .ct{font:800 .78rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 .4em}
@@ -194,5 +199,9 @@ textarea{min-height:9rem;resize:vertical}
 .hero .covers .cover:nth-child(3){transform:rotate(-1.5deg) translateY(.8rem);z-index:1}
 .hero .covers.n1 .cover{width:min(100%,24rem);margin:0;transform:rotate(1.5deg)}
 .hero .covers .cover:hover{transform:rotate(0) translateY(-.3rem);z-index:5}
-@media (max-width:52rem){.hero .covers{order:-1}.hero .covers .cover{width:min(44%,12rem)}}
+/* three or more covers: more room for the row and less overlap, so every title stays readable */
+.hero .wrap.hero-n3,.hero .wrap.hero-n4{grid-template-columns:1.05fr .95fr}
+.hero .covers.n3 .cover{width:min(34%,13rem);margin:0 -.2rem}
+.hero .covers.n4 .cover{width:min(26%,10.5rem);margin:0 -.2rem}
+@media (max-width:52rem){.hero .covers{order:-1}.hero .covers .cover{width:min(44%,12rem)}.hero .wrap.hero-n3,.hero .wrap.hero-n4{grid-template-columns:1fr}.hero .covers.n3 .cover{width:min(31%,11rem)}.hero .covers.n4 .cover{width:min(24%,9rem)}}
 .parents-book + .parents-book{border-top:1px solid var(--line);margin-top:2.5rem;padding-top:.5rem}

@@ -118,6 +118,18 @@ def fade_bottom_to_white(bgr: np.ndarray, frac: float) -> np.ndarray:
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
+def paper_to_white(bgr: np.ndarray, paper_rgb, d0: float = 9.0, d1: float = 34.0) -> np.ndarray:
+    """Print copy of a vignette painted on a tinted paper ground: pixels close to `paper_rgb` become pure white
+    (so no ink prints in the margin and the picture floats on the page), pixels far from it are untouched, and the
+    soft edge in between is blended (smoothstep of the colour distance from d0 to d1)."""
+    img = bgr.astype(np.float32)
+    p = np.array(paper_rgb[::-1], np.float32)                     # RGB -> BGR
+    d = np.sqrt(((img - p) ** 2).sum(axis=2))
+    a = np.clip((d - d0) / max(d1 - d0, 1e-6), 0.0, 1.0)
+    a = (a * a * (3 - 2 * a))[..., None]
+    return np.clip(255.0 - a * (255.0 - img), 0, 255).astype(np.uint8)
+
+
 class Art:
     def __init__(self, book: Book):
         self.book = book
@@ -158,6 +170,10 @@ class Art:
         if ov.get("print_fade_bottom"):
             arr = fade_bottom_to_white(arr, float(ov["print_fade_bottom"]))
             notes.append("print copy: bottom edge fades to paper")
+        if ov.get("print_paper_to_white"):
+            cfg = ov["print_paper_to_white"]
+            arr = paper_to_white(arr, cfg["paper"], cfg.get("d0", 9.0), cfg.get("d1", 34.0))
+            notes.append("print copy: the tinted paper ground around the vignette prints as unprinted paper")
         work = self.out / f"{aid}.jpg"
         Image.fromarray(cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)).save(work, quality=95, subsampling=0, optimize=True)
         af = ArtFile(aid, src, work, im.width, im.height, self.slot(aid)["kind"], notes, web=web)

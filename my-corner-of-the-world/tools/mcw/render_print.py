@@ -63,6 +63,33 @@ BELL_SVG = ('<svg class="orn" viewBox="0 0 120 34" xmlns="http://www.w3.org/2000
 
 COLOR_LABELS = ("color of the day", "couleur du jour", "color del día")
 
+# copy-fitting: levels tried, in order, on a chapter whose last page would hold only a few lines.
+# tt = tighter tracking, lo = looser tracking (they only change a line count where a paragraph's last line is short),
+# vt / vl = leading 1.5 % tighter / looser (one more / one less line on every full page: the lever that works).
+FIT_CLASSES = ["", "tt1", "tt2", "vt", "vt tt2", "vl", "vl lo2"]
+FIT_ROUNDS = 8          # layouts tried before the remaining short pages are accepted and reported
+RUNT_FILL = 0.14        # a chapter's last text page filled less than this share of the text area counts as a runt
+
+LINK_RE = re.compile(r'<a href="([^"]+)"([^>]*)>(.*?)</a>', re.S)
+
+
+def url_text(u: str) -> str:
+    """https://www.example.org/path/  ->  example.org/path"""
+    return re.sub(r"^https?://(www\.)?", "", u).rstrip("/")
+
+
+def show_urls(html: str) -> str:
+    """A paper reader cannot click: every web link whose text is not already its address gets the address after it."""
+    def rep(m: re.Match) -> str:
+        href, label = m.group(1), m.group(3)
+        if not href.startswith("http"):
+            return m.group(0)
+        shown = url_text(href)
+        if url_text(typo.plain(label).strip()).lower() == shown.lower():
+            return m.group(0)
+        return f'{m.group(0)}<span class="url">{_html.escape(shown, quote=False)}</span>'
+    return LINK_RE.sub(rep, html)
+
 
 @dataclass
 class Geometry:
@@ -140,6 +167,8 @@ class PrintBuilder:
         self.plate_pos: dict[str, int] = {}       # art id -> index of the block the plate follows
         self.inline_scale: dict[str, float] = {}  # art id -> width factor (<1) for an inline picture that would leave a gap
         self._second_pass = False
+        self.fit: dict[str, int] = {}              # section id -> index into FIT_CLASSES (copy-fitting of runt last pages)
+        self.fit_round = 0
         self.flow_mode = False                    # True while rendering the text-only "flow" pass
         self.flow_cands: dict[str, tuple[str, int, list[int], int]] = {}
         self.flow_xy: dict[str, tuple[int, float]] = {}
@@ -154,6 +183,10 @@ class PrintBuilder:
     # ---------- helpers ---------------------------------------------------
     def T(self, html: str) -> str:
         return typo.apply(html, self.lang, hyphenate=True)
+
+    def Th(self, html: str) -> str:
+        """Headings and contents lines: language typography, never hyphenated."""
+        return typo.apply(html, self.lang, hyphenate=False)
 
     def mark(self, eid: str, parity: str) -> str:
         """Register a parity constraint; emit a blank spacer page before it if the solver asked for one."""
@@ -184,6 +217,13 @@ class PrintBuilder:
         raise SystemExit(
             f"[{self.lang}] anchor for {aid} not found in {sec.id}: “{slot['anchor'][self.lang]}”. "
             "An edit changed the anchor sentence; restore it or update art/register.json.")
+
+    def locate_text(self, sec: Section, aid: str, text: str) -> int:
+        a = typo.norm(text)
+        for i, b in enumerate(sec.blocks):
+            if b.kind == "p" and a in typo.norm(b.html):
+                return i
+        raise SystemExit(f"[{self.lang}] 'stop' text for {aid} not found in {sec.id}: “{text}”")
 
     def is_page_art(self, aid: str, slot: dict) -> bool:
         """True when the picture takes whole pages (plate or spread) instead of sitting inline."""
@@ -258,8 +298,10 @@ class PrintBuilder:
         if kind == "half" and abs(af.aspect - 1.5) > 0.2:
             self.warnings.append(f"{aid}: aspect {af.aspect:.2f} differs from 3:2; kept uncropped at text width")
         self.placed[aid] = info
-        sc = self.inline_scale.get(aid)
-        if sc and sc < 0.995:      # shrunk so that it fits into the gap at the foot of the previous page
+        sc = slot.get("scale") or self.inline_scale.get(aid)
+        if self.inline_scale.get(aid):
+            sc = min(sc, self.inline_scale[aid])
+        if sc and sc < 0.995:      # smaller than the text width: the register asks for it, or it fits into the gap at the foot of the previous page
             return f'<figure class="inline"><img src="{url}" alt="{alt}" style="width:{sc * 100:.1f}%;margin:0 auto"></figure>'
         return f'<figure class="inline"><img src="{url}" alt="{alt}"></figure>'
 
@@ -282,7 +324,8 @@ class PrintBuilder:
         if k == "dateline":
             return f'<p class="dateline">{self.T(b.html)}</p>'
         if k == "notice":
-            return f'<div class="notice">{self.T(b.html)}</div>'
+            cls = "notice hand" if self.design.get("notice_hand") and sec.kind in ("chapter", "epilogue", "prologue") else "notice"
+            return f'<div class="{cls}">{self.T(b.html)}</div>'
         if k == "poster":
             return '<div class="poster">' + "".join(f"<div>{self.T(l)}</div>" for l in b.items) + "</div>"
         if k == "label":
@@ -340,7 +383,7 @@ class PrintBuilder:
         pg = self.chapter_pagename(sec)
         head = {"id": sec.id, "pg": pg, "head_css": css_str(sec.title)}
         label = esc(strip_tags(sec.label)) if sec.label else ""
-        title = self.T(esc(sec.title))
+        title = self.Th(esc(sec.title))
         orn = self.orn_svg(self.book.palette["plaster"], self.book.palette["kesariya"])
         sound = ""
         if sec.blocks and sec.blocks[0].kind == "sound":
@@ -368,10 +411,14 @@ class PrintBuilder:
                     stop = len(sec.blocks)
                     if self.design.get("plate_stop_at_notebook"):      # a plate never floats past a notebook page
                         stop = next((i for i in range(idx + 1, len(sec.blocks)) if sec.blocks[i].kind in ("card", "ul", "notice", "poster")), stop)
+                    if slot.get("stop"):                                # register: the plate must not move past this paragraph
+                        stop = min(stop, self.locate_text(sec, aid, slot["stop"][self.lang]))
                     cands = [i for i in range(idx, min(idx + 70, len(sec.blocks))) if sec.blocks[i].kind in ("p", "card", "ul", "notice")]
                     self.flow_cands[aid] = (sec.id, idx, cands, stop)
                     for i in cands:
                         flow_marks[i] = f"fe-{aid}-{i}"
+                    if slot.get("early") and idx > 0 and sec.blocks[idx - 1].kind in ("p", "card", "ul", "notice"):
+                        flow_marks.setdefault(idx - 1, f"fe-{aid}-{idx - 1}")      # where does the paragraph before the anchor end?
                     continue
                 idx = self.plate_pos.get(aid, idx)
             inserts.setdefault(idx, []).append(self.render_art(aid, slot))
@@ -408,7 +455,8 @@ class PrintBuilder:
             body.append("</div>")
         inner = op + "".join(body)
         pre = self.mark(sec.id, "r") if sec.id in self.faces_part else (self.mark(sec.id, None) if False else "")
-        html = pre + f'<section class="chapter{cls_extra}" id="{sec.id}">{inner}</section>'
+        fit = FIT_CLASSES[self.fit.get(sec.id, 0)]
+        html = pre + f'<section class="chapter{cls_extra}{(" " + fit) if fit else ""}" id="{sec.id}">{inner}</section>'
         return html, head
 
     def render_part(self, sec: Section, chapters: list[Section]) -> str:
@@ -419,7 +467,7 @@ class PrintBuilder:
         if sec.blocks and sec.blocks[0].kind in ("dateline", "note") and self.design.get("part_period"):
             per = f'<div class="per">{self.T(strip_tags(sec.blocks[0].html))}</div>'
         return (self.mark(sec.id, "v") + f'<section class="partpage" id="{sec.id}"><div class="lab">{esc(strip_tags(sec.label))}</div>'
-                f'<div class="big">{self.T(esc(sec.title))}</div>{orn}{per}<div class="rng">{rng}</div></section>')
+                f'<div class="big">{self.Th(esc(sec.title))}</div>{orn}{per}<div class="rng">{rng}</div></section>')
 
     # ---------- front matter -------------------------------------------------
     def front_matter(self, toc_html: str) -> str:
@@ -457,7 +505,7 @@ class PrintBuilder:
 
         def row(sec_id, num, title, cls=""):
             n = f'<span class="n">{num}</span>' if num else '<span class="n"></span>'
-            return (f'<a class="row {cls}" href="#{sec_id}">{n}<span class="t">{self.T(esc(title))}</span>'
+            return (f'<a class="row {cls}" href="#{sec_id}">{n}<span class="t">{self.Th(esc(title))}</span>'
                     f'<span class="dots"></span><span class="pg">{pn(sec_id)}</span></a>')
 
         for sec in self.ms.sections:
@@ -487,22 +535,24 @@ class PrintBuilder:
                f'<div class="sub">{self.T(g.intro) if g.intro else ""}</div>'
                f'<div class="warn">{esc(S["spoiler"])}</div>'
                + "".join(f'<div class="care">{self.T(x)}</div>' for x in g.before) + '</section>']
-        body = ['<section class="guide">']
+        fit = FIT_CLASSES[self.fit.get("guide", 0)]
+        body = [f'<section class="guide{(" " + fit) if fit else ""}">']
         first = True
         for s in g.sections:
             if s.kind == "guide-facts":
                 body.append(self.render_table(s.blocks[0]))
                 continue
             gn = f'<span class="gn">{s.number}</span>' if s.number else ""
-            body.append(f'<h2 class="{"first" if first else ""}">{gn}{self.T(esc(s.title))}</h2>')
+            body.append(f'<h2 class="{"first" if first else ""}">{gn}{self.Th(esc(s.title))}</h2>')
             first = False
             for b in s.blocks:
                 if s.title.lower().startswith(("words from", "quelques mots", "palabras")) and b.kind == "table":
-                    body.append(self.render_table(b).replace("<table", '<table class="gloss"', 1))
+                    cols = b.meta.get("cols", 3)
+                    body.append(self.render_table(b).replace("<table", f'<table class="gloss{" gloss4" if cols == 4 else ""}"', 1))
                 elif b.kind in ("ul", "ol"):
-                    body.append(self.render_list(b.items, b.kind, b.meta.get("start", 1)))
+                    body.append(show_urls(self.render_list(b.items, b.kind, b.meta.get("start", 1), "src" if not s.number and b.kind == "ul" else "")))
                 elif b.kind == "p":
-                    html = self.T(b.html)
+                    html = show_urls(self.T(b.html))
                     cls = ""
                     body.append(f"<p{cls}>{html}</p>")
                 else:
@@ -513,13 +563,10 @@ class PrintBuilder:
     # ---------- series end page ------------------------------------------------
     def end_page(self) -> str:
         S, lang = self.S, self.lang
-        from .core import load_project
         items = []
-        for b in sorted(load_project().books.values(), key=lambda b: b.cfg["volume"]):
-            items.append(f'<div class="it"><em>{esc(b.title(lang))}: {esc(b.subtitle(lang))}</em></div>')
-        for u in self.series["upcoming"]:
-            if u.get("visible"):
-                items.append(f'<div class="it"><em>{esc(u["titles"][lang])}</em></div>')
+        for e in load_project().catalog():
+            name = f'{e["book"].title(lang)}: {e["book"].subtitle(lang)}' if e["book"] else e["upcoming"]["titles"][lang]
+            items.append(f'<div class="it"><em>{esc(name)}</em></div>')
         site = self.series["site"]["url"]
         return (f'<section class="endpage" id="endpage"><h3>{esc(self.series["names"][lang])}</h3>'
                 f'<div class="it" style="font-style:italic">{esc(self.series["descriptions"][lang])}</div>'
@@ -564,14 +611,28 @@ class PrintBuilder:
                f'<title>{esc(self.book.title(self.lang))}</title><style>{css}</style></head><body>{front}{"".join(pieces)}</body></html>')
         return doc, heads
 
+    OVERFLOW_JS = """(w) => { const out = [];
+        for (const el of document.querySelectorAll('body *')) {
+          if (el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflowX === 'visible')
+            out.push((el.tagName + '.' + el.className).slice(0, 40) + ' → ' + (el.textContent || '').trim().slice(0, 50));
+        }
+        return [document.documentElement.scrollWidth, out.slice(0, 6)]; }"""
+
     def render_pdf(self, html: str, pdf_path: Path) -> None:
         html_path = pdf_path.with_suffix(".html")
         html_path.write_text(html, encoding="utf-8")
         with sync_playwright() as p:
             br = launch(p)
-            pg = br.new_page()
+            pw_px = round(self.geo.PW * 96)
+            pg = br.new_page(viewport={"width": pw_px, "height": round(self.geo.PH * 96)})
+            pg.emulate_media(media="print")
             pg.goto(html_path.resolve().as_uri(), wait_until="load")
             pg.evaluate("document.fonts.ready")
+            # Chromium silently shrinks the WHOLE document when any content is wider than the page; never let that happen
+            width, offenders = pg.evaluate(self.OVERFLOW_JS, pw_px)
+            if width > pw_px + 1:
+                raise SystemExit(f"[{self.lang}-{self.edition}] content is {width}px wide on a {pw_px}px page; Chromium would shrink every page. "
+                                 "Offending elements:\n  " + "\n  ".join(offenders))
             pg.wait_for_timeout(400)
             pg.pdf(path=str(pdf_path), prefer_css_page_size=True, print_background=True,
                    display_header_footer=False, margin={"top": "0", "right": "0", "bottom": "0", "left": "0"})
@@ -651,6 +712,11 @@ class PrintBuilder:
                 self.plate_pos[aid] = idx
                 continue
             pa = cs[0][1]
+            slot = self.book.register["slots"][aid]
+            prev = self.flow_xy.get(f"fe-{aid}-{idx - 1}") if slot.get("early") else None
+            if prev and prev[0] < pa and self.fill_of(prev[1]) >= 0.85:
+                self.plate_pos[aid] = idx - 1      # "early": the anchor paragraph starts a page, so the plate stands at the page turn just before it
+                continue
             best = self.pick_on_page(aid, pa)
             if best and best[2] >= 0.70:
                 self.plate_pos[aid] = best[0]
@@ -758,9 +824,9 @@ class PrintBuilder:
             if s.id in dests:
                 lvl = 2 if s.kind == "chapter" else 1
                 lab = (f"{s.number}. " if s.kind == "chapter" else "") + s.title
+                if s.kind == "part":
+                    lab = f"{strip_tags(s.label)} · {s.title}"
                 toc.append([lvl, lab, dests[s.id] + 1])
-            elif s.kind == "part" and s.id in dests:
-                toc.append([1, f"{strip_tags(s.label)} · {s.title}", dests[s.id] + 1])
         if self.guide_on and "guide" in dests:
             toc.append([1, self.S["guide"], dests["guide"] + 1])
         # outline must start at level 1 and never jump levels
@@ -845,6 +911,36 @@ class PrintBuilder:
         doc.close()
         return fixes
 
+    def copyfit(self, raw: Path, dests: dict[str, int], final: bool = False) -> bool:
+        """Chapters whose last text page holds only a few lines get their tracking nudged (tighter first, then looser)
+        so that the last line(s) are pulled back, or enough lines are pushed over to make a real last page.
+        Returns True when some chapter changed level (the book is then laid out again)."""
+        doc = fitz.open(raw)
+        info = self.classify(doc, dests)
+        G = self.geo
+        top_pt = (G.b + G.top) * 72
+        text_h_pt = G.text_h * 72
+        changed = False
+        units = [s.id for s in self.ms.sections if s.kind in ("chapter", "prologue", "epilogue", "glossary", "note")] + (["guide"] if self.guide_on else [])
+        for sid in units:
+            pages = [d["i"] for d in info if d["sec"] == sid and d["kind"] in ("body", "opener", "guide-title")]
+            if len(pages) < 2:
+                continue
+            pg = doc[pages[-1]]
+            bottoms = [l["bbox"][3] for b in pg.get_text("dict")["blocks"] if b["type"] == 0 for l in b["lines"]
+                       if top_pt - 3 <= l["bbox"][1] <= top_pt + text_h_pt]
+            bottoms += [r.y1 for im in pg.get_images(full=True) for r in pg.get_image_rects(im[0]) if r.width < pg.rect.width * 0.95]
+            fill = ((max(bottoms) - top_pt) / text_h_pt) if bottoms else 0.0
+            if fill < RUNT_FILL:
+                lvl = self.fit.get(sid, 0)
+                if lvl + 1 < len(FIT_CLASSES) and not final:
+                    self.fit[sid] = lvl + 1
+                    changed = True
+                else:
+                    self.warnings.append(f"{sid}: the last text page stays short ({fill:.0%} full) after copy-fitting")
+        doc.close()
+        return changed
+
     def build(self) -> dict:
         # base render (no spacers) to learn where every constrained element starts
         self.spacers = set()
@@ -891,6 +987,10 @@ class PrintBuilder:
         if bad:
             self.warnings.append("parity not satisfied for: " + ", ".join(bad))
         final = self.out_dir / f"{self.book.slug}_{self.lang}_{self.edition}_interior.pdf"
+        if self.design.get("copyfit") and self.copyfit(raw, d2, final=self.fit_round >= FIT_ROUNDS):
+            self.fit_round += 1
+            self.inline_scale, self._second_pass, self.warnings = {}, False, []
+            return self.build()
         if not self._second_pass:
             fix = self.inline_gap_fixes(raw)
             if fix:                                   # one more full build with the pictures that left a gap shrunk to fit

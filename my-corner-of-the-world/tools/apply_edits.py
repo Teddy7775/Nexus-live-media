@@ -14,7 +14,12 @@ from pathlib import Path
 
 # usage: python3 tools/apply_edits.py [book-slug]   (default: ananya-stolen-flame)
 BOOK = Path(__file__).resolve().parents[1] / "books" / (sys.argv[1] if len(sys.argv) > 1 else "ananya-stolen-flame")
-TITLE = {"ananya-stolen-flame": "Ananya’s Notebook", "anastasiya-echo": "Anastasiya’s Echo"}.get(BOOK.name, BOOK.name)
+def _title() -> str:
+    try:
+        return json.loads((BOOK / "book.json").read_text(encoding="utf-8"))["titles"]["en"]["title"]
+    except (OSError, KeyError, ValueError):
+        return BOOK.name
+TITLE = _title()
 
 
 def load_normalizer():
@@ -62,7 +67,8 @@ def apply(which: str, lang: str, log: list):
     norm = load_normalizer()
     if norm:
         text = norm.normalize(text, lang, which)
-        log.append("- structure normalized to the canonical layout, no wording changed (title block, contents list and the French “Révision éditoriale proposée” line are replaced by the generated title page and contents; “...” → “…”; notebook pages and timetables become titled lists): `books/%s/normalize.py`" % BOOK.name)
+        note = getattr(norm, "NOTE", "structure normalized to the canonical layout, no wording changed")
+        log.append("- %s: `books/%s/normalize.py`" % (note, BOOK.name))
     ep = BOOK / "edits" / f"{which}-{lang}.json"
     if ep.exists():
         log.append(f"\n### {which.title()} · {lang.upper()} — edits\n")

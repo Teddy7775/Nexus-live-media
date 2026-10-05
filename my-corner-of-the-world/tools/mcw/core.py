@@ -42,7 +42,7 @@ class Book:
 
     @property
     def design(self) -> dict:
-        """Per-book typographic switches (book.json "design"); empty for Volume 1."""
+        """Per-book typographic switches (book.json "design"); empty for Ananya’s Notebook."""
         return self.cfg.get("design", {})
 
     def guide(self, lang: str) -> Guide:
@@ -80,6 +80,23 @@ class Project:
 
     def i18n(self, lang: str) -> dict:
         return load_json(self.root / "site" / "i18n" / f"{lang}.json")
+
+    @property
+    def featured(self) -> Book:
+        """The book the home page puts first: series.json "featured" (a slug), else the lowest volume number."""
+        slug = self.series.get("featured")
+        if slug in self.books:
+            return self.books[slug]
+        return min(self.books.values(), key=lambda b: b.cfg["volume"])
+
+    def catalog(self) -> list[dict]:
+        """Every volume of the collection in series order: the books built here and the announced titles
+        (series.json "upcoming", entries with "visible": true). Announced titles carry their own "volume" number."""
+        out = [{"volume": b.cfg["volume"], "book": b, "upcoming": None} for b in self.books.values()]
+        out += [{"volume": u.get("volume"), "book": None, "upcoming": u}
+                for u in self.series.get("upcoming", []) if u.get("visible")]
+        out.sort(key=lambda e: (e["volume"] is None, e["volume"] or 0))
+        return out
 
 
 def load_project(root: Path = ROOT) -> Project:

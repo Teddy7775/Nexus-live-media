@@ -119,7 +119,7 @@ def main():
         edited = base / f"{lang}.md"
         try:
             before = audit(base / "original" / f"{lang}.md", lang)
-        except IndexError:          # raw word-processor export (Volume 2): only the normalized master is parseable
+        except IndexError:          # raw word-processor export (Anastasiya’s Echo): only the normalized master is parseable
             before = audit(edited, lang)
         after = audit(edited, lang) if edited.exists() else None
         rows[lang] = {"before": before, "after": after}

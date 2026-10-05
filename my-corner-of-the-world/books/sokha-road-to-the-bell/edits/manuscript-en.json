@@ -1,0 +1,11 @@
+[
+ {
+  "id": "MSE-01",
+  "kind": "grammar",
+  "find": "She mentioned a assessment day.",
+  "replace": "She mentioned an assessment day.",
+  "why": "Article agreement: “an” before a vowel sound (chapter 7). The only wording change to the supplied English manuscript.",
+  "regex": false,
+  "count": 1
+ }
+]
