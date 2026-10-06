@@ -1,0 +1,11 @@
+[
+ {
+  "id": "GAS-01",
+  "kind": "clarity",
+  "find": "Lo que les pasó a Papá y a Mykhailo no se resuelve.",
+  "replace": "Lo que les pasó a Papá y a Mykhailo, el hermano de Daryna, no se resuelve.",
+  "why": "Mykhailo is not introduced in the guide’s Who’s Who; a teacher reading this line would not know who he is (Daryna’s missing brother, chapter 18).",
+  "regex": false,
+  "count": 1
+ }
+]

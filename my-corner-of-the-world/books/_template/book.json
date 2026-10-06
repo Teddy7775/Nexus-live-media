@@ -1,0 +1,132 @@
+{
+  "slug": "REPLACE-with-url-safe-slug",
+  "volume": 2,
+  "status": "draft",
+  "narrator": {
+    "name": "",
+    "age": 0
+  },
+  "place": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "story_dates": {
+    "from": "",
+    "to": ""
+  },
+  "age_range": [
+    9,
+    13
+  ],
+  "year": 2026,
+  "titles": {
+    "en": {
+      "title": "",
+      "subtitle": ""
+    },
+    "fr": {
+      "title": "",
+      "subtitle": ""
+    },
+    "es": {
+      "title": "",
+      "subtitle": ""
+    }
+  },
+  "url_slugs": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "taglines": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "blurbs": {
+    "en": [],
+    "fr": [],
+    "es": []
+  },
+  "short_descriptions": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "keywords": {
+    "en": [],
+    "fr": [],
+    "es": []
+  },
+  "palette": {
+    "paper": "#F2E7D2",
+    "plaster": "#C88E82",
+    "petrol": "#315768",
+    "indigo": "#35445D",
+    "kesariya": "#C66B32",
+    "ember": "#A13F30",
+    "pale": "#DDA16C",
+    "stain": "#805F4D"
+  },
+  "chapter_swatches": {},
+  "editions": [
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
+  ],
+  "isbn": {
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
+  },
+  "print": {
+    "trim_in": [
+      6,
+      9
+    ],
+    "bleed_in": 0.125,
+    "bleed_mode": "all",
+    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "cream",
+    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
+    "body_pt": 11.5,
+    "leading": 1.5
+  },
+  "reader": {
+    "access": "full",
+    "sample_chapters": 3
+  },
+  "question": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "site": {
+    "gallery": []
+  },
+  "buy_links": {}
+}

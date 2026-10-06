@@ -1,0 +1,54 @@
+{
+  "id": "my-corner-of-the-world",
+  "names": {
+    "en": "My Corner of the World",
+    "fr": "Mon coin du monde",
+    "es": "Mi rincón del mundo"
+  },
+  "descriptions": {
+    "en": "My Corner of the World follows four fictional young narrators in four countries on three continents. Each book can be read on its own, and they speak to each other in surprising ways.",
+    "fr": "Mon coin du monde suit quatre jeunes narrateurs fictifs dans quatre pays, sur trois continents. Chaque livre peut se lire seul, et ils se répondent de façon surprenante.",
+    "es": "Mi rincón del mundo sigue a cuatro jóvenes narradores ficticios en cuatro países de tres continentes. Cada libro se puede leer por separado, y entre ellos se hablan de maneras sorprendentes."
+  },
+  "languages": [
+    "en",
+    "fr",
+    "es"
+  ],
+  "default_language": "en",
+  "language_names": {
+    "en": "English",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "locales": {
+    "en": "en_US",
+    "fr": "fr_FR",
+    "es": "es_MX"
+  },
+  "site": {
+    "url": "",
+    "url_note": "Set to your final https:// address (no trailing slash) before the production build, e.g. https://mycorneroftheworld.com",
+    "contact_email": "",
+    "analytics": "none"
+  },
+  "publisher": {
+    "name": "",
+    "address": "",
+    "copyright_holder": "",
+    "copyright_year": 2026
+  },
+  "author": {
+    "name": "",
+    "note": "Leave empty until the approved author or pen name is decided. Print covers and title pages show a clearly marked placeholder in PROOF files and print nothing in PRINT files."
+  },
+  "books": [
+    "sokha-road-to-the-bell",
+    "lamine-drum-and-ball",
+    "ananya-stolen-flame",
+    "anastasiya-echo"
+  ],
+  "upcoming": [],
+  "featured": "ananya-stolen-flame",
+  "featured_note": "Book shown first on the home page and in the social card. Remove this key to feature the lowest volume number."
+}

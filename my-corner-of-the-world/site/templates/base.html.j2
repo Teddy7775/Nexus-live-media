@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="{{ L }}"{% if page.book %} data-book="{{ page.book }}"{% endif %}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page.title }}</title>
+<meta name="description" content="{{ page.description }}">
+{% if page.noindex %}<meta name="robots" content="noindex">{% endif %}
+{% if page.canonical %}<link rel="canonical" href="{{ page.canonical }}">{% endif %}
+{% for a in alts %}<link rel="alternate" hreflang="{{ a.lang }}" href="{{ a.href }}">
+{% endfor %}{% if alts_default %}<link rel="alternate" hreflang="x-default" href="{{ alts_default }}">{% endif %}
+<meta property="og:site_name" content="{{ series_name }}">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.description }}">
+<meta property="og:type" content="{{ page.og_type|default('website') }}">
+<meta property="og:locale" content="{{ locale }}">
+{% if page.canonical %}<meta property="og:url" content="{{ page.canonical }}">{% endif %}
+{% if page.og_image %}<meta property="og:image" content="{{ page.og_image }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{{ page.og_image }}">{% endif %}
+<meta name="theme-color" content="#35445D">
+<link rel="icon" href="{{ base }}/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" href="{{ base }}/assets/fonts/literata-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="{{ base }}/assets/fonts/nunito-sans-latin-700-normal.woff2" crossorigin>
+<link rel="stylesheet" href="{{ base }}/assets/css/site.css?v={{ ver }}">
+<link rel="stylesheet" href="{{ base }}/assets/css/books.css?v={{ ver }}">
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem('mcw:theme');if(t)d.setAttribute('data-theme',t);var s=parseFloat(localStorage.getItem('mcw:size'));if(s)d.style.setProperty('--reader-size',s+'rem')}catch(e){}})()</script>
+{% if page.jsonld %}<script type="application/ld+json">{{ page.jsonld|safe }}</script>{% endif %}
+</head>
+<body>
+<a class="skip" href="#main">{{ t.nav.skip }}</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="{{ u.home }}">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 15 16 30 4 15Z" fill="#F2E7D2" stroke="#35445D" stroke-width="1.6"/><path d="M16 2v28M4 15h24" stroke="#35445D" stroke-width="1"/><path d="M12.5 19c3-7 3.5-3.4 3.5-3.4s1.8-3.6 4 3.4c-3.2 3.2-6.6 1.6-7.5 0Z" fill="#C66B32"/></svg>
+      <span>{{ series_name }}</span>
+    </a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="nav" type="button">{{ t.nav.menu }}</button>
+    <nav class="nav" id="nav" aria-label="{{ series_name }}">
+      <a href="{{ u.books }}" {% if nav_current=='books' %}aria-current="page"{% endif %}>{{ t.nav.books }}</a>
+      <a href="{{ u.parents }}" {% if nav_current=='parents' %}aria-current="page"{% endif %}>{{ t.nav.parents }}</a>
+      <a href="{{ u.about }}" {% if nav_current=='about' %}aria-current="page"{% endif %}>{{ t.nav.about }}</a>
+      <a href="{{ u.contact }}" {% if nav_current=='contact' %}aria-current="page"{% endif %}>{{ t.nav.contact }}</a>
+      <div class="lang" role="group" aria-label="{{ t.nav.language }}">
+        {% for a in alts %}<a href="{{ a.href_rel }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}" {% if a.lang==L %}aria-current="true"{% endif %} title="{{ a.name }}">{{ a.lang|upper }}</a>{% endfor %}
+      </div>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="cols">
+      <div><h2>{{ series_name }}</h2><p>{{ t.foot.tagline }}</p></div>
+      <div><h2>{{ series_name }}</h2><ul><li><a href="{{ u.books }}">{{ t.nav.books }}</a></li><li><a href="{{ u.parents }}">{{ t.nav.parents }}</a></li><li><a href="{{ u.about }}">{{ t.nav.about }}</a></li></ul></div>
+      <div><h2>{{ t.nav.contact }}</h2><ul><li><a href="{{ u.contact }}">{{ t.nav.contact }}</a></li><li><a href="{{ u.legal }}">{{ t.nav.legal }}</a></li></ul></div>
+    </div>
+    <p class="fine">{{ t.foot.copyright.format(year=year, holder=holder) }} · {{ t.foot.rights }}</p>
+  </div>
+</footer>
+<script src="{{ base }}/assets/js/site.js?v={{ ver }}" defer></script>
+</body>
+</html>

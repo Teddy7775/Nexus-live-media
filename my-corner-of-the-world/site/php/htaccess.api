@@ -1,0 +1,5 @@
+# Block direct access to internals; only the two handlers are public.
+<FilesMatch "^(_lib|config|config\.sample)\.php$">
+  Require all denied
+</FilesMatch>
+Options -Indexes

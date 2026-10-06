@@ -1,0 +1,200 @@
+[
+ {
+  "id": "ES-01",
+  "kind": "fix",
+  "find": "No lo conocía avergonzado.",
+  "replace": "Nunca lo había visto avergonzado.",
+  "why": "Aligns with EN-01.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-02",
+  "kind": "consistency",
+  "find": "Esa noche, bajé de la pared de mi cuarto la copia del cartel del duelo que yo misma había dibujado.",
+  "replace": "Esa noche, prendí con una tachuela en la pared de mi cuarto la copia del cartel del duelo que yo misma había dibujado.",
+  "why": "The Spanish said she took the poster down; EN (and the story) has her pin up the copy she drew. Corrected.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-03",
+  "kind": "consistency",
+  "find": "Rohan volvió a la casa con ocho puntos y tres mentiras.",
+  "replace": "Rohan volvió a la casa con ocho puntos y cuatro mentiras.",
+  "why": "The chapter counts four lies (“Mentira número cuatro”); EN already says four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-04",
+  "kind": "fix",
+  "find": "Su silencio cambió de forma. Ya no era el silencio cerrado que había guardado frente a nuestros papás. Era el de una puerta entreabierta.",
+  "replace": "Su silencio cambió de forma. El silencio cerrado que había guardado frente a nuestros papás ya no estaba. Quedaba el de una puerta entreabierta.",
+  "why": "Mirrors EN-04.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-05",
+  "kind": "voice",
+  "find": "Todavía no era valiente. Solo era rápido, caliente y callado, como cuando pisas una losa que quema y sales corriendo antes de pensar.",
+  "replace": "Todavía no era valentía, solo algo rápido, caliente y callado, como cuando pisas una losa que quema y sales corriendo antes de pensar.",
+  "why": "Mirrors EN-06.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-06",
+  "kind": "voice",
+  "find": "Esto es lo que yo debí entender: Rohan no me estaba ofreciendo su lugar.",
+  "replace": "Ahora lo veo: Rohan no me estaba ofreciendo su lugar.",
+  "why": "Mirrors EN-07.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-07",
+  "kind": "voice",
+  "find": "\n\nTodavía no sabía lo útil que nos iba a ser esa frase.",
+  "replace": "",
+  "why": "Mirrors EN-08.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-08",
+  "kind": "voice",
+  "find": "No sería verdad. El dolor solo demostraba",
+  "replace": "Solo demostraba",
+  "why": "Mirrors EN-09.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-09",
+  "kind": "voice",
+  "find": "Justo por eso importaba mi mentira. No estaba escondiendo solo un proyecto. Estaba usando su discreción como si me la debiera.",
+  "replace": "Por eso importaba mi mentira: no solo estaba escondiendo un proyecto, estaba usando su discreción como si me la debiera.",
+  "why": "Mirrors EN-10.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-10",
+  "kind": "voice",
+  "find": "Entendí que estaba buscando un final que lo dejara respirar",
+  "replace": "Estaba buscando un final que lo dejara respirar",
+  "why": "Mirrors EN-11.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-11",
+  "kind": "cliche",
+  "find": "Las consecuencias se iban alejando de mí como círculos en el agua. Doblado, el cuadro robado cabía en la palma de mi mano. Y aun así tocaba a personas de las que ni siquiera sabía el nombre.",
+  "replace": "Las consecuencias se iban extendiendo. Doblado, el cuadro robado cabía en la palma de mi mano, y aun así había llegado a personas de las que ni siquiera sabía el nombre.",
+  "why": "Mirrors EN-12.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-12",
+  "kind": "rhythm",
+  "find": "Había volado con mi nombre. Había escogido una maniobra. Había funcionado frente a la gente",
+  "replace": "Había volado con mi nombre y escogido mi propia maniobra, y había funcionado frente a la gente",
+  "why": "Mirrors EN-13.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-13",
+  "kind": "cliche",
+  "find": "Todo pasó demasiado rápido y, al mismo tiempo, lo bastante despacio para que yo viera cada detalle.",
+  "replace": "Todo pasó demasiado rápido, y aun así vi cada detalle.",
+  "why": "Mirrors EN-14.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-14",
+  "kind": "rhythm",
+  "find": "No era el kesariya robado. No tenía que demostrar nada. Era un pedazo permitido",
+  "replace": "No era el kesariya robado y no tenía que demostrar nada. Era un pedazo permitido",
+  "why": "Mirrors EN-15.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-15",
+  "kind": "cliche",
+  "find": "Se me paró el corazón.",
+  "replace": "No me moví.",
+  "why": "Mirrors EN-16.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-16",
+  "kind": "cliche",
+  "find": "Se me encogió el estómago.",
+  "replace": "El cuadro sobre su cama de pronto me pareció mucho más importante.",
+  "why": "Mirrors EN-17.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "ES-M1",
+  "kind": "markup",
+  "find": "\\*\\*Reporte del viento\\*\\*\\n\\nDirección[^\\n]*\\n\\nFuerza[^\\n]*\\n\\nEstado de mis manos[^\\n]*\\n\\nEstado de mi cabeza[^\\n]*\\n",
+  "replace": "**Reporte del viento**\n\n- Dirección: oeste.\n- Fuerza: suficiente para llevar a Agni y suficiente para llevarse muy lejos una mala decisión.\n- Estado de mis manos: protegidas.\n- Estado de mi cabeza: mucho menos.\n",
+  "why": "Wind report: four paragraphs become a list (as in EN).",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "ES-M2",
+  "kind": "markup",
+  "find": "\\*\\*Es menos espectacular\\.\\*\\*",
+  "replace": "*Es menos espectacular.*",
+  "why": "Text messages are italic in EN.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "ES-M3",
+  "kind": "markup",
+  "find": "\\*\\*Me gusta más\\.\\*\\*",
+  "replace": "*Me gusta más.*",
+  "why": "Text messages are italic in EN.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "ES-M4",
+  "kind": "markup",
+  "find": "\\*\\*(Puede leerlo todo si se guarda para usted lo que no le pertenece al salón\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Teacher’s written notes are italic in EN.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "ES-M5",
+  "kind": "markup",
+  "find": "\\*\\*(De acuerdo\\. Las historias de los demás siguen siendo de ellos\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Same.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "ES-M6",
+  "kind": "markup",
+  "find": "\\*\\*(Escogiste la palabra exacta\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Same.",
+  "regex": true,
+  "count": 1
+ }
+]

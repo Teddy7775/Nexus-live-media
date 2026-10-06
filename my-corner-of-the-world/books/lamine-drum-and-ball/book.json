@@ -1,0 +1,289 @@
+{
+  "slug": "lamine-drum-and-ball",
+  "volume": 2,
+  "status": "proof",
+  "narrator": {
+    "name": "Lamine",
+    "age": 12,
+    "short": "Lamine"
+  },
+  "place": {
+    "en": "Bambali, Senegal",
+    "fr": "Bambali, Sénégal",
+    "es": "Bambali, Senegal"
+  },
+  "story_dates": {
+    "from": "2024-02-05",
+    "to": "2024-03-17"
+  },
+  "age_range": [
+    9,
+    12
+  ],
+  "age_label": {
+    "en": "9–12",
+    "fr": "9–12 ans",
+    "es": "9–12 años"
+  },
+  "year": 2026,
+  "titles": {
+    "en": {
+      "title": "The Drum and the Ball",
+      "subtitle": "Lamine’s Journal"
+    },
+    "fr": {
+      "title": "Le Tambour et le Ballon",
+      "subtitle": "Le journal de Lamine NDiop"
+    },
+    "es": {
+      "title": "El tambor y el balón",
+      "subtitle": "El diario de Lamine"
+    }
+  },
+  "descriptors": {
+    "en": "Lamine’s Journal",
+    "fr": "Le journal de Lamine NDiop",
+    "es": "El diario de Lamine"
+  },
+  "url_slugs": {
+    "en": "the-drum-and-the-ball-lamines-journal",
+    "fr": "le-tambour-et-le-ballon-le-journal-de-lamine-ndiop",
+    "es": "el-tambor-y-el-balon-el-diario-de-lamine"
+  },
+  "taglines": {
+    "en": "Listen. Pass. Play fair.",
+    "fr": "Écouter. Passer. Rester digne.",
+    "es": "Escuchar. Pasar el balón. Mantener la dignidad."
+  },
+  "blurbs": {
+    "en": [
+      "The team’s patched ball splits open for the third time, just as Lamine was about to score. He is twelve and he knows exactly what he wants to be: a professional soccer player, like Sadio Mané, who grew up in the very same village. His father, Baba, has another plan. Baba is a griot, a keeper of family memory, and Lamine is supposed to learn the names, the stories and the drum that go with them.",
+      "Then Cheikh comes home from a soccer academy in shiny white cleats and says they play with garbage. Lamine answers with a challenge: a real match, less than three weeks away. To get ready, he starts cutting corners with his time: late for errands, small lies, friends pushed around on the field. And the people who love him begin to pay for his dream.",
+      "A novel in journal form about two rhythms, the beat of a drum and the bounce of a ball, and about a boy who has to learn to listen before he can find his place in either. For readers 9 to 12, alone or read aloud."
+    ],
+    "fr": [
+      "Le ballon rafistolé de l’équipe craque pour la troisième fois, juste au moment où Lamine allait marquer. Il a douze ans et il sait exactement ce qu’il veut devenir : footballeur professionnel, comme Sadio Mané, qui a grandi dans le même village. Son père, Baba, a un autre projet. Baba est griot, gardien de la mémoire des familles, et Lamine est censé apprendre les noms, les récits et le tambour qui vont avec.",
+      "Puis Cheikh revient d’une académie de football avec des crampons blancs tout neufs et dit qu’ils jouent « avec des déchets ». Lamine répond par un défi : un vrai match, dans moins de trois semaines. Pour se préparer, il se met à tricher avec son temps : des courses en retard, de petits mensonges, des amis bousculés sur le terrain. Et ceux qui l’aiment commencent à payer le prix de son rêve.",
+      "Un roman en forme de journal sur deux rythmes, le battement d’un tambour et le rebond d’un ballon, et sur un garçon qui doit apprendre à écouter avant de trouver sa place dans l’un comme dans l’autre. Pour les 9–12 ans, à lire seul ou à voix haute."
+    ],
+    "es": [
+      "El balón remendado del equipo se abre por tercera vez, justo cuando Lamine iba a meter gol. Tiene doce años y sabe exactamente qué quiere ser: futbolista profesional, como Sadio Mané, que creció en su mismo pueblo. Su papá, Baba, tiene otro plan. Baba es griot, un guardián de la memoria de las familias, y Lamine debería aprender los nombres, las historias y el tambor que los acompañan.",
+      "Entonces Cheikh vuelve de una academia de fútbol con unos tacos blancos relucientes y les dice que juegan “con basura”. Lamine le contesta con un desafío: un partido de verdad, en menos de tres semanas. Para prepararse, empieza a hacer trampa con su tiempo: llega tarde a los encargos, dice mentiras, empuja a sus amigos en la cancha. Y quienes lo quieren empiezan a pagar el precio de su sueño.",
+      "Una novela en forma de diario sobre dos ritmos, el golpe de un tambor y el bote de un balón, y sobre un niño que tiene que aprender a escuchar antes de encontrar su lugar en cualquiera de los dos. Para lectores de 9 a 12 años, para leer solos o en voz alta."
+    ]
+  },
+  "short_descriptions": {
+    "en": "Twelve-year-old Lamine dreams of playing professional soccer in Bambali, Senegal, while his father, a griot, wants him to learn the family names and the drum. A novel in journal form about a ball, a drum and learning to listen, for readers 9 to 12.",
+    "fr": "Lamine, douze ans, rêve de devenir footballeur professionnel à Bambali, au Sénégal, tandis que son père, griot, veut lui transmettre les noms des familles et le tambour. Un roman en forme de journal sur un ballon, un tambour et l’art d’écouter, pour les 9–12 ans.",
+    "es": "Lamine, de doce años, sueña con ser futbolista profesional en Bambali, Senegal, mientras su papá, griot, quiere que aprenda los nombres de las familias y el tambor. Una novela en forma de diario sobre un balón, un tambor y aprender a escuchar, para lectores de 9 a 12 años."
+  },
+  "keywords": {
+    "en": [
+      "middle-grade novel",
+      "Senegal",
+      "soccer",
+      "griots and oral tradition",
+      "father and son",
+      "diary novel",
+      "teamwork and fair play"
+    ],
+    "fr": [
+      "roman jeunesse",
+      "Sénégal",
+      "football",
+      "griots et tradition orale",
+      "père et fils",
+      "journal intime",
+      "esprit d’équipe et fair-play"
+    ],
+    "es": [
+      "novela infantil",
+      "Senegal",
+      "fútbol",
+      "griots y tradición oral",
+      "padre e hijo",
+      "diario",
+      "trabajo en equipo y juego limpio"
+    ]
+  },
+  "palette": {
+    "paper": "#F6EEDC",
+    "plaster": "#C99B6A",
+    "petrol": "#34466B",
+    "indigo": "#2A3350",
+    "kesariya": "#A8532A",
+    "ember": "#6F3A22",
+    "pale": "#E6D2AA",
+    "stain": "#6B5A44",
+    "green": "#5D6C4B",
+    "amber": "#D6A648",
+    "pink": "#8C313C",
+    "pen": "#34466B"
+  },
+  "chapter_swatches": {},
+  "editions": [
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
+  ],
+  "isbn": {
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
+  },
+  "print": {
+    "trim_in": [
+      6,
+      9
+    ],
+    "bleed_in": 0.125,
+    "bleed_mode": "all",
+    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "cream",
+    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
+    "body_pt": 11.5,
+    "leading": 1.5
+  },
+  "reader": {
+    "access": "full",
+    "sample_chapters": 3
+  },
+  "parser": {
+    "prologue": false,
+    "tail": false,
+    "sound_lines": false
+  },
+  "design": {
+    "hand": true,
+    "notice_hand": false,
+    "nb_cards": false,
+    "orn": "drum",
+    "part_period": false,
+    "plate_stop_at_notebook": false,
+    "opener_num": false,
+    "guide_flow": true,
+    "copyfit": true,
+    "text_pretty": true,
+    "guide_cards_break": true,
+    "note_pt": {
+      "fr": 10.0
+    }
+  },
+  "question": {
+    "en": "Can you follow your dream and still honor where you come from?",
+    "fr": "Peut-on suivre son rêve et honorer d’où l’on vient ?",
+    "es": "¿Se puede seguir un sueño y honrar de dónde vienes?"
+  },
+  "site": {
+    "gallery": [
+      "DB-I02",
+      "DB-I06",
+      "DB-I07",
+      "DB-I09",
+      "DB-I15"
+    ]
+  },
+  "buy_links": {},
+  "cover": {
+    "style": "night",
+    "spine_color": "petrol",
+    "show_volume": true,
+    "shade_in": 4.1,
+    "title_pt": {
+      "en": 42,
+      "fr": 38,
+      "es": 40
+    },
+    "title_lines": {
+      "en": [
+        "The Drum",
+        "and the Ball"
+      ],
+      "fr": [
+        "Le Tambour",
+        "et le Ballon"
+      ],
+      "es": [
+        "El tambor",
+        "y el balón"
+      ]
+    },
+    "age": {
+      "en": "Ages 9–12",
+      "fr": "Pour les 9–12 ans",
+      "es": "Para lectores de 9 a 12 años"
+    },
+    "front": {
+      "fit": "width",
+      "anchor": "bottom"
+    },
+    "back": {
+      "fit": "width",
+      "anchor": "bottom",
+      "barcode_in_art": false,
+      "foot_right": true,
+      "text_box_in": {
+        "left": 1.4,
+        "right": 0.42,
+        "top": 1.28
+      },
+      "text_pt": {
+        "en": 9.5,
+        "fr": 9.0,
+        "es": 9.1
+      },
+      "leading": {
+        "en": 1.38,
+        "fr": 1.36,
+        "es": 1.36
+      },
+      "label": {
+        "pad": 0.2,
+        "bg": "rgba(248,240,224,.9)"
+      },
+      "barcode_right_in": 0.36
+    }
+  },
+  "age_note": {
+    "en": "For ages 9–12 (shared reading from 8)",
+    "fr": "Pour les 9–12 ans (lecture accompagnée dès 8 ans)",
+    "es": "Para lectores de 9 a 12 años (lectura acompañada desde los 8)"
+  },
+  "parents_note": {
+    "en": {
+      "title": "What to expect",
+      "text": "This book is for readers 9 to 12 and contains no graphic violence. Its hard moments are small and close to home: lies, broken promises, a father who reads a private journal, family arguments and the pressure to succeed. Children who feel pushed toward one path by their family, or torn between two cultures, may recognise themselves in Lamine and in Cheikh. The Discovery Guide has questions for each part, activities, and notes for teachers and families."
+    },
+    "fr": {
+      "title": "À quoi s’attendre",
+      "text": "Ce livre s’adresse aux lecteurs de 9 à 12 ans et ne contient pas de violence graphique. Ses moments difficiles sont petits et proches de la maison : des mensonges, des promesses non tenues, un père qui lit un journal intime, des disputes de famille et la pression de la réussite. Les enfants qui se sentent poussés vers une voie par leur famille, ou tiraillés entre deux cultures, peuvent se reconnaître en Lamine et en Cheikh. Le guide de découverte propose des questions pour chaque partie, des activités et des conseils pour les enseignants et les familles."
+    },
+    "es": {
+      "title": "Qué esperar",
+      "text": "Este libro es para lectores de 9 a 12 años y no contiene violencia explícita. Sus momentos difíciles son pequeños y cercanos: mentiras, promesas rotas, un papá que lee un diario privado, discusiones familiares y la presión por triunfar. Los niños que sienten que su familia los empuja hacia un camino, o que se sienten divididos entre dos culturas, pueden identificarse con Lamine y con Cheikh. La guía de descubrimiento trae preguntas para cada parte, actividades y notas para maestros y familias."
+    }
+  }
+}

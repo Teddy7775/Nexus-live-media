@@ -1,0 +1,278 @@
+{
+  "slug": "sokha-road-to-the-bell",
+  "volume": 1,
+  "status": "proof",
+  "narrator": {
+    "name": "Sokha",
+    "age": 12,
+    "short": "Sokha"
+  },
+  "place": {
+    "en": "Banteay Meanchey, Cambodia",
+    "fr": "Banteay Meanchey, Cambodge",
+    "es": "Banteay Meanchey, Camboya"
+  },
+  "story_dates": {
+    "from": "2025-04-13",
+    "to": "2025-05-11"
+  },
+  "age_range": [
+    9,
+    12
+  ],
+  "age_label": {
+    "en": "9–12",
+    "fr": "9–12 ans",
+    "es": "9–12 años"
+  },
+  "year": 2026,
+  "titles": {
+    "en": {
+      "title": "Sokha’s Diary",
+      "subtitle": "The Road to the Bell"
+    },
+    "fr": {
+      "title": "Le Journal de Sokha",
+      "subtitle": "Le chemin de la cloche"
+    },
+    "es": {
+      "title": "El diario de Sokha",
+      "subtitle": "El camino de la campana"
+    }
+  },
+  "descriptors": {
+    "en": "The Road to the Bell",
+    "fr": "Le chemin de la cloche",
+    "es": "El camino de la campana"
+  },
+  "url_slugs": {
+    "en": "sokhas-diary-the-road-to-the-bell",
+    "fr": "le-journal-de-sokha-le-chemin-de-la-cloche",
+    "es": "el-diario-de-sokha-el-camino-de-la-campana"
+  },
+  "taglines": {
+    "en": "Next time, I’ll ask first.",
+    "fr": "La prochaine fois, je demanderai d’abord.",
+    "es": "La próxima vez, primero voy a preguntar."
+  },
+  "blurbs": {
+    "en": [
+      "Tomorrow is New Year’s Day, and a chicken has just eaten the corner of the first page of Sokha’s diary. He is twelve, always has a plan, and doesn’t always listen to the end. His sister Maly is nine, walks with a wooden crutch tied with a pink ribbon, and would like to be asked what she wants.",
+      "In a village where old mines left by decades of war still close some paths, the road to school gets longer and the class has to move. Sokha is sure he knows exactly how to fix everything for Maly. He is wrong. A secret plan, a seam that slips and a meeting under the tree teach him that helping and deciding are not the same thing.",
+      "A novel in diary form about a brother who learns to ask, a sister who tells her own story, and a village that decides school is worth carrying from one house to another. For readers 9 to 12, alone or read aloud."
+    ],
+    "fr": [
+      "Demain, c’est le Nouvel An, et une poule vient de manger le coin de la première page du journal de Sokha. Il a douze ans, il a toujours un plan et n’écoute pas toujours jusqu’au bout. Sa sœur Maly a neuf ans, marche avec une béquille en bois nouée d’un ruban rose, et aimerait qu’on lui demande ce qu’elle veut.",
+      "Dans un village où d’anciennes mines laissées par des décennies de guerre ferment encore certains chemins, la route de l’école s’allonge et la classe doit déménager. Sokha est sûr de savoir exactement comment tout arranger pour Maly. Il se trompe. Un plan secret, une couture qui glisse et une réunion sous l’arbre lui apprennent qu’aider et décider ne sont pas la même chose.",
+      "Un roman en forme de journal sur un frère qui apprend à demander, une sœur qui raconte sa propre histoire et un village qui décide que l’école vaut la peine d’être portée d’une maison à l’autre. Pour les 9–12 ans, à lire seul ou à voix haute."
+    ],
+    "es": [
+      "Mañana es Año Nuevo, y una gallina acaba de comerse la esquina de la primera página del diario de Sokha. Tiene doce años, siempre tiene un plan y no siempre escucha hasta el final. Su hermana Maly tiene nueve, camina con una muleta de madera atada con una cinta rosa y le gustaría que le preguntaran qué quiere.",
+      "En un pueblo donde viejas minas dejadas por décadas de guerra todavía cierran algunos caminos, el trayecto a la escuela se alarga y la clase tiene que mudarse. Sokha está seguro de saber exactamente cómo arreglarlo todo para Maly. Se equivoca. Un plan secreto, una costura que resbala y una reunión bajo el árbol le enseñan que ayudar y decidir no son lo mismo.",
+      "Una novela en forma de diario sobre un hermano que aprende a preguntar, una hermana que cuenta su propia historia y un pueblo que decide que la escuela merece ser llevada de una casa a otra. Para lectores de 9 a 12 años, para leer solos o en voz alta."
+    ]
+  },
+  "short_descriptions": {
+    "en": "Twelve-year-old Sokha keeps a diary while the village school has to move, and learns that helping his sister Maly is not the same as deciding for her. A novel in diary form about a brother, a sister and a bell, for readers 9 to 12.",
+    "fr": "Sokha, douze ans, tient un journal pendant que l’école du village doit déménager, et découvre qu’aider sa sœur Maly n’est pas décider à sa place. Un roman en forme de journal sur un frère, une sœur et une cloche, pour les 9–12 ans.",
+    "es": "Sokha, de doce años, escribe un diario mientras la escuela del pueblo tiene que mudarse, y descubre que ayudar a su hermana Maly no es decidir por ella. Una novela en forma de diario sobre un hermano, una hermana y una campana, para lectores de 9 a 12 años."
+  },
+  "keywords": {
+    "en": [
+      "middle-grade novel",
+      "Cambodia",
+      "disability and inclusion",
+      "siblings",
+      "diary novel",
+      "landmine safety",
+      "school and community"
+    ],
+    "fr": [
+      "roman jeunesse",
+      "Cambodge",
+      "handicap et inclusion",
+      "frère et sœur",
+      "journal intime",
+      "sécurité face aux mines",
+      "école et communauté"
+    ],
+    "es": [
+      "novela infantil",
+      "Camboya",
+      "discapacidad e inclusión",
+      "hermanos",
+      "diario",
+      "seguridad ante las minas",
+      "escuela y comunidad"
+    ]
+  },
+  "palette": {
+    "paper": "#F3EBDD",
+    "plaster": "#C2A878",
+    "petrol": "#4A5F48",
+    "indigo": "#2E3A3D",
+    "kesariya": "#A24D2A",
+    "ember": "#7A4426",
+    "pale": "#D9C9A6",
+    "stain": "#716049",
+    "green": "#66765A",
+    "amber": "#D9B351",
+    "pink": "#C87A91",
+    "pen": "#3E566F"
+  },
+  "chapter_swatches": {},
+  "editions": [
+    {
+      "id": "story",
+      "guide": false
+    },
+    {
+      "id": "guide",
+      "guide": true
+    }
+  ],
+  "isbn": {
+    "story": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "guide": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    },
+    "ebook": {
+      "en": "",
+      "fr": "",
+      "es": ""
+    }
+  },
+  "print": {
+    "trim_in": [
+      6,
+      9
+    ],
+    "bleed_in": 0.125,
+    "bleed_mode": "all",
+    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "cream",
+    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "margins_in": {
+      "top": 0.78,
+      "bottom": 0.9,
+      "inner": 0.85,
+      "outer": 0.65
+    },
+    "body_pt": 11.5,
+    "leading": 1.5
+  },
+  "reader": {
+    "access": "full",
+    "sample_chapters": 3
+  },
+  "parser": {
+    "tail": false,
+    "sound_lines": false
+  },
+  "design": {
+    "hand": true,
+    "notice_hand": true,
+    "nb_cards": false,
+    "orn": "bell",
+    "part_period": false,
+    "plate_stop_at_notebook": false,
+    "opener_num": false,
+    "guide_flow": true,
+    "copyfit": true,
+    "text_pretty": true,
+    "guide_cards_break": true
+  },
+  "question": {
+    "en": "How do you help without taking over?",
+    "fr": "Comment aider sans décider à la place de l’autre ?",
+    "es": "¿Cómo se ayuda sin decidir por el otro?"
+  },
+  "site": {
+    "gallery": [
+      "SK-I01",
+      "SK-I02",
+      "SK-I03",
+      "SK-I05",
+      "SK-I09"
+    ]
+  },
+  "buy_links": {},
+  "cover": {
+    "style": "paper",
+    "spine_color": "petrol",
+    "show_volume": true,
+    "title_pt": {
+      "en": 46,
+      "fr": 40,
+      "es": 42
+    },
+    "title_lines": {
+      "en": [
+        "Sokha’s Diary"
+      ],
+      "fr": [
+        "Le Journal",
+        "de Sokha"
+      ],
+      "es": [
+        "El diario",
+        "de Sokha"
+      ]
+    },
+    "age": {
+      "en": "Ages 9–12",
+      "fr": "Pour les 9–12 ans",
+      "es": "Para lectores de 9 a 12 años"
+    },
+    "front": {
+      "fit": "width",
+      "anchor": "bottom"
+    },
+    "back": {
+      "fit": "width",
+      "anchor": "bottom",
+      "barcode_in_art": true,
+      "barcode_box_in": {
+        "right": 0.3,
+        "bottom": 0.34,
+        "w": 1.75,
+        "h": 1.1
+      },
+      "text_pt": {
+        "en": 10.2,
+        "fr": 9.6,
+        "es": 9.7
+      },
+      "leading": {
+        "en": 1.45,
+        "fr": 1.42,
+        "es": 1.42
+      }
+    }
+  },
+  "age_note": {
+    "en": "For ages 9–12 (shared reading from 8)",
+    "fr": "Pour les 9–12 ans (lecture accompagnée dès 8 ans)",
+    "es": "Para lectores de 9 a 12 años (lectura acompañada desde los 8)"
+  },
+  "parents_note": {
+    "en": {
+      "title": "A note on difficult content",
+      "text": "This book is for readers 9 to 12, and it is honest about what war leaves behind. A father has died on the road, a girl lost her leg to an explosive when she was four, and an explosion off the page badly hurts a neighbor. Nothing is shown in graphic detail, and the story is full of humor, work and care. The Discovery Guide has a safety section (do not approach, touch nothing, tell an adult) and suggestions for talking with children, including those who live with disability or loss. Please read it first, and never ask a child to share personal experience."
+    },
+    "fr": {
+      "title": "À propos des sujets difficiles",
+      "text": "Ce livre s’adresse aux lecteurs de 9 à 12 ans et parle honnêtement de ce que la guerre laisse derrière elle. Un père est mort sur la route, une petite fille a perdu une jambe à cause d’un engin explosif quand elle avait quatre ans, et une explosion, hors champ, blesse gravement un voisin. Rien n’est décrit de façon graphique, et le récit est plein d’humour, de travail et de soin. Le guide de découverte contient une section sur la sécurité (ne pas s’approcher, ne rien toucher, prévenir un adulte) et des conseils pour en parler avec les enfants, y compris ceux qui vivent avec un handicap ou un deuil. Lisez-la d’abord, et ne demandez jamais à un enfant de raconter son expérience personnelle."
+    },
+    "es": {
+      "title": "Sobre los temas difíciles",
+      "text": "Este libro es para lectores de 9 a 12 años y es honesto sobre lo que deja la guerra. Un padre murió en la carretera, una niña perdió una pierna por un explosivo cuando tenía cuatro años y una explosión, fuera de escena, hiere gravemente a un vecino. Nada se cuenta de forma explícita, y el relato está lleno de humor, trabajo y cuidado. La guía de descubrimiento incluye una sección de seguridad (no acercarse, no tocar nada, avisar a un adulto) y sugerencias para conversar con los niños, también con quienes viven con una discapacidad o una pérdida. Léanla primero, y nunca pidan a un niño que cuente su experiencia personal."
+    }
+  }
+}

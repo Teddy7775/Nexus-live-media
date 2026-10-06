@@ -1,0 +1,12 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<section class="block"><div class="narrow">
+  <p class="kicker"><a href="{{ book_url }}" style="color:inherit">{{ title }}</a></p>
+  <h1>{{ t.reader.contents }}</h1>
+  <p><a class="btn btn-primary" href="{{ first_url }}" data-continue="{{ slug }}:{{ L }}" data-continue-label="{{ t.book.continue }}">{{ t.book.start }}</a></p>
+  <ul class="toc-list mt">
+  {% for it in items %}{% if it.part %}<li class="part">{{ it.label }} · {{ it.title }}</li>{% else %}<li>{% if it.locked %}<span class="toc-lock" style="display:flex;gap:1rem;padding:.8rem .2rem;opacity:.55"><span class="n">{{ it.num or '' }}</span><span>{{ it.title }}</span></span>{% else %}<a href="{{ it.url }}"><span class="n">{{ it.num or '' }}</span><span>{{ it.title }}</span>{% if it.date %}<span class="d">{{ it.date }}</span>{% endif %}</a>{% endif %}</li>{% endif %}{% endfor %}
+  </ul>
+  <p class="mt"><a class="btn btn-ghost" href="{{ guide_url }}">{{ t.reader.open_guide }}</a></p>
+</div></section>
+{% endblock %}

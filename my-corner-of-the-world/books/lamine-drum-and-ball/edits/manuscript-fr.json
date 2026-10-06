@@ -1,0 +1,11 @@
+[
+ {
+  "id": "MLF-01",
+  "kind": "duplicate",
+  "find": "\n\nLe journal de Lamine couvre la période du 5 février au 17 mars 2024. Cette année-là, le jeûne du ramadan a commencé au Sénégal le 11 ou le 12 mars, selon les communautés.",
+  "replace": "",
+  "why": "The last paragraph of “Note documentaire” repeats the one before it with a few words changed (same duplicate as in English, absent from the Spanish file). The first version is kept, as in Spanish.",
+  "regex": false,
+  "count": 1
+ }
+]

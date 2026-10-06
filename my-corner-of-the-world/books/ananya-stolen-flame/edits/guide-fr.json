@@ -1,0 +1,29 @@
+[
+ {
+  "id": "GFR-01",
+  "kind": "consistency",
+  "find": "huit points de suture à la main et trois mensonges.",
+  "replace": "huit points de suture à la main et quatre mensonges.",
+  "why": "Guide said three; the story enumerates four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GFR-02",
+  "kind": "consistency",
+  "find": "huit points de suture et trois mensonges. »",
+  "replace": "huit points de suture et quatre mensonges. »",
+  "why": "Quotes the novel’s first line.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GFR-03",
+  "kind": "consistency",
+  "find": "décroche la copie de l’affiche qu’elle avait dessinée pour le mur de sa chambre et écrit",
+  "replace": "épingle sur le mur de sa chambre la copie de l’affiche qu’elle avait dessinée et écrit",
+  "why": "Matches the corrected novel sentence (FR-02).",
+  "regex": false,
+  "count": 1
+ }
+]
