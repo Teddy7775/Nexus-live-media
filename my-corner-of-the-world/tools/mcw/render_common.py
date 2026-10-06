@@ -122,7 +122,7 @@ class Common:
         out = []
         for b in sec.blocks:
             if b.kind == "table":
-                cls = "gloss" if sec.title.lower().startswith(("words from", "quelques mots", "palabras")) else ""
+                cls = "gloss" if sec.title.lower().startswith(("words from", "quelques mots", "les mots", "palabras")) else ""
                 out.append(self.table(b, cls))
             elif b.kind in ("ul", "ol"):
                 out.append(self._list(b.items, b.kind, b.meta.get("start", 1)))

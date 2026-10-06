@@ -52,6 +52,7 @@ class CoverBuilder:
         self.H = round(self.th + 2 * self.b, 4)
         self.cfg = book.cfg.get("cover", {})
         self.paper = self.cfg.get("style") == "paper"          # dark text on a cream upper area, no dark shade
+        self.night = self.cfg.get("style") == "night"          # light text over a dark upper sky, with a soft dark gradient behind it
         self.out = BUILD / book.slug / "cover" / f"{lang}-{edition}"
         self.out.mkdir(parents=True, exist_ok=True)
         self.warnings: list[str] = []
@@ -105,9 +106,9 @@ class CoverBuilder:
         author_html = esc(author) if author else (f'<span class="todo">{esc(S["ph_author"])}</span>' if proof else "")
         pill_txt = esc(S["guide_pill"])
         tsize = self.cfg.get("title_pt", {}).get(lang, 40)
-        if self.paper:       # the guide badge sits under the descriptor, inside the quiet upper area
+        if self.paper or self.night:       # the guide badge sits under the descriptor, inside the quiet upper area
             pill = f'<div class="pill in-flow">{pill_txt}</div>' if self.edition == "guide" else ""
-            shade, pill_abs = "", ""
+            shade, pill_abs = ('<div class="shade"></div>' if self.night else ""), ""
         else:
             pill, shade = "", '<div class="shade"></div>'
             pill_abs = f'<div class="pill">{pill_txt}</div>' if self.edition == "guide" else ""
@@ -164,16 +165,22 @@ class CoverBuilder:
         sitetxt = esc(site.replace("https://", "").replace("http://", "")) if site else ""
         barcode_lbl = '<div class="bc-lbl">BARCODE / ISBN AREA 2.0 × 1.2 in</div>' if proof else ""
         publine = f'<div class="bpub">{pubtxt}{(" · " + sitetxt) if (pub or sitetxt) and sitetxt else ""}</div>'
+        tb = bcfg.get("text_box_in") or {}   # where the copy sits on this artwork (a plain wall, not the whole panel)
+        t_left, t_right, t_top = tb.get("left", self.b + 0.55), tb.get("right", 0.55), tb.get("top", self.b + 0.55)
         if bcfg.get("barcode_in_art"):       # the artwork already carries the quiet box for the barcode
             bb = bcfg["barcode_box_in"]
             foot = (f'<div class="bfoot r" style="right:{bb["right"]}in;bottom:{bb["bottom"] + bb["h"] + 0.14:.3f}in">{publine}</div>')
             barcode = (f'<div class="bcbox" style="right:{bb["right"]}in;bottom:{bb["bottom"]}in;width:{bb["w"]}in;height:{bb["h"]}in">{barcode_lbl}</div>' if proof else "")
+        elif bcfg.get("foot_right"):         # publisher line right-aligned above the barcode (the lower-left is taken by the still life)
+            bcr = bcfg.get("barcode_right_in", 0.55)
+            foot = f'<div class="bfoot r" style="right:{bcr:.3f}in;bottom:{self.b + 0.5 + 1.2 + 0.14:.3f}in">{publine}</div>'
+            barcode = f'<div class="barcode" style="right:{bcr:.3f}in;bottom:{self.b + 0.5:.3f}in">{barcode_lbl}</div>'
         else:
             foot = f'<div class="bfoot" style="left:{self.b + 0.55:.3f}in;bottom:{self.b + 0.5:.3f}in">{publine}</div>'
             barcode = f'<div class="barcode" style="right:{0.55:.3f}in;bottom:{self.b + 0.5:.3f}in">{barcode_lbl}</div>'
         return f'''<div class="back" style="width:{bw:.4f}in">
   {img}
-  <div class="btxt" style="left:{self.b + 0.55:.3f}in;right:0.55in;top:{self.b + 0.55:.3f}in">
+  <div class="btxt{' label' if bcfg.get('label') else ''}" style="left:{t_left:.3f}in;right:{t_right:.3f}in;top:{t_top:.3f}in">
     <div class="bser">{esc(S["series"].upper())}{(" · " + esc(self.vol_label().upper())) if self.vol_label() else ""}</div>
     <div class="btag">{tag}</div>
     {paras}
@@ -212,6 +219,24 @@ class CoverBuilder:
                     f'.bfoot,.bpub{{color:{pal["indigo"]};text-shadow:none}}')
         return css
 
+    def night_css(self) -> str:
+        if not self.night:
+            return ""
+        pal = self.book.palette
+        lab = self.cfg.get("back", {}).get("label")
+        label_css = ""
+        if lab:      # the copy sits on a paper label so it stays legible on a mid-tone wall
+            label_css = (f'.btxt.label{{box-sizing:border-box;padding:{lab.get("pad", 0.22)}in {lab.get("pad", 0.22) + 0.04}in;'
+                         f'background:{lab.get("bg", "rgba(247,239,222,.9)")};border-radius:3pt;box-shadow:0 .02in .14in rgba(52,26,10,.34)}}'
+                         f'.btxt.label .bser{{color:{pal["kesariya"]}}}')
+        h = self.cfg.get("shade_in", 4.1)
+        return (f'.shade{{top:0;bottom:auto;height:{h}in;background:linear-gradient(to bottom,rgba(24,28,56,.88) 0%,rgba(24,28,56,.72) 45%,'
+                f'rgba(24,28,56,.36) 78%,rgba(24,28,56,0) 100%)}}'
+                f'.ftxt{{color:{pal["paper"]}}} .series{{color:{pal["amber"]}}}'
+                f'.title{{color:{pal["paper"]};text-shadow:0 .02in .1in rgba(10,12,30,.55)}}'
+                f'.sub{{color:{pal["pale"]};text-shadow:0 .02in .08in rgba(10,12,30,.6)}}'
+                f'.pill.in-flow{{position:static;display:inline-block;margin-top:.26in}}' + label_css)
+
     def html(self, proof: bool, guides: bool) -> str:
         bk, pal = self.book, self.book.palette
         f = FONTS.resolve().as_uri()
@@ -243,7 +268,7 @@ class CoverBuilder:
 .bages{{margin-top:.2in;font:800 7.8pt "Nunito Sans";letter-spacing:.2em;text-transform:uppercase;color:{pal["petrol"]}}}
 .bfoot{{position:absolute;color:#fff}} .bser{{font:800 7.4pt "Nunito Sans";letter-spacing:.2em;color:{pal["ember"]};margin-bottom:.16in}} .bpub{{font:700 7.8pt "Nunito Sans";letter-spacing:.06em;color:#fff;text-shadow:0 0 .08in rgba(0,0,0,.6)}}
 .barcode{{position:absolute;width:2in;height:1.2in;background:#fff}}
-{self.paper_css()}
+{self.paper_css()}{self.night_css()}
 .todo{{background:#ffe9a8;color:#7a3b00;padding:0 .06in;border-radius:2px}}
 .gl{{position:absolute;pointer-events:none;z-index:50}} .gl.v{{top:0;bottom:0;width:.4pt}} .gl.h{{left:0;right:0;height:.4pt}}
 .gtxt{{position:absolute;z-index:60;font:600 6.5pt "Nunito Sans";color:#e6007e;background:rgba(255,255,255,.8);padding:0 .04in}}

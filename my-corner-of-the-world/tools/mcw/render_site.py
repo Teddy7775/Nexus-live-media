@@ -523,8 +523,8 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
         self.write(".htaccess", self.htaccess())
         self.write("README-DEPLOY.txt",
                    "Upload the CONTENTS of this folder to public_html on Hostinger.\n"
-                   "(If you work from the two zip files in release/: extract my-corner-of-the-world_public_html.zip and then\n"
-                   " my-corner-of-the-world_downloads.zip into the same folder; the second one holds the EPUB downloads.)\n"
+                   "(If you work from the zip files in release/: extract my-corner-of-the-world_public_html.zip and then every\n"
+                   " my-corner-of-the-world_downloads_N.zip into the same folder; those hold the EPUB downloads.)\n"
                    "Then copy api/config.sample.php to api/config.php and fill it in (owner email, mail_from).\n"
                    "Full instructions: my-corner-of-the-world/README.md\n")
 
@@ -581,16 +581,34 @@ AddType font/woff2 .woff2
 """
 
     def make_zip(self) -> Path:
-        """Two archives, each under GitHub's 100 MB file limit: the site itself, and the EPUB downloads (unzip both into the same folder)."""
+        """The site archive plus the EPUB downloads in as many archives as needed, each under GitHub's 100 MB file limit
+        (unzip them all into the same folder)."""
         out = RELEASE / f"{self.P.series['id']}_public_html.zip"
-        dl = RELEASE / f"{self.P.series['id']}_downloads.zip"
         out.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z, zipfile.ZipFile(dl, "w", zipfile.ZIP_STORED) as zd:
-            for p in sorted(self.out.rglob("*")):
-                if p.is_file() and p.name != "config.php" and "subscribers.csv" not in p.name:
-                    rel = p.relative_to(self.out).as_posix()
-                    (zd if rel.startswith("downloads/") else z).write(p, rel)
-        self.downloads_zip = dl
+        for old in RELEASE.glob(f"{self.P.series['id']}_downloads*.zip"):
+            old.unlink()
+        files = [p for p in sorted(self.out.rglob("*")) if p.is_file() and p.name != "config.php" and "subscribers.csv" not in p.name]
+        parts: list[list[tuple[Path, str]]] = [[]]
+        size = 0
+        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+            for p in files:
+                rel = p.relative_to(self.out).as_posix()
+                if not rel.startswith("downloads/"):
+                    z.write(p, rel)
+                    continue
+                n = p.stat().st_size
+                if size + n > 88 * 1024 * 1024 and parts[-1]:
+                    parts.append([])
+                    size = 0
+                parts[-1].append((p, rel))
+                size += n
+        self.downloads_zips = []
+        for i, part in enumerate(parts, 1):
+            dl = RELEASE / f"{self.P.series['id']}_downloads_{i}.zip"
+            with zipfile.ZipFile(dl, "w", zipfile.ZIP_STORED) as zd:
+                for p, rel in part:
+                    zd.write(p, rel)
+            self.downloads_zips.append(dl)
         return out
 
 
@@ -600,6 +618,7 @@ def build_site(P: Project):
     n = sum(1 for _ in sb.out.rglob("*.html"))
     print(f"[site] {n} HTML pages, {len(sb.pages)} in sitemap -> {sb.out}")
     print(f"[site] deploy zip: {z} ({z.stat().st_size // 1024} KB)")
-    print(f"[site] downloads zip (EPUBs, extract into the same folder): {sb.downloads_zip} ({sb.downloads_zip.stat().st_size // 1024} KB)")
+    for dz in sb.downloads_zips:
+        print(f"[site] downloads zip (EPUBs, extract into the same folder): {dz} ({dz.stat().st_size // 1024} KB)")
     for w in sb.warnings:
         print("   !", w)

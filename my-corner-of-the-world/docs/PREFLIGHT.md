@@ -1,6 +1,6 @@
 # Preflight report
 
-Generated 2026-10-05 by `tools/preflight.py` from the files in `release/`.
+Generated 2026-10-06 by `tools/preflight.py` from the files in `release/`.
 A printer’s own preflight (KDP previewer, IngramSpark file check) remains the final authority.
 
 ## sokha-road-to-the-bell
@@ -43,6 +43,47 @@ The PRINT wrap contains no guides, placeholders or barcode box; the PROOF wrap s
 | fr-guide | 5942 | valid, 0 messages |
 | es-story | 5913 | valid, 0 messages |
 | es-guide | 5940 | valid, 0 messages |
+
+## lamine-drum-and-ball
+
+Page size expected for bleed mode `all`: **6.250 × 9.250 in**.
+
+### Interiors
+
+| Edition | Pages | Size (in) | Even | Body pt | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |
+|---|---|---|---|---|---|---|---|---|---|
+| en-story | 136 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 23 ✓ | 24 | 299 | [2] | 13.6 |
+| en-guide | 158 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 30 ✓ | 25 | 299 | [2, 136, 158] | 13.8 |
+| fr-story | 138 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 23 ✓ | 24 | 299 | [2, 37] | 13.7 |
+| fr-guide | 162 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 30 ✓ | 25 | 299 | [2, 37, 138, 162] | 14.0 |
+| es-story | 136 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 23 ✓ | 24 | 299 | [2, 136] | 13.6 |
+| es-guide | 156 | 6.250 × 9.250 ✓ | ✓ | 11.5 ✓ | 30 ✓ | 25 | 299 | [2] | 13.9 |
+
+Blank pages are intentional (verso after the half-title, recto/verso balancing before part pages, final page when the count had to be rounded to an even number).
+
+### Cover wraps
+
+| Edition | Wrap (in) | Expected (in) | Spine (in) | Lowest image ppi |
+|---|---|---|---|---|
+| en-story | 12.583 × 9.250 | ≈ 12.590 × 9.250 | 0.340 for 136 pp | 167 |
+| en-guide | 12.640 × 9.250 | ≈ 12.645 × 9.250 | 0.395 for 158 pp | 167 |
+| fr-story | 12.597 × 9.250 | ≈ 12.595 × 9.250 | 0.345 for 138 pp | 167 |
+| fr-guide | 12.653 × 9.250 | ≈ 12.655 × 9.250 | 0.405 for 162 pp | 167 |
+| es-story | 12.583 × 9.250 | ≈ 12.590 × 9.250 | 0.340 for 136 pp | 167 |
+| es-guide | 12.640 × 9.250 | ≈ 12.640 × 9.250 | 0.390 for 156 pp | 167 |
+
+The PRINT wrap contains no guides, placeholders or barcode box; the PROOF wrap shows trim, bleed, spine and safe zone. Chromium rounds the PDF page size to whole CSS pixels (1/96 in), so the file width can differ from the computed width by up to 0.01 in (0.25 mm); the artwork itself is positioned on the exact computed grid.
+
+### EPUB
+
+| Edition | KB | EPUBCheck |
+|---|---|---|
+| en-story | 5562 | valid, 0 messages |
+| en-guide | 5584 | valid, 0 messages |
+| fr-story | 5465 | valid, 0 messages |
+| fr-guide | 5489 | valid, 0 messages |
+| es-story | 5561 | valid, 0 messages |
+| es-guide | 5584 | valid, 0 messages |
 
 ## ananya-stolen-flame
 

@@ -6,7 +6,7 @@ Mi rincón del mundo**.
 | Volume | Title | Slug | Readers |
 |---|---|---|---|
 | 1 | *Sokha’s Diary: The Road to the Bell* (FR *Le Journal de Sokha : Le chemin de la cloche*, ES *El diario de Sokha : El camino de la campana*) | `sokha-road-to-the-bell` | 9–12 |
-| 2 | *The Drum and the Ball: Lamine’s Journal* (announced; shown as “coming soon”, not built yet) | — | — |
+| 2 | *The Drum and the Ball: Lamine’s Journal* (FR *Le Tambour et le Ballon*, ES *El tambor y el balón*) | `lamine-drum-and-ball` | 9–12 |
 | 3 | *Ananya’s Notebook: The Stolen Flame* (FR *Le Vol du Safran Interdit*, ES *El cuaderno de Ananya*) | `ananya-stolen-flame` | 9–13 |
 | 4 | *Anastasiya’s Echo: Katya’s Notebook* (FR *L’Écho d’Anastasiya*, ES *El eco de Anastasiya*) | `anastasiya-echo` | 13 and up |
 
@@ -21,7 +21,7 @@ languages** and **each of the two editions** (story only; story + Discovery Guid
 | Paperback interior PDF | `release/<book>/print/<lang>-<edition>/…_interior.pdf` | 6 × 9 in, bleed, embedded fonts, even page count, bookmarks, clickable contents |
 | Cover wrap PDF (print) + PROOF PDF + front PNG | `release/<book>/covers/<lang>-<edition>/` | spine width computed from the real page count; PROOF shows trim/bleed/spine/safe zone |
 | EPUB 3 | `release/<book>/epub/` | reflowable, accessible metadata, embedded fonts, EPUBCheck-valid |
-| Website | `public_html/`, `release/my-corner-of-the-world_public_html.zip` and `release/my-corner-of-the-world_downloads.zip` (the EPUB downloads) | static, 3 languages, upload to Hostinger |
+| Website | `public_html/`, `release/my-corner-of-the-world_public_html.zip` and `release/my-corner-of-the-world_downloads_1.zip`, `_2.zip`, … (the EPUB downloads) | static, 3 languages, upload to Hostinger |
 
 The Nexus Live Media site at the repository root (`index.php`) is **not** touched; everything for this
 project lives in this folder.
@@ -102,19 +102,24 @@ Per-book switches in `book.json` (all optional, defaults reproduce *Ananya’s N
 | `parser.sound_lines` / `parser.tail` | read the italic "Sound …" line under each chapter date; keep closing notebook blocks as ordinary blocks |
 | `design.hand` | `false` = serif italics instead of the handwriting face for dates, notes and lists |
 | `design.nb_cards` | notebook pages (lists under a bold title) set as ruled paper with a margin line |
-| `design.sound_lines`, `design.opener_num`, `design.part_period`, `design.orn` | chapter-opener layout, part-page period line, ornament (`bell`) |
+| `design.sound_lines`, `design.opener_num`, `design.part_period`, `design.orn` | chapter-opener layout, part-page period line, ornament (`bell`, `drum`; default a lotus) |
+| `parser.prologue` | `false` when the book opens straight on Part One (no prologue section before the first part) |
+| `design.note_pt` | type size of the closing note on the story, one number or a `{lang: pt}` map (default 10.4) |
+| `design.inset_in` | width in inches of a picture of kind `inset` (default 5.0) |
 | `design.guide_flow`, `design.guide_cards_break` | Discovery Guide sections flow one after another instead of each starting a page; question cards may split across pages |
 | `design.plate_stop_at_notebook` | a full-page plate stays before the next notebook page when possible |
 | `design.notice_hand` | a bold line on its own in a chapter (a line Sokha writes in his notebook) is set in the handwriting face, not as a poster-style notice |
 | `design.copyfit` | a chapter whose last page would hold only a few lines gets its tracking nudged (tighter, then looser) until it does not; the book is laid out again |
 | `design.text_pretty` | `text-wrap: pretty` on body text (no one-word last lines) |
 | `palette.pen`, `palette.pink` | optional extra colours (handwritten lines, the ribbon rule) |
-| `cover.*` | cover style (`paper` = dark text on a cream upper area), title lines, age label, panel fit, barcode box |
+| `cover.*` | cover style (`paper` = dark text on a cream upper area, `night` = light text over a dark upper sky with a soft gradient), title lines, age label, panel fit, barcode box; `cover.back.label` puts the back-cover copy on a paper label, `text_box_in` places it, `foot_right` moves the publisher line above the barcode |
 | `age_label`, `age_note`, `parents_note` | text shown on the site (age, reading advice, content note on the parents page) |
 
 Per-picture switches in `art/register.json` (all optional): `stop` (a plate should not move past this paragraph unless its page
 would stay mostly empty), `early` (a plate may stand at the page turn before its anchor paragraph when that paragraph starts a page),
-`scale` (an inline picture prints narrower than the text width). `art/overrides.json` also takes `print_paper_to_white` (a vignette
+`scale` (an inline picture prints narrower than the text width), `min_fill` (how full the page before a page-sized picture must be, default 0.70).
+Slot kind `inset` is a picture on a page of its own, kept whole and centred on paper (no bleed, no crop), for a portrait picture that is not
+meant to be a full-bleed plate. `art/overrides.json` also takes `print_paper_to_white` (a vignette
 painted on a tinted paper ground prints on unprinted paper; the web copy keeps the ground).
 
 ## Website
@@ -140,8 +145,8 @@ painted on a tinted paper ground prints on unprinted paper; the web copy keeps t
    `site.contact_email`, `publisher`, and `author.name` once decided. Rebuild: `python3 build.py site`.
 2. In hPanel → **Files → File Manager**, open the document root of the (sub)domain (normally `public_html`) and
    upload **the contents** of the generated `public_html/` (or upload `my-corner-of-the-world_public_html.zip` and then
-   `my-corner-of-the-world_downloads.zip`, the EPUB downloads, into the same folder and use *Extract* on each; they are two files
-   because GitHub refuses files over 100 MB). Make sure `.htaccess` is uploaded (hidden file).
+   every `my-corner-of-the-world_downloads_N.zip`, the EPUB downloads, into the same folder and use *Extract* on each; the downloads are
+   split in parts because GitHub refuses files over 100 MB). Make sure `.htaccess` is uploaded (hidden file).
    The site uses root-relative links, so it must sit at the root of a domain or sub-domain, not in a sub-folder.
 3. Copy `api/config.sample.php` to `api/config.php` and edit `owner_email` and `mail_from` (create that
    mailbox in hPanel → Emails so mail is delivered). Leave `base_path` empty.
@@ -177,9 +182,9 @@ empty on purpose.
 
 * **Nobody can guarantee that text passes “all AI detection tools.”** Detectors disagree with one another,
   routinely flag polished human prose, and none is certified. *Ananya’s Notebook* got a light, logged line edit aimed at what a
-  human editor would fix anyway (repeated sentence shapes, stock phrases, over-even rhythm, translationese); *Anastasiya’s Echo* and
-  *Sokha’s Diary* were taken as supplied (the corrected versions that came with their reviews), with only structure normalized and
-  a few logged one-line fixes (`books/*/docs/EDIT_LOG.md`). The habits of a text are measured with `tools/audit_style.py`, which
+  human editor would fix anyway (repeated sentence shapes, stock phrases, over-even rhythm, translationese); *Anastasiya’s Echo*,
+  *Sokha’s Diary* and *The Drum and the Ball* were taken as supplied (the corrected versions that came with their reviews, or the
+  author’s files), with only structure normalized and a few logged one-line fixes (`books/*/docs/EDIT_LOG.md`). The habits of a text are measured with `tools/audit_style.py`, which
   reports *habits* (sentence-length spread, repeated openers, stock-phrase counts), not a detector score.
 * **Disclosure obligations are real.** Amazon KDP requires you to declare AI-generated content
   (text, images and translations) when you upload; other retailers and some schools/libraries ask the

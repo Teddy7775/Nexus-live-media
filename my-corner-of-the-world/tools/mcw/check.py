@@ -68,6 +68,9 @@ def art_report(book: Book, meta_by_edition: dict | None = None) -> list[dict]:
         elif kind == "cover":
             width = tw + b
             place = "cover panel"
+        elif kind == "inset":
+            width = float(slot.get("inset_in") or book.design.get("inset_in", 5.0))
+            place = "whole-page inset"
         elif kind == "full" and af.aspect < 1:
             width = (tw + 2 * b)
             place = "full-bleed plate"
@@ -75,7 +78,7 @@ def art_report(book: Book, meta_by_edition: dict | None = None) -> list[dict]:
             width = text_w
             place = "inline"
         ppi = af.w / width
-        want = {"2:3": 2 / 3, "3:2": 1.5, "4:3": 4 / 3}.get(slot["ratio"])
+        want = {"2:3": 2 / 3, "3:2": 1.5, "4:3": 4 / 3, "3:4": 3 / 4, "16:9": 16 / 9}.get(slot["ratio"])
         rows.append({"id": aid, "scene": slot["scene"]["en"], "file": af.src.name, "px": f"{af.w}x{af.h}",
                      "aspect": round(af.aspect, 3), "wanted": slot["ratio"], "slot": kind, "placement": place,
                      "ppi": round(ppi), "ok_aspect": want is None or abs(af.aspect - want) < 0.05,

@@ -44,34 +44,11 @@
   },
   "books": [
     "sokha-road-to-the-bell",
+    "lamine-drum-and-ball",
     "ananya-stolen-flame",
     "anastasiya-echo"
   ],
-  "upcoming": [
-    {
-      "id": "lamine",
-      "volume": 2,
-      "visible": true,
-      "titles": {
-        "en": "The Drum and the Ball: Lamine’s Journal",
-        "fr": "Le Tambour et le Ballon : Le journal de Lamine NDiop",
-        "es": "El tambor y el balón: El diario de Lamine"
-      },
-      "narrator": "Lamine, 12",
-      "where": {
-        "en": "Bambali, Senegal, early 2024",
-        "fr": "Bambali, Sénégal, début 2024",
-        "es": "Bambali, Senegal, principios de 2024"
-      },
-      "question": {
-        "en": "Can you follow your dream and still honor where you come from?",
-        "fr": "Peut-on suivre son rêve et honorer d’où l’on vient ?",
-        "es": "¿Se puede seguir un sueño y honrar de dónde vienes?"
-      },
-      "accent": "#2F6B4F",
-      "age_note": null
-    }
-  ],
+  "upcoming": [],
   "featured": "ananya-stolen-flame",
   "featured_note": "Book shown first on the home page and in the social card. Remove this key to feature the lowest volume number."
 }

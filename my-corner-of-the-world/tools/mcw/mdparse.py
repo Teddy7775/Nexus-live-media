@@ -310,7 +310,8 @@ def _sound_block(b: Block) -> Block:
 
 def parse_manuscript(text: str, lang: str, opts: dict | None = None) -> Manuscript:
     """opts (book.json "parser"): tail=False keeps closing notebook blocks as ordinary blocks;
-    sound_lines=True turns the italic line under a chapter's date into a "sound" block."""
+    sound_lines=True turns the italic line under a chapter's date into a "sound" block;
+    prologue=False when the book opens straight on Part One (no h2 prologue between Contents and the first part)."""
     opts = opts or {}
     md = make_md()
     toks = md.parse(text)
@@ -392,15 +393,19 @@ def parse_manuscript(text: str, lang: str, opts: dict | None = None) -> Manuscri
 
     # --- resolve h2 sections by position -------------------------------------
     h2s = [s for s in sections if s.kind == "h2"]
-    # layout: prologue, parts..., epilogue, glossary, note
-    prologue = h2s[0]
+    # layout: [prologue,] parts..., epilogue, glossary, note   (book.json "parser": {"prologue": false} when there is none)
     epilogue, glossary, note = h2s[-3], h2s[-2], h2s[-1]
-    prologue.kind, prologue.id = "prologue", "prologue"
+    if opts.get("prologue", True):
+        prologue = h2s[0]
+        prologue.kind, prologue.id = "prologue", "prologue"
+        part_heads = h2s[1:-3]
+    else:
+        part_heads = h2s[:-3]
     epilogue.kind, epilogue.id = "epilogue", "epilogue"
     glossary.kind, glossary.id = "glossary", "glossary"
     note.kind, note.id = "note", "note"
     pi = 0
-    for s in h2s[1:-3]:
+    for s in part_heads:
         pi += 1
         s.kind, s.id, s.number = "part", f"part-{pi}", pi
     # chapters inherit part index

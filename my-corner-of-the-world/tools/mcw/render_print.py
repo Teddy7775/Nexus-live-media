@@ -61,6 +61,15 @@ BELL_SVG = ('<svg class="orn" viewBox="0 0 120 34" xmlns="http://www.w3.org/2000
             '<path d="M60 4 c-1.6 0 -2.6 1 -2.6 2.4 C52.4 8 50.6 12.2 50.6 18 v4.6 l-3.4 3.8 h25.6 l-3.4 -3.8 V18 c0 -5.8 -1.8 -10 -6.8 -11.6 C62.6 5 61.6 4 60 4z" fill="none" stroke="{c}" stroke-width="1.4"/>'
             '<circle cx="60" cy="29.2" r="2.1" fill="{k}"/></svg>')
 
+# a goblet drum (the book's own instrument): head, laced body, flared foot, between two rules
+DRUM_SVG = ('<svg class="orn" viewBox="0 0 120 34" xmlns="http://www.w3.org/2000/svg">'
+            '<line x1="2" y1="17" x2="46" y2="17" stroke="{c}" stroke-width="1.2"/>'
+            '<line x1="74" y1="17" x2="118" y2="17" stroke="{c}" stroke-width="1.2"/>'
+            '<ellipse cx="60" cy="7.4" rx="9.6" ry="2.7" fill="none" stroke="{c}" stroke-width="1.4"/>'
+            '<path d="M50.4 7.4 C50.6 14 54.6 16.6 55.6 21 C56.4 25 53.8 28.2 52.6 30.6 H67.4 C66.2 28.2 63.6 25 64.4 21 C65.4 16.6 69.4 14 69.6 7.4" fill="none" stroke="{c}" stroke-width="1.4" stroke-linejoin="round"/>'
+            '<path d="M52.2 10.6 L60 16.2 L67.8 10.6 M54.6 14.2 L60 18.2 L65.4 14.2" fill="none" stroke="{k}" stroke-width=".9" stroke-linejoin="round"/>'
+            '<circle cx="60" cy="32.2" r="1.5" fill="{k}"/></svg>')
+
 COLOR_LABELS = ("color of the day", "couleur du jour", "color del día")
 
 # copy-fitting: levels tried, in order, on a chapter whose last page would hold only a few lines.
@@ -177,8 +186,13 @@ class PrintBuilder:
         self.out_dir = BUILD / book.slug / "print" / f"{lang}-{edition}"
         self.out_dir.mkdir(parents=True, exist_ok=True)
 
+    def note_pt(self) -> float:
+        """Type size of the closing "note on the story": design.note_pt, one number or a {lang: size} map (default 10.4)."""
+        v = self.design.get("note_pt", 10.4)
+        return float(v.get(self.lang, 10.4) if isinstance(v, dict) else v)
+
     def orn_svg(self, c: str, k: str) -> str:
-        return (BELL_SVG if self.design.get("orn") == "bell" else ORN_SVG).format(c=c, k=k)
+        return {"bell": BELL_SVG, "drum": DRUM_SVG}.get(self.design.get("orn"), ORN_SVG).format(c=c, k=k)
 
     # ---------- helpers ---------------------------------------------------
     def T(self, html: str) -> str:
@@ -229,9 +243,9 @@ class PrintBuilder:
         """True when the picture takes whole pages (plate or spread) instead of sitting inline."""
         kind = slot["kind"]
         af = self.art.get(aid)
-        if kind not in ("full", "spread"):
+        if kind not in ("full", "spread", "inset"):
             return False
-        if af is None:
+        if af is None or kind == "inset":
             return True
         return (kind == "spread" and af.aspect > 1.2) or (kind == "full" and af.aspect < 1.0)
 
@@ -250,7 +264,7 @@ class PrintBuilder:
                 return (self.mark(f"fig-{aid}", "v")
                         + f'<div class="plate missing spread-l" id="fig-{aid}"><div>{esc(label)}<br>[spread · left page]</div></div>'
                         f'<div class="plate missing spread-r"><div>{esc(label)}<br>[spread · right page]</div></div>')
-            if kind == "full":
+            if kind in ("full", "inset"):
                 info["pages"] = 1
                 return f'<div class="plate missing"><div>{esc(label)}<br>[full page]</div></div>'
             return f'<figure class="inline missing"><div class="ph">{esc(label)}<br>[{kind}]</div></figure>'
@@ -277,6 +291,18 @@ class PrintBuilder:
                                      f"placed as a top-bleed band ({img_h:.1f} in tall of {G.PH:.2f}). Supply 4:3 for a full spread.")
             self.placed[aid] = info
             return html
+        if kind == "inset":
+            # a page of its own that keeps the picture whole (the art direction asks for no crop): centred, paper all round
+            info.update(mode="inset", pages=1)
+            iw = float(slot.get("inset_in") or self.design.get("inset_in", 5.0))
+            ih = iw / af.aspect
+            room = G.PH - 2 * (G.b + 0.6)
+            if ih > room:
+                iw, ih = room * af.aspect, room
+            style = (f"left:{(G.PW - iw) / 2:.4f}in;top:{(G.PH - ih) / 2 - 0.1:.4f}in;width:{iw:.4f}in;height:{ih:.4f}in;"
+                     "border-radius:2.5pt;")
+            self.placed[aid] = info
+            return f'<div class="plate inset"><img src="{url}" alt="{alt}" style="{style}"></div>'
         if kind in ("full",) and af.aspect < 1.0:
             info.update(mode="plate", pages=1)
             ph = G.PH
@@ -295,8 +321,9 @@ class PrintBuilder:
                                  "placed inline at text width. Supply a 2:3 version for a full-page plate.")
         if kind == "spread":
             self.warnings.append(f"{aid}: spread slot received a non-landscape image; placed inline")
-        if kind == "half" and abs(af.aspect - 1.5) > 0.2:
-            self.warnings.append(f"{aid}: aspect {af.aspect:.2f} differs from 3:2; kept uncropped at text width")
+        want = {"3:2": 1.5, "16:9": 16 / 9, "4:3": 4 / 3}.get(slot.get("ratio"), 1.5)
+        if kind == "half" and abs(af.aspect - want) > 0.2:
+            self.warnings.append(f"{aid}: aspect {af.aspect:.2f} differs from the registered {slot.get('ratio', '3:2')}; kept uncropped at text width")
         self.placed[aid] = info
         sc = slot.get("scale") or self.inline_scale.get(aid)
         if self.inline_scale.get(aid):
@@ -546,7 +573,7 @@ class PrintBuilder:
             body.append(f'<h2 class="{"first" if first else ""}">{gn}{self.Th(esc(s.title))}</h2>')
             first = False
             for b in s.blocks:
-                if s.title.lower().startswith(("words from", "quelques mots", "palabras")) and b.kind == "table":
+                if s.title.lower().startswith(("words from", "quelques mots", "les mots", "palabras")) and b.kind == "table":
                     cols = b.meta.get("cols", 3)
                     body.append(self.render_table(b).replace("<table", f'<table class="gloss{" gloss4" if cols == 4 else ""}"', 1))
                 elif b.kind in ("ul", "ol"):
@@ -606,7 +633,7 @@ class PrintBuilder:
             m_out_r=round(G.b_out + G.outer, 4), m_in_r=round(G.b_in + G.inner, 4),
             m_in_l=round(G.b_in + G.inner, 4), m_out_l=round(G.b_out + G.outer, 4),
             opener_top=1.25, chapters=heads, book_title_css=css_str(self.book.title(self.lang).upper()),
-            design=self.design, hand=self.design.get("hand", True))
+            design=self.design, hand=self.design.get("hand", True), note_pt=self.note_pt())
         doc = (f'<!doctype html><html lang="{self.lang}"><head><meta charset="utf-8">'
                f'<title>{esc(self.book.title(self.lang))}</title><style>{css}</style></head><body>{front}{"".join(pieces)}</body></html>')
         return doc, heads
@@ -718,7 +745,9 @@ class PrintBuilder:
                 self.plate_pos[aid] = idx - 1      # "early": the anchor paragraph starts a page, so the plate stands at the page turn just before it
                 continue
             best = self.pick_on_page(aid, pa)
-            if best and best[2] >= 0.70:
+            mf = slot.get("min_fill", 0.70)    # register "min_fill": how full the page before a plate must be (one number or {lang: number})
+            mf = float(mf.get(self.lang, 0.70) if isinstance(mf, dict) else mf)
+            if best and best[2] >= mf:
                 self.plate_pos[aid] = best[0]
                 continue
             nxt = self.pick_on_page(aid, pa + 1)
@@ -776,7 +805,7 @@ class PrintBuilder:
         css = env.get_template("print.css.j2").render(
             fonts=patched_fonts_dir().resolve().as_uri(), pal=self.book.palette, body_pt=11, leading=1.5, PW=G.PW, PH=G.PH,
             text_h=G.text_h, m_top=0, m_bot=0, m_out_r=0, m_in_r=0, m_in_l=0, m_out_l=0, opener_top=1, chapters=[],
-            book_title_css="", design=self.design, hand=self.design.get("hand", True))
+            book_title_css="", design=self.design, hand=self.design.get("hand", True), note_pt=self.note_pt())
         pages = []
         book_title = esc(self.book.title(self.lang))
         for d in info:
