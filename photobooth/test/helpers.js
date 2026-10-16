@@ -6,7 +6,7 @@ import { createBooth } from '../server/index.js';
 import { createLogger } from '../server/logger.js';
 
 /** Starts a complete booth (mock camera, dry-run printer by default) on a random port with its own temp folder. */
-export async function startBooth({ overrides = {}, camera, printer, uploader, mailer, now } = {}) {
+export async function startBooth({ overrides = {}, camera, printer, uploader, mailer, now, paymentProvider, paymentPollMs = 25 } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-test-'));
   const base = { storage: { dir: path.join(dir, 'events') }, camera: { mock: { captureDelayMs: 5 } }, printer: { dryRunDelayMs: 20 } };
   const config = validateConfig(deepMerge(DEFAULTS, deepMerge(base, overrides)));
@@ -18,6 +18,8 @@ export async function startBooth({ overrides = {}, camera, printer, uploader, ma
     uploader,
     mailer,
     now,
+    paymentProvider,
+    paymentPollMs,
   });
   const server = await new Promise((resolve) => {
     const s = booth.app.listen(0, '127.0.0.1', () => resolve(s));
@@ -57,6 +59,7 @@ export async function startBooth({ overrides = {}, camera, printer, uploader, ma
     async close() {
       booth.uploadQueue?.stop();
       booth.approvals?.stop();
+      booth.payments?.stop();
       booth.hub?.closeAll();
       lanServer.closeAllConnections();
       await new Promise((resolve) => lanServer.close(resolve));

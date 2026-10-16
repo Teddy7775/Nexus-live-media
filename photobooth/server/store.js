@@ -60,9 +60,9 @@ export class SessionStore {
     return `/media/${encodeURIComponent(session.eventSlug)}/${session.id}/${relative.split(path.sep).join('/')}`;
   }
 
-  async create({ eventSlug, eventName, templateId, shotsNeeded, share = false, background = null, now = new Date() }) {
+  async create({ id = null, eventSlug, eventName, templateId, shotsNeeded, share = false, background = null, payment = null, now = new Date() }) {
     const session = {
-      id: newSessionId(now),
+      id: id ?? newSessionId(now),
       eventSlug,
       eventName,
       templateId,
@@ -70,6 +70,8 @@ export class SessionStore {
       // Green screen: the picture chosen for behind the guest and the keying settings in force when the session began,
       // so every preview, the print and the GIF of this session look alike even if the operator tunes the keyer meanwhile.
       background, // { id, name, key } | null
+      // Paid-session mode: the payment that opened this session ({ id, method, amountCents }), or null.
+      payment,
       createdAt: now.toISOString(),
       status: 'shooting', // shooting -> composed
       shots: [], // [{ index, attempt, file, preview }]

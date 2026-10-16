@@ -13,6 +13,8 @@ const email = { open: false, value: '', sent: [], waiters: [], confirmedTypo: fa
 class FlowCancelled extends Error {}
 /** The attendant did not approve the print (or nobody answered). The guest's photos are still saved and shared. */
 class PrintNotApproved extends Error {}
+/** The guest did not complete a payment (cancelled, ran out of time). Nothing was charged. */
+class PaymentNotCompleted extends PrintNotApproved {}
 
 // ------------------------------------------------------------------ helpers
 
@@ -302,12 +304,21 @@ async function loadState() {
   app.state = await api('GET', '/api/state');
 }
 
+const usd = (cents) => `$${(cents / 100).toFixed(2)}`;
+
+/** "Photos $10.00" style hint for the start screen, or '' when the host pays. */
+function priceHint() {
+  const p = app.state.payments;
+  if (!p?.enabled || p.mode === 'off') return '';
+  return p.mode === 'session' ? ` · ${usd(p.pricePerSessionCents)} per session` : ` · prints ${usd(p.pricePerPrintCents)} each`;
+}
+
 function renderAttract() {
   const { event, template, printer } = app.state;
   $('#eventName').textContent = event.name;
   const outcome = printer.enabled ? 'printed on the spot' : 'saved for you';
   const chooser = app.state.greenScreen?.enabled && app.state.greenScreen.guestChoice ? ' - on a background you choose' : '';
-  $('#eventInfo').textContent = `${plural(template.shots, 'photo')}, ${outcome}${chooser}`;
+  $('#eventInfo').textContent = `${plural(template.shots, 'photo')}, ${outcome}${chooser}${priceHint()}`;
 }
 
 async function goAttract() {
@@ -421,7 +432,9 @@ async function review(session, shots, signal) {
   $('#reviewTitle').textContent = 'Looking good!';
   const gifNote = session.hasGif ? (app.state.sharing?.enabled ? ' Your GIF will be in your online gallery.' : ' Your GIF is saved too.') : '';
   $('#reviewSub').textContent = (canPrint ? 'Happy with them? Tap to print.' : 'Your photos are saved.') + gifNote;
-  $('#printBtn').textContent = canPrint ? 'Print my photos' : 'Done';
+  const pay = app.state.payments;
+  const charge = pay?.enabled && pay.mode === 'print' && !session.paidSession ? ` · ${usd(pay.pricePerPrintCents * pay.copies)}` : '';
+  $('#printBtn').textContent = canPrint ? `Print my photos${charge}` : 'Done';
 
   const pairs = [[$('#printBtn'), { action: canPrint ? 'print' : 'done' }]];
   const retakes = $('#retakes');
@@ -486,8 +499,59 @@ async function awaitApproval(approval, session, signal) {
   throw new PrintNotApproved(current.reason === 'no_station' || current.reason === 'timeout' ? 'Nobody was available to approve a print, so your photos were not printed. They are saved, and you can still get them on your phone.' : 'The attendant did not print these. Your photos are saved, and you can still get them on your phone.');
 }
 
+/**
+ * Shows how to pay and waits until it is paid. Resolves with the paid payment; throws PaymentNotCompleted if the guest cancels
+ * or runs out of time (the server closes the payment page in both cases, so nobody can pay it afterwards).
+ */
+async function payFlow(payment, signal) {
+  const attendant = payment.via === 'attendant';
+  $('#payAmount').textContent = usd(payment.amountCents);
+  $('#payTitle').textContent = attendant ? 'Please pay the attendant' : 'Scan to pay';
+  $('#payMsg').textContent = attendant
+    ? (payment.reason === 'offline' ? 'Card payments are not available right now. Please pay the attendant by cash or Zelle - this screen continues by itself once they have it.' : 'Please pay the attendant. This screen continues by itself once they have it.')
+    : 'Point your phone camera at the code and pay by card, Apple Pay or Google Pay. This screen continues by itself.';
+  const qr = $('#payQr');
+  qr.hidden = !payment.qrSvg;
+  if (payment.qrSvg) qr.src = `data:image/svg+xml;utf8,${encodeURIComponent(payment.qrSvg)}`;
+  else qr.removeAttribute('src');
+  const bar = $('#payBar');
+  bar.style.transition = 'none';
+  bar.style.transform = 'scaleX(1)';
+  show('pay');
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      bar.style.transition = `transform ${payment.timeoutSeconds}s linear`;
+      bar.style.transform = 'scaleX(0)';
+    }),
+  );
+
+  let cancelled = false;
+  const onCancel = () => {
+    cancelled = true;
+  };
+  $('#payCancel').addEventListener('click', onCancel);
+  try {
+    let current = payment;
+    while (current.status === 'pending') {
+      await delay(700, signal);
+      if (cancelled) {
+        await api('DELETE', `/api/payments/${payment.id}`).catch(() => {});
+        throw new PaymentNotCompleted('You cancelled, so nothing was charged and nothing was printed. Your photos are saved, and you can still get them on your phone.');
+      }
+      current = (await api('GET', `/api/payments/${payment.id}`)).payment;
+    }
+    if (current.status !== 'paid') throw new PaymentNotCompleted('The payment was not completed in time, so nothing was charged and nothing was printed. Your photos are saved, and you can still get them on your phone.');
+    return current;
+  } catch (error) {
+    if (error instanceof FlowCancelled) api('DELETE', `/api/payments/${payment.id}`).catch(() => {}); // the guest walked away
+    throw error;
+  } finally {
+    $('#payCancel').removeEventListener('click', onCancel);
+    qr.removeAttribute('src');
+  }
+}
+
 async function printFlow(session, signal) {
-  const { printer } = app.state;
   placeSharePanel('#printShareSlot');
   show('printing');
   const bar = $('#printBar');
@@ -498,22 +562,46 @@ async function printFlow(session, signal) {
 
   await guarded(signal, async () => {
     let queued = await api('POST', `/api/sessions/${session.id}/print`);
-    if (queued.approval) queued = await awaitApproval(queued.approval, session, signal);
-    const seconds = (queued.estimatedSeconds || printer.estimatedSeconds) * (1 + queued.queueAhead);
-    $('#printMsg').textContent = queued.queueAhead > 0 ? `${plural(queued.queueAhead, 'print')} ahead of yours — about ${seconds} seconds` : `About ${seconds} seconds`;
-    bar.style.transition = `transform ${seconds}s linear`;
-    requestAnimationFrame(() => requestAnimationFrame(() => (bar.style.transform = 'scaleX(1)')));
-
-    const deadline = Date.now() + (seconds * 3 + 60) * 1000;
-    for (;;) {
-      await delay(700, signal);
-      const { job } = await api('GET', `/api/print/jobs/${queued.job.id}`);
-      // Finished printing: if the guest is mid-way through typing their email, wait for them before the thank-you screen.
-      if (job.status === 'done') return emailClosed(signal);
-      if (job.status === 'error') throw new Error('Your photos are saved, but they could not be printed.');
-      if (Date.now() > deadline) throw new Error('The printer is taking too long.');
+    let paid = false;
+    if (queued.payment) {
+      const payment = await payFlow(queued.payment, signal);
+      paid = true;
+      show('printing');
+      $('#printTitle').textContent = 'Printing your photos…';
+      $('#printMsg').textContent = 'Thank you! Sending to the printer…';
+      queued = await api('POST', `/api/sessions/${session.id}/print`, { paymentId: payment.id });
+    }
+    try {
+      return await finishPrint(session, queued, signal);
+    } catch (error) {
+      // After paying, a "Try again" would charge the guest again: end here and send them to the attendant instead.
+      if (paid && !(error instanceof FlowCancelled) && !(error instanceof PrintNotApproved)) {
+        console.error(error);
+        throw new PrintNotApproved('We received your payment but could not finish your print. Please see the attendant: they can print it or refund you. Your photos are saved.');
+      }
+      throw error;
     }
   });
+}
+
+async function finishPrint(session, queued, signal) {
+  const { printer } = app.state;
+  const bar = $('#printBar');
+  if (queued.approval) queued = await awaitApproval(queued.approval, session, signal);
+  const seconds = (queued.estimatedSeconds || printer.estimatedSeconds) * (1 + queued.queueAhead);
+  $('#printMsg').textContent = queued.queueAhead > 0 ? `${plural(queued.queueAhead, 'print')} ahead of yours — about ${seconds} seconds` : `About ${seconds} seconds`;
+  bar.style.transition = `transform ${seconds}s linear`;
+  requestAnimationFrame(() => requestAnimationFrame(() => (bar.style.transform = 'scaleX(1)')));
+
+  const deadline = Date.now() + (seconds * 3 + 60) * 1000;
+  for (;;) {
+    await delay(700, signal);
+    const { job } = await api('GET', `/api/print/jobs/${queued.job.id}`);
+    // Finished printing: if the guest is mid-way through typing their email, wait for them before the thank-you screen.
+    if (job.status === 'done') return emailClosed(signal);
+    if (job.status === 'error') throw new Error('Your photos are saved, but they could not be printed.');
+    if (Date.now() > deadline) throw new Error('The printer is taking too long.');
+  }
 }
 
 async function doneScreen(printed, signal, notice = null) {
@@ -574,7 +662,21 @@ async function guestFlow(signal) {
   const gs = app.state.greenScreen;
   let background = null;
   if (gs?.enabled) background = gs.guestChoice ? await pickBackground(signal) : gs.backdrop;
-  const session = await guarded(signal, () => api('POST', '/api/sessions', background ? { background } : undefined));
+  let paymentId;
+  const pay = app.state.payments;
+  if (pay?.enabled && pay.mode === 'session') {
+    // Pay per session: the guest pays BEFORE the photos, and the payment opens exactly one session.
+    const asked = await guarded(signal, () => api('POST', '/api/payments'));
+    try {
+      paymentId = (await payFlow(asked.payment, signal)).id;
+    } catch (error) {
+      if (error instanceof PaymentNotCompleted) throw new FlowCancelled(); // changed their mind: back to the start screen
+      throw error;
+    }
+  }
+  const body = { ...(background ? { background } : {}), ...(paymentId ? { paymentId } : {}) };
+  const session = await guarded(signal, () => api('POST', '/api/sessions', Object.keys(body).length ? body : undefined));
+  session.paidSession = Boolean(paymentId);
   app.session = session;
   email.sent = [];
   updateEmailButton();

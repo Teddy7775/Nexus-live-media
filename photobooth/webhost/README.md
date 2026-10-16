@@ -34,6 +34,10 @@ The menu names below are from general knowledge of Hostinger's panel and may dif
    `php /home/<your-user>/domains/<your-domain>/public_html/booth/cleanup.php 30`
    (the path is shown in File Manager). `30` is the number of days to keep galleries.
 
+## Optional: the "thank you" page for card payments
+
+If guests pay by card (`payments.provider: "stripe"`), their phone shows a page after paying. Upload `paid.html` next to `upload.php` and set `payments.stripe.returnUrl` to its address, e.g. `https://example.com/booth/paid.html`. It is a plain static page with no scripts; it only tells the guest to look at the booth screen.
+
 ## Check these yourself before an event
 
 These rely on the web server reading `.htaccess`, which could **not** be tested where this was developed. Open each address in a browser:

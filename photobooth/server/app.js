@@ -7,6 +7,8 @@ import { CameraError } from './camera/errors.js';
 import { ComposeError, composeTemplate, makePreview, renderTestPattern } from './compose.js';
 import { HttpError } from './http-error.js';
 import { ApprovalQueue } from './approval.js';
+import { PAY_NOTES } from './payments.js';
+import { newSessionId } from './store.js';
 import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
 import { qrSvg } from './qr.js';
@@ -31,7 +33,7 @@ const clampCopies = (value, fallback) => {
   return Math.min(10, Math.max(1, n));
 };
 
-export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null, backgrounds = null, hub = null, stationUrl = null }) {
+export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null, backgrounds = null, hub = null, stationUrl = null, payments = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '10kb' }));
@@ -199,7 +201,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     await ensureShareBundle(session, { upload: config.sharing.autoUpload }).catch((err) => logger.error(`share bundle for ${session.id}: ${err.message}`));
   }
 
-  async function printSession(session, copies, label) {
+  async function printSession(session, copies, label, { paymentId = null } = {}) {
     await ensureComposed(session);
     const template = templateFor(session);
     await withLock(`pdf:${session.id}`, async () => {
@@ -207,7 +209,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       await buildPrintPdf({ imageFile: store.resolve(session, session.final.file), template, outFile: store.resolve(session, 'print.pdf') });
       session.pdf = 'print.pdf';
     });
-    const job = queue.enqueue({ sessionId: session.id, pdfFile: store.resolve(session, session.pdf), copies, label });
+    const job = queue.enqueue({ sessionId: session.id, pdfFile: store.resolve(session, session.pdf), copies, label, paymentId });
     session.prints.push({ jobId: job.id, copies, at: new Date().toISOString() });
     await store.save(session);
     return job;
@@ -246,15 +248,59 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         logger,
         onApprove: async (item) => {
           const session = await requireSession(item.sessionId);
-          const job = await printSession(session, item.copies, 'print');
+          const job = await printSession(session, item.copies, 'print', { paymentId: item.paymentId });
           return { job, queueAhead: Math.max(0, queue.pending() - 1), estimatedSeconds: config.printer.estimatedSeconds };
         },
         onChange: (item) => {
           hub?.publish('approval', item);
           hub?.touch(item.sessionId);
+          // The guest paid, and then the print was refused, abandoned or failed to start: a person decides about the money.
+          if (item.paymentId && ['rejected', 'expired', 'cancelled', 'error'].includes(item.status)) payments?.flagRefund(item.paymentId, `print_${item.status}`);
         },
       })
     : null;
+
+  // ------------------------------------------------------------------ payments
+  const payMode = () => (payments ? settings.payMode : 'off');
+
+  /** What a guest's kiosk is told about a payment. The QR code is sent once, when the payment starts. */
+  async function guestPayment(item, { withQr = false } = {}) {
+    return {
+      id: item.id,
+      kind: item.kind,
+      status: item.status,
+      via: item.via,
+      method: item.method,
+      reason: item.reason,
+      amountCents: item.amountCents,
+      currency: item.currency,
+      url: item.url,
+      expiresAt: item.expiresAt,
+      timeoutSeconds: Math.round(item.timeoutMs / 1000),
+      ...(withQr && item.url ? { qrSvg: await qrSvg(item.url) } : {}),
+    };
+  }
+
+  /** The attendant decides a guest gets their print after all (it was paid, then refused or paid late): print it and close the flag. */
+  async function honourPayment(id) {
+    const payment = payments?.get(id);
+    if (!payment) throw new HttpError(404, 'no_payment', 'Payment not found');
+    if (payment.kind !== 'print' || !payment.sessionId) throw new HttpError(409, 'not_printable', 'Only a print payment can be honoured');
+    const session = await requireSession(payment.sessionId);
+    const honoured = payments.honour(id);
+    if (!honoured) throw new HttpError(409, 'not_flagged', 'That payment is not waiting for a decision');
+    const job = await printSession(session, honoured.copies, 'print', { paymentId: id });
+    return { payment: honoured, job };
+  }
+
+  /** Turns a refusal from the payment service into a message a person can act on. */
+  async function payOp(fn) {
+    try {
+      return await fn();
+    } catch (err) {
+      throw err instanceof HttpError ? err : new HttpError(409, 'payment_failed', err.message);
+    }
+  }
 
   /** What the guest's kiosk is told about a print request. Never includes anything an attendant typed beyond the short reason. */
   const approvalView = (item) => ({
@@ -288,6 +334,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       gif: { enabled: config.gif.enabled, countdownSeconds: config.gif.countdownSeconds, frames: config.gif.frames, intervalMs: config.gif.intervalMs },
       email: { enabled: Boolean(emailQueue), maxPerSession: config.email.maxPerSession, marketingOptIn: config.email.marketingOptIn },
       station: { approval: Boolean(approvals) && settings.approvalRequired },
+      payments: { enabled: Boolean(payments), mode: payMode(), currency: 'usd', pricePerPrintCents: settings.pricePerPrintCents, pricePerSessionCents: settings.pricePerSessionCents, copies: settings.copies, provider: payments ? config.payments.provider : null },
       greenScreen: greenOn
         ? {
             enabled: true,
@@ -316,7 +363,21 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     wrap(async (req, res) => {
       const template = settings.activeTemplate;
       const background = chooseBackground(req.body?.background);
-      const session = await store.create({ eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots, share: sharingOn, background });
+      // "Pay per session": a paid payment is used up for this session BEFORE it exists, so one payment can never open two sessions.
+      let payment = null;
+      const id = newSessionId();
+      if (payMode() === 'session') {
+        const used = payments.consume(req.body?.paymentId, { kind: 'session', sessionId: id });
+        if (!used) throw new HttpError(402, 'payment_required', 'Please pay to start your photos.');
+        payment = { id: used.id, method: used.method, amountCents: used.amountCents };
+      }
+      let session;
+      try {
+        session = await store.create({ id, eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots, share: sharingOn, background, payment });
+      } catch (err) {
+        if (payment) payments.flagRefund(payment.id, 'session_not_started');
+        throw err;
+      }
       if (session.share) await shareIndex?.set(session.share.token, { eventSlug: session.eventSlug, sessionId: session.id });
       logger.info(`session ${session.id} started (${template.id}, event ${settings.eventSlug}${background ? `, background ${background.id}` : ''})`);
       res.status(201).json({ ...sessionView(session), template: templateView(template) });
@@ -419,15 +480,56 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     wrap(async (req, res) => {
       if (!settings.printEnabled) throw new HttpError(409, 'printing_disabled', 'Printing is turned off');
       const session = await requireSession(req.params.id);
-      const copies = clampCopies(req.body?.copies, settings.copies);
+      let copies = clampCopies(req.body?.copies, settings.copies);
+
+      // "Pay per print": the guest pays first. A paid, unused payment for this very print is used up here, exactly once.
+      let paymentId = null;
+      if (payMode() === 'print' && !session.payment) {
+        let item = payments.get(req.body?.paymentId);
+        if (!item) {
+          item = await payments.request({ kind: 'print', sessionId: session.id, copies, amountCents: settings.pricePerPrintCents * copies, eventSlug: session.eventSlug });
+          if (item.status !== 'paid') return res.json({ payment: await guestPayment(item, { withQr: true }) });
+        }
+        const used = payments.consume(item.id, { kind: 'print', sessionId: session.id });
+        if (!used) throw new HttpError(402, 'payment_required', 'This print has not been paid for yet.');
+        paymentId = used.id;
+        copies = used.copies; // what was paid for is what is printed
+      }
+
       if (approvals && settings.approvalRequired) {
         // The attendant looks at the finished picture before it is printed, so make sure there is one.
         await ensureComposed(session);
-        const item = await approvals.request({ sessionId: session.id, copies, label: 'print', stationOnline: Boolean(hub?.online()) });
+        const item = await approvals.request({ sessionId: session.id, copies, label: 'print', stationOnline: Boolean(hub?.online()), paymentId });
         return res.json({ approval: approvalView(item) });
       }
-      const job = await printSession(session, copies, 'print');
+      const job = await printSession(session, copies, 'print', { paymentId });
       return res.json({ job, queueAhead: Math.max(0, queue.pending() - 1), estimatedSeconds: config.printer.estimatedSeconds });
+    }),
+  );
+
+  // ---- paying (guest kiosk)
+  app.post(
+    '/api/payments',
+    wrap(async (req, res) => {
+      if (payMode() !== 'session') throw new HttpError(409, 'payments_off', 'Payment is not needed right now');
+      const item = await payments.request({ kind: 'session', amountCents: settings.pricePerSessionCents, eventSlug: settings.eventSlug });
+      res.json({ payment: await guestPayment(item, { withQr: true }) });
+    }),
+  );
+
+  app.get('/api/payments/:id', (req, res, next) => {
+    const item = payments?.get(req.params.id);
+    if (!item) return next(new HttpError(404, 'no_payment', 'Payment not found'));
+    return guestPayment(item).then((payment) => res.json({ payment }), next);
+  });
+
+  /** The guest changed their mind: the payment page is closed so nobody can pay it afterwards. */
+  app.delete(
+    '/api/payments/:id',
+    wrap(async (req, res) => {
+      if (!payments?.get(req.params.id)) throw new HttpError(404, 'no_payment', 'Payment not found');
+      const item = await payments.cancel(req.params.id);
+      res.json({ ok: true, status: item ? item.status : payments.get(req.params.id).status });
     }),
   );
 
@@ -567,6 +669,21 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           uploads: uploadQueue ? uploadQueue.list().filter((i) => i.status !== 'done').slice(0, 12) : [],
         },
         email: { enabled: Boolean(emailQueue), from: emailQueue ? config.email.from : null, host: emailQueue ? config.email.smtp.host : null, queue: emailQueue ? emailQueue.list().slice(0, 12) : [], marketingOptIn: config.email.marketingOptIn.enabled },
+        payments: payments
+          ? {
+              enabled: true,
+              mode: settings.payMode,
+              provider: config.payments.provider,
+              stripeMode: payments.provider?.mode ?? null,
+              pricePerPrintCents: settings.pricePerPrintCents,
+              pricePerSessionCents: settings.pricePerSessionCents,
+              offline: config.payments.offline,
+              timeoutSeconds: config.payments.timeoutSeconds,
+              lastError: payments.lastProviderError,
+              totals: payments.totals(settings.eventSlug),
+              needs: payments.needsAttention().slice(0, 12),
+            }
+          : { enabled: false },
         station: { enabled: config.station.enabled, url: stationUrl, online: Boolean(hub?.online()), approvalRequired: Boolean(approvals) && settings.approvalRequired, timeoutSeconds: config.station.approval.timeoutSeconds, onTimeout: config.station.approval.onTimeout, waiting: approvals ? approvals.pending().length : 0 },
         greenScreen: greenOn ? { enabled: true, key: { ...settings.key }, defaults: { ...DEFAULT_KEY }, backdrop: settings.backdrop, backgrounds: backgrounds.list().map((b) => ({ ...b, thumbUrl: thumbUrl(b.id) })), folder: config.greenScreen.dir } : { enabled: false },
         queue: queue.list().slice(0, 8),
@@ -614,6 +731,34 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       res.json(suggestion);
     }),
   );
+
+  app.post(
+    '/api/operator/check-payments',
+    wrap(async (req, res) => {
+      if (!payments) throw new HttpError(409, 'payments_disabled', 'Payments are not turned on (payments.enabled in config.json)');
+      res.json(payments.provider ? await payments.provider.check() : { ok: true, detail: 'No payment service is set up: guests pay an attendant, who confirms it at the station or here.' });
+    }),
+  );
+
+  // Cash, Zelle, refunds: the operator panel can do everything the station can, for a booth with no second screen.
+  const paymentRoute = (name, fn) =>
+    app.post(
+      `/api/operator/payments/:id/${name}`,
+      wrap(async (req, res) => {
+        if (!payments) throw new HttpError(409, 'payments_disabled', 'Payments are not turned on');
+        res.json(await payOp(() => fn(req)));
+      }),
+    );
+  const missing = async (pending) => {
+    const value = await pending;
+    if (!value) throw new HttpError(409, 'not_pending', 'That payment is no longer waiting (it was already settled, or the guest left)');
+    return value;
+  };
+  paymentRoute('paid', async (req) => ({ payment: await missing(payments.markPaid(req.params.id, { note: PAY_NOTES.includes(req.body?.note) ? req.body.note : 'other', by: 'operator' })) }));
+  paymentRoute('waive', async (req) => ({ payment: await missing(payments.waive(req.params.id, 'operator')) }));
+  paymentRoute('refund', async (req) => ({ payment: await payments.refund(req.params.id, { by: 'operator' }) }));
+  paymentRoute('honour', async (req) => honourPayment(req.params.id));
+  paymentRoute('clear-flag', async (req) => ({ payment: await missing(payments.clearRefundFlag(req.params.id)) }));
 
   app.post(
     '/api/operator/check-email',
@@ -758,7 +903,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
   });
 
   // What the station (a second part of the booth) is allowed to do on a session. It is handed these rather than reaching in.
-  app.actions = { requireSession, ensureComposed, ensureShareBundle, shareState, printSession, queueEmail, isCapturing: () => capturing };
+  app.actions = { requireSession, ensureComposed, ensureShareBundle, shareState, printSession, queueEmail, isCapturing: () => capturing, payOp, honourPayment };
   app.approvals = approvals;
   return app;
 }

@@ -132,6 +132,26 @@ export const DEFAULTS = Object.freeze({
     },
     recentSessions: 30, // how many recent sessions the station shows
   },
+  // Guests paying for prints or sessions. Off by default: the host pays and nothing here is used.
+  payments: {
+    enabled: false,
+    // What guests pay for (also switchable live in the operator panel): "off" = free for guests (the host pays),
+    // "print" = each print order is paid at the Print button, "session" = one payment before the photos.
+    mode: 'off',
+    // "stripe": the guest scans a QR code and pays by card / Apple Pay / Google Pay on their own phone (card details never touch this PC).
+    // "attendant": no payment service; the guest pays a person (cash, Zelle...) who taps "Mark paid" at the station or operator panel.
+    provider: 'stripe',
+    currency: 'usd',
+    pricePerPrintCents: 500, // per copy: a guest who gets 2 copies pays twice this
+    pricePerSessionCents: 1000,
+    timeoutSeconds: 180, // how long a guest has to pay before the request is dropped
+    // When a card payment cannot even be started (no internet, the payment service is down):
+    // "attendant" = ask the guest to pay the attendant instead; "free" = let them through without paying.
+    offline: 'attendant',
+    // Stripe: set the key with BOOTH_STRIPE_KEY (a restricted key, see the README). returnUrl is the page the guest's phone
+    // shows after paying, e.g. https://example.com/booth/paid.html (a ready-made page is in webhost/).
+    stripe: { secretKey: '', returnUrl: '', timeoutMs: 8000 },
+  },
   email: {
     enabled: false,
     from: '', // e.g. Nexus Booth <booth@example.com> - must be the mailbox you log in with
@@ -240,6 +260,23 @@ export function validateConfig(cfg) {
   need(Number.isInteger(gs.previewWidth) && gs.previewWidth >= 240 && gs.previewWidth <= 1280, 'greenScreen.previewWidth must be an integer from 240 to 1280');
   for (const problem of validateKey(gs.key)) problems.push(`greenScreen.key: ${problem}`);
 
+  const pay = cfg.payments ?? {};
+  need(typeof pay.enabled === 'boolean', 'payments.enabled must be true or false');
+  need(['off', 'print', 'session'].includes(pay.mode), 'payments.mode must be "off", "print" or "session"');
+  need(['stripe', 'attendant'].includes(pay.provider), 'payments.provider must be "stripe" or "attendant"');
+  need(pay.currency === 'usd', 'payments.currency must be "usd" (the only currency supported)');
+  const cents = (v) => Number.isInteger(v) && v >= 50 && v <= 100_000;
+  need(cents(pay.pricePerPrintCents), 'payments.pricePerPrintCents must be a whole number of cents from 50 ($0.50) to 100000 ($1000)');
+  need(cents(pay.pricePerSessionCents), 'payments.pricePerSessionCents must be a whole number of cents from 50 ($0.50) to 100000 ($1000)');
+  need(typeof pay.timeoutSeconds === 'number' && pay.timeoutSeconds >= 5 && pay.timeoutSeconds <= 1800, 'payments.timeoutSeconds must be a number from 5 to 1800');
+  need(['attendant', 'free'].includes(pay.offline), 'payments.offline must be "attendant" or "free"');
+  need(pay.mode === 'off' || pay.enabled === true, 'payments.mode needs payments.enabled');
+  if (pay.enabled && pay.provider === 'stripe') {
+    need(typeof pay.stripe?.secretKey === 'string' && /^(sk|rk)_(test|live)_[A-Za-z0-9]{8,}$/.test(pay.stripe.secretKey), 'payments.stripe.secretKey must be a Stripe secret or restricted key (sk_... / rk_...): set BOOTH_STRIPE_KEY');
+    need(typeof pay.stripe?.returnUrl === 'string' && /^https:\/\/[^\s/]+\S*$/.test(pay.stripe.returnUrl), 'payments.stripe.returnUrl must be an https:// address (the page a guest sees after paying)');
+    need(typeof pay.stripe?.timeoutMs === 'number' && pay.stripe.timeoutMs >= 1000 && pay.stripe.timeoutMs <= 60_000, 'payments.stripe.timeoutMs must be a number from 1000 to 60000');
+  }
+
   const st = cfg.station ?? {};
   need(typeof st.enabled === 'boolean', 'station.enabled must be true or false');
   if (st.enabled) {
@@ -287,6 +324,16 @@ export function configWarnings(cfg) {
   if (cfg.greenScreen.enabled && cfg.camera.driver === 'digicamcontrol' && !cfg.camera.digicamcontrol.liveView) {
     warnings.push('greenScreen is on but camera.digicamcontrol.liveView is off: guests will not see themselves on the new background before the photo');
   }
+  if (cfg.payments.enabled) {
+    const key = cfg.payments.stripe.secretKey;
+    if (cfg.payments.provider === 'stripe') {
+      if (/_test_/.test(key)) warnings.push('Stripe is in TEST mode: payments are rehearsals and no real money moves');
+      if (/_live_/.test(key) && (cfg.camera.driver === 'mock' || cfg.printer.mode === 'dryrun')) warnings.push('a LIVE Stripe key is set while the camera is "mock" or printing is "dryrun": guests would really be charged');
+      if (key && !process.env.BOOTH_STRIPE_KEY) warnings.push('the Stripe key is stored in config.json; consider the BOOTH_STRIPE_KEY environment variable instead');
+    }
+    if (cfg.payments.mode !== 'off' && cfg.payments.offline === 'free') warnings.push('payments.offline is "free": if card payments cannot be reached, guests print without paying');
+    if (cfg.payments.mode !== 'off' && cfg.payments.provider === 'attendant' && !cfg.station.enabled) warnings.push('payments.provider is "attendant" without the station: payments can only be confirmed in the operator panel on this PC');
+  }
   if (cfg.station.enabled) {
     warnings.push(`the station is on: anyone on this network who knows the station PIN can open http://<this PC>:${cfg.lan.port}/station/ (plain http: use a private network, not a public Wi-Fi)`);
     if (cfg.station.pin === cfg.operatorPin) warnings.push('station.pin is the same as operatorPin: use a different PIN, the station is reachable from the network');
@@ -312,6 +359,7 @@ export function redactedConfig(cfg) {
   if (copy.sharing?.upload?.secret) copy.sharing.upload.secret = '***';
   if (copy.email?.smtp?.pass) copy.email.smtp.pass = '***';
   if (copy.station?.pin) copy.station.pin = '***';
+  if (copy.payments?.stripe?.secretKey) copy.payments.stripe.secretKey = '***';
   return copy;
 }
 
@@ -332,6 +380,7 @@ export function loadConfig({ file, rootDir = ROOT_DIR } = {}) {
   if (env.BOOTH_UPLOAD_SECRET) fromEnv.sharing = { upload: { secret: env.BOOTH_UPLOAD_SECRET } };
   if (env.BOOTH_SMTP_PASS) fromEnv.email = { smtp: { pass: env.BOOTH_SMTP_PASS } };
   if (env.BOOTH_STATION_PIN) fromEnv.station = { pin: env.BOOTH_STATION_PIN };
+  if (env.BOOTH_STRIPE_KEY) fromEnv.payments = { stripe: { secretKey: env.BOOTH_STRIPE_KEY } };
   const merged = validateConfig(deepMerge(deepMerge(DEFAULTS, user), fromEnv));
   const storageDir = path.resolve(rootDir, merged.storage.dir);
   const backgroundsDir = path.resolve(rootDir, merged.greenScreen.dir);

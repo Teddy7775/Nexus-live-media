@@ -37,6 +37,18 @@
       </div>
     </section>
 
+    <!-- 1c. Paying (card QR code, or "pay the attendant") -->
+    <section class="screen pay" data-screen="pay" aria-label="Payment" aria-live="polite">
+      <p class="big" id="payTitle">Scan to pay</p>
+      <p class="pay-amount" id="payAmount"></p>
+      <div class="pay-body">
+        <img id="payQr" alt="QR code: scan with your phone to pay" hidden>
+        <p class="sub" id="payMsg"></p>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="payBar"></i></div>
+      <button id="payCancel" class="btn secondary" type="button">Cancel</button>
+    </section>
+
     <!-- 2. Countdown with live preview -->
     <section class="screen countdown" data-screen="countdown" aria-label="Get ready">
       <div class="live" id="live"><img id="liveImg" alt=""></div>

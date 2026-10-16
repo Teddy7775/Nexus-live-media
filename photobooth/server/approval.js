@@ -29,8 +29,8 @@ export class ApprovalQueue {
   }
 
   view(item) {
-    const { id, sessionId, copies, status, reason, decidedBy, createdAt, expiresAt, decidedAt, job, queueAhead, estimatedSeconds, error } = item;
-    return { id, sessionId, copies, status, reason, decidedBy, createdAt, expiresAt, decidedAt, job, queueAhead, estimatedSeconds, error, timeoutMs: this.timeoutMs };
+    const { id, sessionId, paymentId, copies, status, reason, decidedBy, createdAt, expiresAt, decidedAt, job, queueAhead, estimatedSeconds, error } = item;
+    return { id, sessionId, paymentId, copies, status, reason, decidedBy, createdAt, expiresAt, decidedAt, job, queueAhead, estimatedSeconds, error, timeoutMs: this.timeoutMs };
   }
 
   get(id) {
@@ -60,13 +60,14 @@ export class ApprovalQueue {
    * A guest asks to print. If no station is connected there is nobody to ask, so it is settled at once the way a timeout would be
    * (the guest is told straight away rather than made to wait for nothing).
    */
-  async request({ sessionId, copies = 1, label = 'print', stationOnline = true }) {
+  async request({ sessionId, copies = 1, label = 'print', stationOnline = true, paymentId = null }) {
     const existing = [...this.#items.values()].find((i) => i.sessionId === sessionId && i.status === 'pending');
     if (existing) return this.view(existing); // a double tap must not create two requests
     const created = this.now();
     const item = {
       id: randomBytes(5).toString('hex'),
       sessionId,
+      paymentId,
       copies: this.clampCopies(copies),
       label,
       status: 'pending',

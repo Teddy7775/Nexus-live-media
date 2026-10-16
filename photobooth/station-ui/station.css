@@ -101,4 +101,12 @@ input[type='password'], input[type='email'] { font: inherit; color: inherit; bac
 .wall-close { position: absolute; top: 2vh; right: 2vh; opacity: 0.35; }
 .wall-close:hover, .wall-close:focus-visible { opacity: 1; }
 
+/* ---------- payments ---------- */
+.paycard { display: grid; gap: 10px; align-content: start; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.paycard .amount { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.paycard .why { color: var(--warn); font-weight: 600; }
+.paycard .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.paycard select { font: inherit; color: inherit; background: #0f1520; border: 1px solid var(--line); border-radius: 10px; padding: 10px; min-height: 44px; }
+#takings { margin: 0; font-weight: 600; }
+
 @media (prefers-reduced-motion: reduce) { .session.fresh, .wall img { animation: none; } }

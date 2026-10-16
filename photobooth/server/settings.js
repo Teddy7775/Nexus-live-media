@@ -23,7 +23,12 @@ export class RuntimeSettings {
       backdrop: config.greenScreen.defaultBackdrop,
       // Station: every print waits for an attendant's approval (only possible while the station is on).
       approvalRequired: config.station.enabled && config.station.approval.enabled,
+      // Payments: what guests pay for, and the prices (whole cents).
+      payMode: config.payments.enabled ? config.payments.mode : 'off',
+      pricePerPrintCents: config.payments.pricePerPrintCents,
+      pricePerSessionCents: config.payments.pricePerSessionCents,
     };
+    this.paymentsOn = config.payments.enabled;
     // A configured background that does not exist (typo, deleted file) must not strand every guest.
     if (backgrounds && this.values.backdrop !== 'guest' && !backgrounds.has(this.values.backdrop)) this.values.backdrop = 'guest';
   }
@@ -41,6 +46,10 @@ export class RuntimeSettings {
     if (typeof saved.eventSlug === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(saved.eventSlug)) this.values.eventSlug = saved.eventSlug;
     if (typeof saved.printEnabled === 'boolean') this.values.printEnabled = saved.printEnabled;
     if (Number.isInteger(saved.copies) && saved.copies >= 1 && saved.copies <= 10) this.values.copies = saved.copies;
+    if (this.paymentsOn && ['off', 'print', 'session'].includes(saved.payMode)) this.values.payMode = saved.payMode;
+    for (const key of ['pricePerPrintCents', 'pricePerSessionCents']) {
+      if (Number.isInteger(saved[key]) && saved[key] >= 50 && saved[key] <= 100_000) this.values[key] = saved[key];
+    }
     if (typeof saved.approvalRequired === 'boolean') this.values.approvalRequired = saved.approvalRequired && this.stationOn;
     if (saved.key && validateKey(saved.key).length === 0) this.values.key = { ...saved.key };
     if (saved.backdrop === 'guest' || (typeof saved.backdrop === 'string' && this.backgrounds?.has(saved.backdrop))) this.values.backdrop = saved.backdrop;
@@ -75,6 +84,18 @@ export class RuntimeSettings {
     return this.values.approvalRequired;
   }
 
+  get payMode() {
+    return this.values.payMode;
+  }
+
+  get pricePerPrintCents() {
+    return this.values.pricePerPrintCents;
+  }
+
+  get pricePerSessionCents() {
+    return this.values.pricePerSessionCents;
+  }
+
   get backdrop() {
     return this.values.backdrop;
   }
@@ -86,6 +107,13 @@ export class RuntimeSettings {
     if (patch.eventName !== undefined && (typeof patch.eventName !== 'string' || !patch.eventName.trim() || patch.eventName.length > 80)) problems.push('Event name must be 1-80 characters');
     if (patch.printEnabled !== undefined && typeof patch.printEnabled !== 'boolean') problems.push('printEnabled must be true or false');
     if (patch.copies !== undefined && !(Number.isInteger(patch.copies) && patch.copies >= 1 && patch.copies <= 10)) problems.push('Copies must be a whole number from 1 to 10');
+    if (patch.payMode !== undefined) {
+      if (!['off', 'print', 'session'].includes(patch.payMode)) problems.push('payMode must be "off", "print" or "session"');
+      else if (patch.payMode !== 'off' && !this.paymentsOn) problems.push('Payments are not turned on (payments.enabled in config.json)');
+    }
+    for (const key of ['pricePerPrintCents', 'pricePerSessionCents']) {
+      if (patch[key] !== undefined && !(Number.isInteger(patch[key]) && patch[key] >= 50 && patch[key] <= 100_000)) problems.push(`${key} must be a whole number of cents from 50 ($0.50) to 100000 ($1000)`);
+    }
     if (patch.approvalRequired !== undefined) {
       if (typeof patch.approvalRequired !== 'boolean') problems.push('approvalRequired must be true or false');
       else if (patch.approvalRequired && !this.stationOn) problems.push('The station is not turned on (station.enabled in config.json), so there is nobody to approve prints');
@@ -102,6 +130,7 @@ export class RuntimeSettings {
     if (patch.printEnabled !== undefined) this.values.printEnabled = patch.printEnabled;
     if (patch.copies !== undefined) this.values.copies = patch.copies;
     if (patch.approvalRequired !== undefined) this.values.approvalRequired = patch.approvalRequired;
+    for (const key of ['payMode', 'pricePerPrintCents', 'pricePerSessionCents']) if (patch[key] !== undefined) this.values[key] = patch[key];
     if (patch.key !== undefined) this.values.key = mergeKey(this.values.key, patch.key).key;
     if (patch.backdrop !== undefined) this.values.backdrop = patch.backdrop;
     if (patch.eventName !== undefined && patch.eventName.trim() !== this.values.eventName) {

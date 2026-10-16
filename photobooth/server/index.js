@@ -16,6 +16,8 @@ import { StationHub, createStationRouter } from './station.js';
 import { UploadQueue, WebHostUploader } from './uploader.js';
 import { EmailQueue, Mailer, appendOptIn } from './email.js';
 import { Backgrounds } from './greenscreen.js';
+import { StripeProvider } from './stripe.js';
+import { Payments } from './payments.js';
 
 const version = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8')).version;
 
@@ -31,6 +33,8 @@ export async function createBooth(
     uploader: injectedUploader,
     mailer: injectedMailer,
     shareBase: injectedShareBase,
+    paymentProvider: injectedPaymentProvider, // tests give a Stripe pointed at a fake
+    paymentPollMs = 2500, // how often open Stripe payments are looked at
     now: clock = Date.now, // injectable so tests can move time (station presence, login expiry)
   } = {},
 ) {
@@ -63,7 +67,14 @@ export async function createBooth(
   const printer = injectedPrinter ?? createPrinter(config, { logger });
   // The station hears about every change to a session or a print job through these two hooks.
   const hub = config.station.enabled ? new StationHub({ logger, now: clock }) : null;
-  const queue = new PrintQueue(printer, { logger, onChange: (job) => hub?.touch(job.sessionId) });
+  let payments = null; // set up below; a print that FAILS after the guest paid is flagged for a refund decision
+  const queue = new PrintQueue(printer, {
+    logger,
+    onChange: (job) => {
+      hub?.touch(job.sessionId);
+      if (job.status === 'error' && job.paymentId) payments?.flagRefund(job.paymentId, 'print_failed');
+    },
+  });
   const store = new SessionStore({ rootDir: config.storage.dir, onSave: (session) => hub?.touch(session.id) });
   const stationUrl = config.station.enabled ? `http://${lanAddress() ?? 'localhost'}:${config.lan.port}/station/` : null;
 
@@ -120,13 +131,33 @@ export async function createBooth(
     }).load();
   }
 
+  // Payments: what guests pay (Stripe QR code, or an attendant confirming cash/Zelle), kept on disk with a plain CSV ledger.
+  if (config.payments.enabled) {
+    const pay = config.payments;
+    const provider = injectedPaymentProvider !== undefined ? injectedPaymentProvider : pay.provider === 'stripe' ? new StripeProvider({ secretKey: pay.stripe.secretKey, returnUrl: pay.stripe.returnUrl, timeoutMs: pay.stripe.timeoutMs }) : null;
+    payments = await new Payments({
+      file: path.join(queuesDir, 'payments.json'),
+      provider,
+      timeoutMs: pay.timeoutSeconds * 1000,
+      offline: pay.offline,
+      pollMs: paymentPollMs,
+      ledgerFile: (item) => path.join(store.eventDir(item.eventSlug), 'payments.csv'),
+      describe: (item) => `Photo ${item.kind === 'session' ? 'session' : 'prints'} - ${settings.eventName}`.slice(0, 100),
+      logger,
+      onChange: (view) => {
+        hub?.publish('payment', view);
+        if (view.sessionId) hub?.touch(view.sessionId);
+      },
+    }).load();
+  }
+
   const publicDir = path.join(ROOT_DIR, 'public');
-  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, stationUrl });
+  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, stationUrl, payments });
   const station = hub
-    ? createStationRouter({ config, hub, approvals: app.approvals, actions: app.actions, store, queue, camera, printer, settings, emailQueue, uploadQueue, publicDir, uiDir: path.join(ROOT_DIR, 'station-ui'), logger, now: clock })
+    ? createStationRouter({ config, hub, approvals: app.approvals, payments, actions: app.actions, store, queue, camera, printer, settings, emailQueue, uploadQueue, publicDir, uiDir: path.join(ROOT_DIR, 'station-ui'), logger, now: clock })
     : null;
   const lanApp = createLanApp({ shareIndex, store, logger, station });
-  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, approvals: app.approvals, stationUrl };
+  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, approvals: app.approvals, payments, stationUrl };
 }
 
 async function main() {
@@ -172,6 +203,7 @@ async function main() {
     lanServer?.close();
     booth.hub?.closeAll();
     booth.approvals?.stop();
+    booth.payments?.stop();
     booth.uploadQueue?.stop();
     booth.emailQueue?.stop();
     await booth.camera.close().catch(() => {});

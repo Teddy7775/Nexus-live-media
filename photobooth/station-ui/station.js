@@ -12,6 +12,7 @@ const st = {
   approval: { required: false, timeoutSeconds: 120, onTimeout: 'cancel', maxCopies: 4 },
   email: { enabled: false, marketingOptIn: { enabled: false } },
   printEnabled: true,
+  payments: { enabled: false, needs: new Map(), totals: null, lastError: null, notes: [] },
   skew: 0, // server clock minus this device's clock, so the "waiting" timers are right even if the clocks differ
   source: null,
   copies: new Map(), // approval id -> chosen copies
@@ -110,6 +111,7 @@ function start() {
   });
   source.addEventListener('session', (e) => upsertSession(JSON.parse(e.data)));
   source.addEventListener('approval', (e) => onApproval(JSON.parse(e.data)));
+  source.addEventListener('payment', () => refreshPayments());
   source.onerror = async () => {
     setConn(false);
     try {
@@ -131,6 +133,7 @@ function applySnapshot(data) {
   st.approval = data.approval;
   st.email = data.email;
   st.printEnabled = data.printEnabled;
+  applyPayments(data.payments);
   $('#eventName').textContent = data.event.name;
   st.sessions = new Map(data.sessions.map((s) => [s.id, s]));
   st.approvals = new Map(data.approvals.map((a) => [a.id, a]));
@@ -162,6 +165,7 @@ function onApproval(item) {
 
 function render() {
   renderApprovals();
+  renderPayments();
   renderSessions();
   const waiting = st.approvals.size;
   document.title = waiting ? `(${waiting}) Booth station` : 'Booth station';
@@ -257,6 +261,78 @@ $('#approveAll').addEventListener('click', async (e) => {
   }
 });
 
+// ------------------------------------------------------------------ payments
+
+const usd = (cents) => `$${(cents / 100).toFixed(2)}`;
+const REFUND_REASON = {
+  print_rejected: 'Paid, but you did not approve the print.',
+  print_expired: 'Paid, but nobody approved the print in time.',
+  print_cancelled: 'Paid, but the guest left before the print was approved.',
+  print_error: 'Paid, but the print could not be started.',
+  print_failed: 'Paid, but the print failed at the printer.',
+  paid_after_timeout: 'Paid on their phone AFTER the payment screen had timed out: they did not get what they paid for.',
+  session_not_started: 'Paid, but their session could not start.',
+};
+const NOTE_LABEL = { cash: 'Cash', zelle: 'Zelle', venmo: 'Venmo', cashapp: 'Cash App', 'card-reader': 'Card reader', other: 'Other' };
+
+function applyPayments(p) {
+  st.payments = { enabled: Boolean(p?.enabled), needs: new Map((p?.needs ?? []).map((x) => [x.id, x])), totals: p?.totals ?? null, lastError: p?.lastError ?? null, notes: p?.notes ?? [], mode: p?.mode ?? 'off', provider: p?.provider ?? null };
+}
+
+async function refreshPayments() {
+  try {
+    applyPayments(await api('GET', '/station/api/payments'));
+    renderPayments();
+    renderSessions();
+  } catch {
+    /* the next event or reconnect fixes it */
+  }
+}
+
+function payCard(p) {
+  const what = p.kind === 'session' ? 'Photo session' : `Print x${p.copies}`;
+  const buttons = [];
+  let why = null;
+  let select = null;
+  if (p.status === 'pending') {
+    why = p.reason === 'offline' ? 'Card payments are not available right now: this guest was asked to pay you.' : 'This guest was asked to pay you.';
+    select = h('select', { 'aria-label': 'How they paid' }, ...(st.payments.notes.length ? st.payments.notes : Object.keys(NOTE_LABEL)).map((n) => h('option', { value: n }, NOTE_LABEL[n] ?? n)));
+    buttons.push(h('button', { class: 'btn ok', type: 'button', onclick: (e) => payAction(p.id, 'paid', e.currentTarget, { note: select.value }) }, 'Mark paid'));
+    buttons.push(h('button', { class: 'btn', type: 'button', onclick: (e) => payAction(p.id, 'waive', e.currentTarget) }, 'Waive'));
+  } else {
+    why = REFUND_REASON[p.refundDue] ?? 'Paid, but not used yet.';
+    if (p.refundDue && p.kind === 'print' && p.sessionId) buttons.push(h('button', { class: 'btn ok', type: 'button', onclick: (e) => payAction(p.id, 'honour', e.currentTarget) }, 'Print it anyway'));
+    buttons.push(h('button', { class: 'btn bad', type: 'button', onclick: (e) => payAction(p.id, 'refund', e.currentTarget) }, p.method === 'card' ? `Refund ${usd(p.amountCents)} to their card` : 'Mark refunded (money given back)'));
+    if (p.refundDue) buttons.push(h('button', { class: 'btn', type: 'button', onclick: (e) => payAction(p.id, 'clear-flag', e.currentTarget) }, 'Dismiss'));
+  }
+  return h('article', { class: 'paycard', 'data-id': p.id }, h('div', { class: 'amount' }, usd(p.amountCents)), h('div', {}, `${what}${p.method ? ` · paid by ${p.method === 'card' ? 'card' : p.note ? NOTE_LABEL[p.note] ?? p.note : p.method}` : ''}`), h('div', { class: 'why' }, why), h('div', { class: 'row' }, select, ...buttons));
+}
+
+function renderPayments() {
+  const list = [...st.payments.needs.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  $('#payBox').hidden = list.length === 0;
+  $('#payCards').replaceChildren(...list.map(payCard));
+  const t = st.payments.totals;
+  const line = $('#takings');
+  line.hidden = !st.payments.enabled;
+  if (st.payments.enabled && t) {
+    const methods = Object.entries(t.byMethod).map(([m, c]) => `${m === 'card' ? 'card' : 'cash/Zelle'} ${usd(c)}`);
+    line.textContent = `Takings this event: ${usd(t.net)}${methods.length ? ` (${methods.join(' · ')})` : ''}${t.refunded ? ` · refunded ${usd(t.refunded)}` : ''}${t.waived ? ` · ${t.waived} waived` : ''}${st.payments.lastError ? ' · card payments are currently unreachable' : ''}`;
+  }
+}
+
+async function payAction(id, action, button, body = {}) {
+  button.disabled = true;
+  try {
+    await api('POST', `/station/api/payments/${id}/${action}`, body);
+    say($('#payMsg'), action === 'refund' ? 'Refunded.' : action === 'honour' ? 'Printing it now.' : '', 'ok');
+  } catch (err) {
+    say($('#payMsg'), err.message, 'bad');
+  } finally {
+    await refreshPayments();
+  }
+}
+
 // ------------------------------------------------------------------ sessions
 
 const PRINT_LABEL = {
@@ -295,6 +371,7 @@ function sessionCard(s) {
         { class: 'badges' },
         h('span', { class: `pill ${statusKind}` }, statusText),
         printLabel ? h('span', { class: `pill ${printLabel[1]}`, title: s.print.reason ?? s.print.error ?? '' }, printLabel[0]) : null,
+        s.payment ? h('span', { class: `pill ${s.payment.refundDue ? 'bad' : s.payment.status === 'refunded' ? 'off' : s.payment.status === 'paid' ? (s.payment.method === 'waived' ? 'off' : 'ok') : 'warn'}` }, s.payment.refundDue ? 'Refund due' : s.payment.status === 'refunded' ? 'Refunded' : s.payment.status === 'paid' ? (s.payment.method === 'waived' ? 'Waived' : `Paid ${usd(s.payment.amountCents)}`) : 'Awaiting payment') : null,
         s.share ? h('span', { class: `pill ${s.share.ready ? 'ok' : s.share.state === 'failed' ? 'bad' : 'warn'}` }, s.share.ready ? 'Link ready' : s.share.state === 'failed' ? 'Link failed' : 'Link preparing') : null,
       ),
       done

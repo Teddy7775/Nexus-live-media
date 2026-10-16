@@ -81,6 +81,7 @@ function renderStatus(s) {
   renderMail(s.email);
   renderGreenScreen(s.greenScreen);
   renderStation(s.station);
+  renderPayments(s.payments);
 
   templates = s.templates;
   const select = $('#template');
@@ -158,6 +159,108 @@ function renderMail(m) {
       : [h('li', {}, m.enabled ? 'Nothing waiting' : '-')]),
   );
 }
+
+// -------------------------------------------------------------------- payments
+
+const usd = (cents) => `$${(cents / 100).toFixed(2)}`;
+const REFUND_REASON = {
+  print_rejected: 'paid, print not approved',
+  print_expired: 'paid, nobody approved in time',
+  print_cancelled: 'paid, guest left',
+  print_error: 'paid, print could not start',
+  print_failed: 'paid, print failed',
+  paid_after_timeout: 'paid AFTER the screen timed out',
+  session_not_started: 'paid, session could not start',
+};
+
+function renderPayments(p) {
+  const form = $('#payForm');
+  if (!p.enabled) {
+    dot($('#payDot'), '');
+    $('#payText').textContent = 'Payments are off';
+    $('#payDetail').textContent = 'The host pays; guests are never charged. To let guests pay, turn on payments.enabled in config.json (see the README: Stripe, or an attendant taking cash/Zelle).';
+    form.hidden = true;
+    $('#payTotals').textContent = '';
+    $('#payNeeds').replaceChildren();
+    return;
+  }
+  const label = { off: 'The host pays (guests are not charged)', print: 'Guests pay per print', session: 'Guests pay per session' }[p.mode];
+  dot($('#payDot'), p.lastError ? 'warn' : 'ok');
+  $('#payText').textContent = label;
+  const provider = p.provider === 'stripe' ? `Stripe (${p.stripeMode === 'live' ? 'LIVE - real money' : 'TEST - no real money'})` : 'attendant confirms (cash, Zelle...)';
+  $('#payDetail').textContent = `Taking payment by: ${provider}. If cards cannot be reached: ${p.offline === 'free' ? 'guests go through free' : 'guests are asked to pay the attendant'}.${p.lastError ? ` Last problem: ${p.lastError.message}` : ''}`;
+  form.hidden = false;
+  if (!form.contains(document.activeElement)) {
+    $('#payMode').value = p.mode;
+    $('#pricePrint').value = (p.pricePerPrintCents / 100).toFixed(2);
+    $('#priceSession').value = (p.pricePerSessionCents / 100).toFixed(2);
+  }
+  $('#payCheck').hidden = false;
+  const t = p.totals;
+  const methods = Object.entries(t.byMethod).map(([m, c]) => `${m === 'card' ? 'card' : 'cash/Zelle'} ${usd(c)}`);
+  $('#payTotals').textContent = `This event: ${usd(t.net)} taken${methods.length ? ` (${methods.join(', ')})` : ''}${t.refunded ? `, ${usd(t.refunded)} refunded` : ''}${t.waived ? `, ${t.waived} waived` : ''}. The full record is payments.csv in the event folder. Sales tax is not added: include it in your prices.`;
+  $('#payNeeds').replaceChildren(
+    ...(p.needs.length
+      ? p.needs.map((n) =>
+          h(
+            'li',
+            {},
+            `${usd(n.amountCents)} - ${n.status === 'pending' ? 'waiting for the attendant to collect it' : (REFUND_REASON[n.refundDue] ?? 'paid, not used')}`,
+            h(
+              'div',
+              { class: 'actions' },
+              n.status === 'pending' ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'paid', { note: 'cash' }) }, 'Mark paid (cash)') : null,
+              n.status === 'pending' ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'paid', { note: 'zelle' }) }, 'Mark paid (Zelle)') : null,
+              n.status === 'pending' ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'waive') }, 'Waive') : null,
+              n.status === 'paid' && n.refundDue && n.kind === 'print' ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'honour') }, 'Print it anyway') : null,
+              n.status === 'paid' ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'refund') }, n.method === 'card' ? 'Refund to card' : 'Mark refunded') : null,
+              n.status === 'paid' && n.refundDue ? h('button', { class: 'btn', type: 'button', onclick: () => payAction(n.id, 'clear-flag') }, 'Dismiss') : null,
+            ),
+          ),
+        )
+      : [h('li', {}, 'Nothing')]),
+  );
+}
+
+async function payAction(id, action, body) {
+  try {
+    await api('POST', `/api/operator/payments/${id}/${action}`, body ?? {});
+    say($('#payMsg'), '');
+  } catch (err) {
+    say($('#payMsg'), err.message, 'error');
+  }
+  await refreshStatus();
+}
+
+$('#payForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  say($('#payMsg'), 'Saving…');
+  try {
+    await api('POST', '/api/operator/settings', {
+      payMode: $('#payMode').value,
+      pricePerPrintCents: Math.round(Number($('#pricePrint').value) * 100),
+      pricePerSessionCents: Math.round(Number($('#priceSession').value) * 100),
+    });
+    say($('#payMsg'), 'Saved. The next guest sees the new prices.', 'ok');
+    await refreshStatus();
+  } catch (err) {
+    say($('#payMsg'), err.message, 'error');
+  }
+});
+
+$('#payCheck').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  say($('#payMsg'), 'Contacting the payment service…');
+  try {
+    const r = await api('POST', '/api/operator/check-payments');
+    say($('#payMsg'), r.detail, r.ok ? 'ok' : 'error');
+  } catch (err) {
+    say($('#payMsg'), err.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
 
 // --------------------------------------------------------------------- station
 

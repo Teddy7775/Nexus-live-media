@@ -81,6 +81,31 @@
           <ul id="mails" class="plain small"></ul>
         </section>
 
+        <section class="card" aria-labelledby="h-pay" id="payCard">
+          <h2 id="h-pay">Payments</h2>
+          <p class="status"><span id="payDot" class="dot"></span><span id="payText">…</span></p>
+          <p class="muted" id="payDetail"></p>
+          <form id="payForm" hidden>
+            <label class="field"><span>Who pays?</span>
+              <select id="payMode">
+                <option value="off">The host pays - free for guests</option>
+                <option value="print">Guests pay for each print</option>
+                <option value="session">Guests pay once, before the photos</option>
+              </select>
+            </label>
+            <label class="field"><span>Price per print copy (US dollars)</span><input id="pricePrint" type="number" min="0.5" max="1000" step="0.01" required></label>
+            <label class="field"><span>Price per session (US dollars)</span><input id="priceSession" type="number" min="0.5" max="1000" step="0.01" required></label>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save</button>
+              <button id="payCheck" class="btn" type="button">Check the payment service</button>
+            </div>
+          </form>
+          <p id="payMsg" class="msg" role="status" hidden></p>
+          <p class="muted" id="payTotals"></p>
+          <h3>Needs you</h3>
+          <ul id="payNeeds" class="plain small"></ul>
+        </section>
+
         <section class="card" aria-labelledby="h-st" id="stCard">
           <h2 id="h-st">Attendant station</h2>
           <p class="status"><span id="stDot" class="dot"></span><span id="stText">…</span></p>

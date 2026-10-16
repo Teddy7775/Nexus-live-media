@@ -5,6 +5,7 @@ import express from 'express';
 import { HttpError } from './http-error.js';
 import { SESSION_ID } from './store.js';
 import { qrSvg } from './qr.js';
+import { PAY_NOTES } from './payments.js';
 
 /**
  * The attendant's station: a second screen on the same network that shows sessions live, approves prints before they
@@ -114,7 +115,7 @@ function readCookie(req, name) {
   return null;
 }
 
-export function createStationRouter({ config, hub, approvals, actions, store, queue, camera, printer, settings, emailQueue, uploadQueue, publicDir, uiDir, logger, secret = crypto.randomBytes(32), now = Date.now }) {
+export function createStationRouter({ config, hub, approvals, payments = null, actions, store, queue, camera, printer, settings, emailQueue, uploadQueue, publicDir, uiDir, logger, secret = crypto.randomBytes(32), now = Date.now }) {
   const router = express.Router();
   const pinHash = sha(config.station.pin);
   const sign = (expires) => crypto.createHmac('sha256', secret).update(String(expires)).digest('base64url');
@@ -149,6 +150,25 @@ export function createStationRouter({ config, hub, approvals, actions, store, qu
     return { state: 'none' };
   }
 
+  function paymentSummary(session) {
+    const p = payments?.list().find((x) => x.sessionId === session.id);
+    return p ? { id: p.id, kind: p.kind, status: p.status, method: p.method, amountCents: p.amountCents, refundDue: p.refundDue, paidLate: p.paidLate } : null;
+  }
+
+  function paymentsSnapshot() {
+    if (!payments) return { enabled: false };
+    return {
+      enabled: true,
+      mode: settings.payMode,
+      provider: config.payments.provider,
+      needs: payments.needsAttention(),
+      recent: payments.list().slice(0, 25),
+      totals: payments.totals(settings.eventSlug),
+      lastError: payments.lastProviderError,
+      notes: PAY_NOTES,
+    };
+  }
+
   function summarize(session) {
     const share = actions.shareState(session);
     const shots = [...session.shots].sort((a, b) => a.index - b.index);
@@ -164,6 +184,7 @@ export function createStationRouter({ config, hub, approvals, actions, store, qu
       finalUrl: session.final ? `${media(session, session.final.preview)}?v=${session.final.version}` : null,
       gifUrl: session.gif ? `${media(session, session.gif.file)}?v=${session.gif.version}` : null,
       print: printState(session),
+      payment: paymentSummary(session),
       share: share.enabled ? { ready: share.ready, state: share.state, url: share.url } : null,
     };
   }
@@ -189,6 +210,7 @@ export function createStationRouter({ config, hub, approvals, actions, store, qu
       approvals: pending,
       approval: { required: settings.approvalRequired, timeoutSeconds: config.station.approval.timeoutSeconds, onTimeout: config.station.approval.onTimeout, maxCopies: config.station.approval.maxCopies },
       printEnabled: settings.printEnabled,
+      payments: paymentsSnapshot(),
       email: { enabled: Boolean(emailQueue), marketingOptIn: config.email.marketingOptIn },
       serverTime: new Date(now()).toISOString(),
     };
@@ -293,6 +315,9 @@ export function createStationRouter({ config, hub, approvals, actions, store, qu
     }),
   );
 
+  /** Just the money part (cheap), for when a payment changes. */
+  router.get('/api/payments', (req, res) => res.json(paymentsSnapshot()));
+
   router.get('/api/events', (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.write('retry: 3000\n\n');
@@ -366,6 +391,31 @@ export function createStationRouter({ config, hub, approvals, actions, store, qu
       res.json({ approval: item });
     }),
   );
+
+  // ------------------------------------------------------------------ payments
+
+  const payRoute = (name, fn) =>
+    router.post(
+      `/api/payments/:id/${name}`,
+      wrap(async (req, res) => {
+        if (!payments) throw new HttpError(409, 'payments_disabled', 'Payments are not turned on');
+        res.json(await actions.payOp(() => fn(req)));
+      }),
+    );
+  const settled = async (pending) => {
+    const value = await pending;
+    if (!value) throw new HttpError(409, 'not_pending', 'That payment is no longer waiting (it was already settled, or the guest left)');
+    return value;
+  };
+  payRoute('paid', async (req) => ({ payment: await settled(payments.markPaid(req.params.id, { note: PAY_NOTES.includes(req.body?.note) ? req.body.note : 'other', by: 'station' })) }));
+  payRoute('waive', async (req) => ({ payment: await settled(payments.waive(req.params.id, 'station')) }));
+  payRoute('refund', async (req) => {
+    const payment = await payments.refund(req.params.id, { by: 'station' });
+    logger.info(`station: refunded payment ${payment.id} ($${(payment.amountCents / 100).toFixed(2)})`);
+    return { payment };
+  });
+  payRoute('honour', async (req) => actions.honourPayment(req.params.id));
+  payRoute('clear-flag', async (req) => ({ payment: await settled(payments.clearRefundFlag(req.params.id)) }));
 
   // ------------------------------------------------------------------ share / email / reprint
 

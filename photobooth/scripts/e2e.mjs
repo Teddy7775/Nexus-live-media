@@ -13,6 +13,8 @@ import net from 'node:net';
 import jsQR from 'jsqr';
 import sharp from 'sharp';
 import { startFakeSmtp } from '../test/fakeSmtp.js';
+import { startFakeStripe } from '../test/fakeStripe.js';
+import { StripeProvider } from '../server/stripe.js';
 import { chromium } from 'playwright-core';
 import { DEFAULTS, ROOT_DIR, deepMerge, validateConfig } from '../server/config.js';
 import { createBooth } from '../server/index.js';
@@ -548,6 +550,187 @@ try {
     server4.close();
     await smtp4.close();
     fs.rmSync(work4, { recursive: true, force: true });
+  }
+
+  // ------------------------------------------------------------------------ payments scenario
+  log('payments: pay by QR code, pay the attendant when offline, cancel, and a refund after a refused print');
+  const work5 = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-e2e-pay-'));
+  const lanPort5 = await freePort();
+  const fakeStripe = await startFakeStripe();
+  const config5 = validateConfig(
+    deepMerge(DEFAULTS, {
+      storage: { dir: path.join(work5, 'events') },
+      event: { name: 'Sarah & James Wedding' },
+      ui: { countdownSeconds: 1, shotPreviewSeconds: 1, reviewSeconds: 60, doneSeconds: 60, errorSeconds: 60 },
+      camera: { mock: { captureDelayMs: 100 } },
+      printer: { dryRunDelayMs: 1200, estimatedSeconds: 2 },
+      station: { enabled: true, pin: STATION_PIN, approval: { enabled: true, timeoutSeconds: 90 } },
+      payments: { enabled: true, mode: 'print', provider: 'stripe', timeoutSeconds: 60, stripe: { secretKey: fakeStripe.key, returnUrl: 'https://example.com/booth/paid.html' } },
+    }),
+  );
+  const stripe5 = new StripeProvider({ secretKey: fakeStripe.key, returnUrl: 'https://example.com/booth/paid.html', baseUrl: fakeStripe.base, timeoutMs: 1500 });
+  const booth5 = await createBooth(config5, { logger: createLogger({ quiet: true }), settingsFile: path.join(work5, 'runtime-settings.json'), paymentProvider: stripe5, paymentPollMs: 300 });
+  const server5 = await new Promise((resolve) => { const s = booth5.app.listen(0, '127.0.0.1', () => resolve(s)); });
+  const lanServer5 = await new Promise((resolve) => { const s = booth5.lanApp.listen(lanPort5, '127.0.0.1', () => resolve(s)); });
+  const base5 = `http://127.0.0.1:${server5.address().port}`;
+  const stationCtx5 = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+  const decodeQr = async (locator) => {
+    const shot = await sharp(await locator.screenshot()).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    return jsQR(new Uint8ClampedArray(shot.data), shot.info.width, shot.info.height)?.data;
+  };
+  try {
+    const desk = await stationCtx5.newPage();
+    desk.on('pageerror', (err) => problems.push(`page error (station/pay): ${err.message}`));
+    desk.on('console', (msg) => {
+      if (msg.type() === 'error' && !EXPECTED.test(msg.text())) problems.push(`console error (station/pay): ${msg.text()}`);
+    });
+    await desk.goto(`http://127.0.0.1:${lanPort5}/station/`);
+    await desk.fill('#pin', STATION_PIN);
+    await desk.click('#loginForm button[type=submit]');
+    await desk.waitForFunction(() => document.querySelector('#conn').textContent === 'Live');
+
+    const toReview = async () => {
+      await page.click('#startBtn');
+      await onScreen('review', 60000);
+    };
+    const approveAtDesk = async () => {
+      await desk.waitForSelector('.approval .btn.ok');
+      await desk.click('.approval .btn.ok');
+    };
+
+    // 1. a card payment by QR code
+    await page.goto(base5);
+    await page.waitForSelector('body[data-ready="true"]');
+    assert.match(await page.textContent('#eventInfo'), /prints \$5\.00 each/);
+    await toReview();
+    assert.match(await page.textContent('#printBtn'), /Print my photos · \$5\.00/);
+    await page.click('#printBtn');
+    await onScreen('pay');
+    await page.waitForSelector('#payQr:not([hidden])');
+    assert.equal(await page.textContent('#payAmount'), '$5.00');
+    assert.equal(await page.textContent('#payTitle'), 'Scan to pay');
+    const pageToPay = fakeStripe.open()[0];
+    assert.equal(await decodeQr(page.locator('#payQr')), pageToPay.url, 'the QR on the kiosk is exactly the payment page');
+    assert.equal(booth5.queue.list().length, 0, 'nothing prints before the payment');
+    await snap('pay-qr', 500);
+    fakeStripe.pay(pageToPay.id); // the guest pays on their phone
+    await onScreen('printing', 20000);
+    await approveAtDesk();
+    await onScreen('done', 30000);
+    assert.equal(booth5.queue.list().length, 1);
+    await booth5.payments.flush();
+    const ledgerFile = path.join(config5.storage.dir, booth5.settings.eventSlug, 'payments.csv');
+    assert.match(fs.readFileSync(ledgerFile, 'utf8'), /"paid","[0-9a-f]+","\d{8}-\d{6}-[0-9a-f]{4}","print","5\.00","usd","card"/);
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    // 2. no internet: the guest is asked to pay the attendant, who confirms it at the station
+    fakeStripe.state.down = true;
+    await toReview();
+    await page.click('#printBtn');
+    await onScreen('pay');
+    assert.equal(await page.textContent('#payTitle'), 'Please pay the attendant');
+    assert.match(await page.textContent('#payMsg'), /Card payments are not available right now/);
+    assert.equal(await page.locator('#payQr').isVisible(), false, 'no QR code when cards are unreachable');
+    await snap('pay-attendant', 500);
+    await desk.waitForSelector('.paycard');
+    assert.match(await desk.textContent('.paycard'), /\$5\.00/);
+    assert.match(await desk.textContent('.paycard'), /pay you/);
+    await desk.locator('.paycard select').selectOption('zelle');
+    await snapPage(desk, 'station-collect-payment', 300);
+    await desk.click('.paycard .btn.ok');
+    await onScreen('printing', 20000);
+    await approveAtDesk();
+    await onScreen('done', 30000);
+    assert.equal(booth5.queue.list().length, 2);
+    await booth5.payments.flush();
+    assert.match(fs.readFileSync(ledgerFile, 'utf8'), /"attendant","zelle"/);
+    await page.click('#doneBtn');
+    await onScreen('attract');
+    fakeStripe.state.down = false;
+
+    // 3. the guest cancels: nothing is charged and nobody can pay the closed page
+    await toReview();
+    await page.click('#printBtn');
+    await onScreen('pay');
+    await page.waitForSelector('#payQr:not([hidden])');
+    const abandoned = fakeStripe.open()[0];
+    await page.click('#payCancel');
+    await onScreen('done', 20000);
+    assert.match(await page.textContent('#doneMsg'), /You cancelled, so nothing was charged/);
+    assert.equal(fakeStripe.state.sessions.get(abandoned.id).status, 'expired', 'the payment page was closed at Stripe');
+    assert.equal(booth5.queue.list().length, 2, 'nothing printed');
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    // 4. paid, but the attendant does not approve: the money is flagged and refunded from the station
+    await toReview();
+    await page.click('#printBtn');
+    await onScreen('pay');
+    await page.waitForSelector('#payQr:not([hidden])');
+    fakeStripe.pay(fakeStripe.open()[0].id);
+    await onScreen('printing', 20000);
+    await desk.waitForSelector('.approval .btn.bad');
+    await desk.click('.approval .btn.bad');
+    await onScreen('done', 20000);
+    await desk.waitForSelector('.paycard .why');
+    assert.match(await desk.textContent('.paycard .why'), /Paid, but you did not approve the print/);
+    await snapPage(desk, 'station-refund-due', 300);
+    await desk.click('.paycard .btn.bad');
+    await desk.waitForSelector('.paycard', { state: 'detached' });
+    assert.equal(fakeStripe.calls('POST', '/v1/refunds').length, 1, 'the refund went through Stripe');
+    await desk.waitForFunction(() => /refunded \$5\.00/.test(document.querySelector('#takings').textContent));
+    assert.match(await desk.textContent('#takings'), /Takings this event: \$10\.00/, 'the refunded payment is not counted as takings');
+    await snapPage(desk, 'station-takings', 300);
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    // 5. the operator panel: choose who pays, and the prices
+    await page.goto(`${base5}/operator.html`);
+    await page.fill('#pin', config5.operatorPin);
+    await page.click('#pinForm button[type=submit]');
+    await page.waitForSelector('#dash:not([hidden])');
+    await page.waitForFunction(() => /Guests pay per print/.test(document.querySelector('#payText').textContent));
+    assert.match(await page.textContent('#payDetail'), /Stripe \(TEST - no real money\)/);
+    await page.selectOption('#payMode', 'session');
+    await page.fill('#priceSession', '12.50');
+    await page.click('#payForm button[type=submit]');
+    await page.waitForFunction(() => /Saved/.test(document.querySelector('#payMsg').textContent));
+    assert.equal(booth5.settings.payMode, 'session');
+    assert.equal(booth5.settings.pricePerSessionCents, 1250);
+    await page.click('#payCheck');
+    await page.waitForFunction(() => /the key works \(test mode\)/.test(document.querySelector('#payMsg').textContent));
+    await page.locator('#payCard').scrollIntoViewIfNeeded();
+    step += 1;
+    await page.locator('#payCard').screenshot({ path: path.join(shotsDir, `${String(step).padStart(2, '0')}-operator-payments.jpg`), type: 'jpeg', quality: 82 });
+    console.log(`  screenshot docs/screens/${String(step).padStart(2, '0')}-operator-payments.jpg`);
+
+    // 6. pay per session: the payment comes BEFORE the photos
+    await page.goto(base5);
+    await page.waitForSelector('body[data-ready="true"]');
+    assert.match(await page.textContent('#eventInfo'), /\$12\.50 per session/);
+    await page.click('#startBtn');
+    await onScreen('pay');
+    assert.equal(await page.textContent('#payAmount'), '$12.50');
+    const sessionPage = fakeStripe.open()[0];
+    assert.equal(await decodeQr(page.locator('#payQr')), sessionPage.url);
+    fakeStripe.pay(sessionPage.id);
+    await onScreen('countdown', 20000);
+    await onScreen('review', 60000);
+    assert.doesNotMatch(await page.textContent('#printBtn'), /\$/, 'a paid session does not pay again to print');
+    const sessions5 = (await (await fetch(`${base5}/api/operator/sessions`, { headers: { 'x-operator-pin': config5.operatorPin } })).json()).sessions;
+    assert.equal(sessions5.length, 5);
+  } finally {
+    await stationCtx5.close();
+    booth5.approvals?.stop();
+    booth5.payments?.stop();
+    booth5.hub?.closeAll();
+    lanServer5.closeAllConnections();
+    lanServer5.close();
+    server5.closeAllConnections();
+    server5.close();
+    await fakeStripe.close();
+    fs.rmSync(work5, { recursive: true, force: true });
   }
 
   assert.deepEqual(problems, [], `browser reported problems:\n${problems.join('\n')}\nfailed requests:\n${failedRequests.join('\n')}`);

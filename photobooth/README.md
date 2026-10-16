@@ -6,7 +6,7 @@ A photobooth you run yourself: a touch-screen kiosk for guests, a DSLR for the p
 guest taps  ->  countdown + live preview  ->  3 photos  ->  review / retake  ->  print  ->  thank you
 ```
 
-On top of that it can: put a **QR code** on every print and give each guest a private **online gallery**, **email** the photos, record a boomerang **GIF**, replace a **green screen** with a background the guest picks, and run an **attendant station** - a second screen that shows the booth live, **approves prints before they reach the printer**, and shares photos. Each is off until you switch it on in `config.json`; see the sections below.
+On top of that it can take **payments** (guests pay by card on their phone, or an attendant takes cash/Zelle), put a **QR code** on every print and give each guest a private **online gallery**, **email** the photos, record a boomerang **GIF**, replace a **green screen** with a background the guest picks, and run an **attendant station** - a second screen that shows the booth live, **approves prints before they reach the printer**, and shares photos. Each is off until you switch it on in `config.json`; see the sections below.
 
 It is a small local web app. A Node server drives the camera (through [digiCamControl](https://digicamcontrol.com), a free Windows program), builds the print layout, and sends it to the Windows print queue. The guest screen is just a browser in full-screen kiosk mode.
 
@@ -56,6 +56,7 @@ Do this at home, with paper loaded, on the exact PC, camera and printer you will
 - [ ] Change `operatorPin` and write the PIN down somewhere other than the booth.
 - [ ] **If you use sharing/email:** scan a **printed** QR code with a real phone, and send yourself a real email to a Gmail *and* an Outlook address (check the spam folder).
 - [ ] **If you use green screen:** with your real backdrop and lights, run the tuner's **Calibrate**, check the **Matte** view with a person in front, and run a test photo. Try dark clothes, white clothes and fine hair.
+- [ ] **If you take payments:** in **test mode**, pay with the test card on a real phone from the kiosk screen; unplug the internet and check the guest is asked to pay the attendant; cancel a payment; refuse a print and refund it. Then, with the live key, make one real $0.50 payment and refund it, and check it appears in `payments.csv` and in your Stripe dashboard.
 - [ ] **If you use the station:** open it on the real attendant device over the real network, approve a print and reject one, then close its page and check what a guest sees. Decide what `onTimeout` should be if you step away.
 
 ## Running an event
@@ -202,6 +203,42 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 
 **Security, honestly.** The station is the only part of the booth, besides the guests' galleries, reachable over the network (`lan.port`); the guest kiosk, operator panel and camera controls stay on this PC (`127.0.0.1`) and are not reachable from it. The station needs the PIN: wrong PINs are slowed down and five in a row lock sign-in for a minute; a sign-in is a signed cookie (HttpOnly, SameSite=Strict, 12 hours, revoked on sign-out); changes from other websites are refused; and the station can only fetch screen-size pictures - never the camera originals, print files or the share links file. **But the booth speaks plain `http`** (a self-signed certificate would make every browser warn), so the PIN and pictures cross your network unencrypted. Use a private network (your own router or phone hotspot), not a public or guest Wi-Fi.
 
+## Payments: guests pay for prints or sessions
+
+Off by default: the host pays and guests are never charged. Switch it on when guests should pay, **per print** (they pay at the Print button, after seeing their photos; QR/email sharing stays free) or **per session** (they pay once, before the photos, and that includes the print). Prices are in **US dollars** and can be changed during the event in the operator panel's **Payments** card, as can *who pays* (so a host-paid event and a guest-paid event use the same booth).
+
+![paying by QR code](docs/screens/31-pay-qr.jpg)
+
+**How a guest pays**
+
+- **Stripe (card, Apple Pay, Google Pay):** the kiosk shows the amount and a QR code; the guest scans it with their phone and pays on Stripe's own page. Card details never touch this PC. The booth then asks Stripe whether it was paid (it checks every couple of seconds; no inbound connection to your PC is needed, which is what makes it work behind a mobile hotspot) and continues by itself.
+- **Attendant (cash, Zelle, Venmo...):** with `payments.provider: "attendant"`, or whenever cards cannot be reached, the kiosk says "Please pay the attendant", and the attendant taps **Mark paid** (choosing how they were paid) at the station or in the operator panel. The booth cannot check that cash or a Zelle transfer really arrived: that part is on trust and on your bank app. U.S. Bank lists Zelle for business as a way to accept payments without any hardware (check their fees and limits).
+
+![paying the attendant when cards are unreachable](docs/screens/32-pay-attendant.jpg)
+
+**Setting up Stripe** (about 20 minutes, none of which I could do for you):
+
+1. Open a Stripe account and give it your business details; add your **U.S. Bank business checking account** as the payout account. You do not need a card terminal. Stripe starts in **test mode**, with fake cards and no real money.
+2. Create a **restricted API key** (Developers > API keys) that may write *Checkout Sessions* and *Charges and Refunds* and read *PaymentIntents*. I could not check Stripe's dashboard from here: if a feature fails with a permission message, add the permission it names. A restricted key is safer than the full secret key because a leaked one cannot, for example, move your money.
+3. Give the key to the booth as the **`BOOTH_STRIPE_KEY` environment variable** (Windows: `setx BOOTH_STRIPE_KEY rk_test_...`, then restart the booth). Do not put it in `config.json` and never paste it into a chat, an email or a screenshot.
+4. Upload `webhost/paid.html` to your web host and set `payments.stripe.returnUrl` to its address (the page a guest's phone shows after paying).
+5. Set `payments.enabled`, `payments.mode` (`"print"` or `"session"`) and the prices, start the booth, and press **Check the payment service** in the operator panel. The card shows **TEST** or **LIVE**.
+6. Rehearse with Stripe's test card `4242 4242 4242 4242` (any future date, any CVC). When the checklist below is done, switch to the live key.
+
+```json
+"payments": { "enabled": true, "mode": "print", "pricePerPrintCents": 500, "pricePerSessionCents": 1000, "stripe": { "returnUrl": "https://example.com/booth/paid.html" } }
+```
+
+**Why Stripe and not U.S. Bank's own processing:** U.S. Bank's card processing is run by Elavon. Their online route is a hosted payment page that you apply for through a banker, and I found no published way for a booth to start a payment and then check its result without a public web address, which a hotspot cannot give. The payment code is built so another service can be added (it only needs "start a payment", "was it paid?", "close it" and "refund"), but that needs Elavon's developer documentation and credentials, which I do not have. Stripe pays out to your U.S. Bank account, so the money still lands there.
+
+**When there is no internet.** A card payment needs internet at the booth PC (the hotspot) *and* mobile data on the guest's phone; nothing can change that. So the booth **never stops**: when it cannot start a card payment, `payments.offline` decides. `"attendant"` (default): the guest is asked to pay the attendant, and the attendant confirms it; `"free"`: the guest goes through without paying (and the ledger records "waived"), which keeps the line moving but gives away prints. If the connection drops *after* a guest has paid, the booth keeps asking Stripe, and a payment that arrives late is caught, flagged "paid after the screen timed out", and left for you to refund or honour.
+
+**When something goes wrong after a guest paid.** The booth never decides about money by itself: it flags the payment and a person chooses, at the station (or the operator panel): **Print it anyway**, **Refund** (a card goes back through Stripe, cash is recorded as handed back) or **Dismiss**. It flags: a print the attendant did not approve (or nobody approved in time, or the guest left), a print job that failed at the printer, a payment that arrived after its screen timed out, and a session that could not start. Unused paid sessions older than two minutes are listed too. One payment can only ever buy one print or one session, even if the guest taps twice or two screens ask at once. A guest who cancels, or runs out of time, gets nothing charged: the payment page is closed at Stripe so it cannot be paid afterwards.
+
+**Your records.** Every payment, waiver and refund is also appended to `payments.csv` in the event folder (time, payment id, session id, amount, method, how it was paid, Stripe reference): plain text for your bookkeeping, with no card details and no names. The operator panel and the station show this event's takings. It is a record, not accounting software.
+
+**Things payments do not do:** add **sales tax** (include it in your prices; tax rules for photo services vary, so ask your accountant), send receipts, take tips, or apply discounts and codes. Stripe's fee (typically about 2.9% + 30 cents per US card payment; check their pricing page) comes off each payment, so small prints cost you proportionally more than a session fee; Stripe will not take a card payment under 50 cents. Disputes and chargebacks are handled in the Stripe dashboard.
+
 ## Configuration
 
 `config.json` is merged over the defaults in `server/config.js`; only the keys you set are needed. A typo is reported at startup, naming the setting, instead of failing at the event.
@@ -237,6 +274,11 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 | `station.approval.enabled` | Every print waits for the station's approval (also a switch in the operator panel). |
 | `station.approval.timeoutSeconds`, `onTimeout`, `maxCopies` | How long a guest waits; what happens when nobody answers (`"cancel"` or `"print"`); the most copies the station can choose. |
 | `station.recentSessions` | How many recent sessions the station shows. |
+| `payments.enabled`, `payments.mode` | Let guests pay: `"print"` (per print), `"session"` (once, before the photos) or `"off"` (the host pays). Also switchable in the operator panel. |
+| `payments.provider` | `"stripe"` (QR code, card/Apple Pay/Google Pay) or `"attendant"` (a person confirms cash/Zelle). |
+| `payments.pricePerPrintCents`, `pricePerSessionCents` | Prices in whole US cents (`500` = $5.00; at least 50). A print price is per copy. Changeable live in the operator panel. |
+| `payments.timeoutSeconds`, `payments.offline` | How long a guest has to pay; what to do when cards cannot be reached: `"attendant"` (default) or `"free"`. |
+| `payments.stripe.returnUrl`, `payments.stripe.secretKey` | The page a guest's phone shows after paying (`webhost/paid.html`); the Stripe key (set it with `BOOTH_STRIPE_KEY`, preferably a restricted key). |
 | `email.enabled`, `email.from`, `email.smtp.*` | Let guests email themselves their photos. Needs `sharing.enabled`. Set the password with `BOOTH_SMTP_PASS`. |
 | `email.subject`, `email.intro` | Subject (`{event}` is replaced) and opening line of the email. |
 | `email.marketingOptIn` | `{ "enabled": true, "label": "..." }` adds an unticked tick-box; only ticked addresses are kept. |
@@ -257,6 +299,7 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 - GIFs: encoded for real and decoded back with an independent reader (frame count, order, boomerang, size, timing, looping, colour fidelity); frozen or missing live view is handled; the web-host receiver accepts the GIFs byte for byte.
 - Green screen: the keyer is judged against synthetic footage with **known ground truth** (a noisy, unevenly lit backdrop with a shadow and dark corners; a person in skin, dark hair and a blue top): 99.5%+ of the backdrop is replaced and the interior of the person comes out unchanged; harsher lighting needs a higher sensitivity and the tests prove the setting does that; green glow on hair is removed; keying measured at ~7 ms for a live frame and ~50 ms for a print-size slot. Plus rotation, mirroring (only the person), calibration, the backgrounds loader, keyed photo previews, **the finished print**, GIF frames and the guest gallery, the live keyed stream, the operator tuner, and per-session settings - and the picker and tuner in a real browser.
 - The station: sign-in (wrong PIN slowdown, lockout, tampered/expired/revoked cookies, cross-site requests refused), that every route needs the cookie and that the guest kiosk, operator panel and camera are **not** reachable on the network port, that only screen-size pictures can be fetched (originals, print PDFs, `session.json` and path tricks are refused), the live feed (a session appearing, each photo, the finished picture, the link, the print state), and the whole approval life cycle against a real booth: approve with copies, reject, nobody answers (both `onTimeout` settings), no station connected, a guest who leaves, a double tap, two simultaneous approvals (printed once), approve all, switching approval off, reprints by staff, QR and email from the station. The station page, the kiosk's waiting screen and the whole approval round trip run in two real browsers.
+- Payments, against a **fake Stripe that follows Stripe's documented behaviour** (Checkout Sessions, polling, expiring a page, refunds with idempotency keys, key errors): the exact amount and a QR code that decodes to the payment page; nothing prints (or opens a session) without a paid, unused payment for that guest; one payment can never buy two things, even with simultaneous taps; the printed copies are what was paid for; cancelling closes the payment page; **no internet** falls back to the attendant (or free), and a payment that arrives after a timeout is caught and flagged; a paid-but-refused or failed print is flagged and can be refunded or honoured; refunds are made once; the ledger; prices and mode are validated and saved; the key never appears in the status, the redacted configuration or error messages. The whole flow (QR, attendant, cancel, refund, per-session) runs in real browsers.
 - Email against a **real SMTP server**: the message (link, inline preview, escaped text, no header injection), waiting for the link to go live, temporary vs permanent refusals, a wrong login, a dead connection, restart recovery, rate limits, and that no readable address stays on disk or in logs. The touch-keyboard flow (typo suggestion included) runs in a real browser.
 - The gallery listener exposes only galleries (the booth's API, operator panel and session folders are all unreachable from it).
 - The web-host receiver (`webhost/upload.php`) running under **real PHP**: bad signatures, stale timestamps, path tricks, scripts disguised as images and oversized files are all refused; the queue retries, survives a restart and never publishes a gallery before its pictures.
@@ -272,6 +315,8 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 - Email **deliverability**: whether Hostinger's (or any) SMTP server accepts the messages, whether Gmail/Outlook put them in spam, your hourly sending limit, and how the HTML email looks in real mail apps (only the message content and delivery to a test server were checked).
 - Green screen on **real footage**: a real green sheet, your lights and a real Canon's noise, colour and live-view quality. The keyer is tested on simulated footage, which is cleaner and more regular than a real backdrop, so expect to spend ten minutes with the tuner. The live keyed preview's frame rate and delay on your PC and camera are also unmeasured (only the mock camera was used).
 - The station on **your** devices and network: Windows firewall prompt, client isolation on venue Wi-Fi, how the page looks on your tablet, and that an attendant notices a new print request (a sound can be switched on, but browsers only allow sound after a tap on the page, and a locked tablet may sleep the page).
+- **Stripe itself.** The fake follows Stripe's documentation, not a real account. Not checked: Stripe's real payment page and the QR scan from your kiosk screen under venue lighting, Apple Pay / Google Pay, that your restricted key has the right permissions, real refunds, payouts to your U.S. Bank account, and how Stripe behaves from a hotspot. Do this in test mode first, then make one real $0.50 payment and refund it before your first paid event.
+- **Cash and Zelle confirmations** are trust-based: the booth cannot see your bank or your cash drawer.
 - Typing comfort on your real touch screen size (the keyboard is sized for screens from about 600 px tall up).
 - Local mode on a real venue network (Windows firewall prompt, client isolation, the phone actually reaching the PC).
 - The web host's `.htaccess` rules (hiding `config.php`, blocking folder listings) and the host's own PHP settings; only the PHP script itself was tested. See the checks in `webhost/README.md`.
@@ -284,7 +329,9 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 - Green screen cannot tell a green garment from the backdrop, and fine hair against an unevenly lit backdrop will look rougher than against a well-lit one (see the setup advice above).
 - **Print approval is not a guarantee against waste**: it protects the printer from prints nobody checked, but the booth still cannot see an empty paper tray (above). Pending requests live in memory: restarting the booth while a guest waits sends that guest to the error screen.
 - The station uses plain `http` on your network (see its security note); the live wall shows every finished photo to whoever can see that screen, so only use it where guests know their photos are displayed.
-- Not included yet: SMS sharing, multiple printers.
+- **Card payments cannot work offline** (see Payments). Pending payments do not survive a booth restart as "waiting guests": a restart closes any open payment page (or finds it paid and flags it for you), and a guest at the kiosk starts again.
+- Payments are US dollars only, with no tax, tips, discounts or receipts. Prices are per copy / per session.
+- Not included yet: SMS sharing, multiple printers, other payment services (U.S. Bank/Elavon needs their developer access).
 
 ## Troubleshooting
 
@@ -309,6 +356,9 @@ A second screen - an attendant's PC or tablet on the same network - that shows t
 | Station: "No station connected" in the operator panel | The station page is not open and signed in on the attendant's device, or it cannot reach `http://<this PC>:3001/station/` (firewall, a different network, Wi-Fi client isolation). |
 | Station: guests are told "Nobody was available to approve a print" | No station was connected (or nobody answered in time). Open the station, or switch approval off, or set `station.approval.onTimeout` to `"print"`. |
 | Station: the page keeps showing "Reconnecting…" | The booth stopped, the tablet slept, or the network dropped. It reconnects by itself; sign in again if asked. |
+| Payments: guests are asked to pay the attendant although there is internet | The booth could not start a Stripe payment. Operator panel > Payments > **Check the payment service** says why (wrong or revoked key, missing permission, no connection). |
+| Payments: a guest paid but the kiosk did not continue | Cards are checked every couple of seconds, so a few seconds' delay is normal. If the hotspot dropped, the payment is picked up when it returns and, if the screen had timed out, shown at the station as "paid after the screen timed out": refund it or print it. |
+| Payments: "Stripe refused the key" | The key was revoked, mistyped, or is a test key used in live mode (or the reverse). The key is never shown here; create a new restricted key and set `BOOTH_STRIPE_KEY` again. |
 | Port already in use | Another copy of the booth is running. Close it, or change `port`. |
 
 ## Development

@@ -26,13 +26,14 @@ export class PrintQueue {
     }
   }
 
-  enqueue({ sessionId, pdfFile, copies = 1, label = 'print' }) {
+  enqueue({ sessionId, pdfFile, copies = 1, label = 'print', paymentId = null }) {
     const job = {
       id: randomBytes(5).toString('hex'),
       sessionId,
       pdfFile,
       copies,
       label,
+      paymentId,
       status: 'queued',
       error: null,
       createdAt: new Date().toISOString(),
@@ -62,8 +63,8 @@ export class PrintQueue {
   }
 
   view(job) {
-    const { id, sessionId, copies, label, status, error, createdAt, startedAt, finishedAt } = job;
-    return { id, sessionId, copies, label, status, error, createdAt, startedAt, finishedAt };
+    const { id, sessionId, copies, label, paymentId, status, error, createdAt, startedAt, finishedAt } = job;
+    return { id, sessionId, copies, label, paymentId, status, error, createdAt, startedAt, finishedAt };
   }
 
   async #drain() {

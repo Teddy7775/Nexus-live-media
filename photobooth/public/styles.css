@@ -246,6 +246,14 @@ h2 { font-size: clamp(28px, 5vmin, 80px); font-weight: 800; letter-spacing: -0.0
 /* ---------- recording indicator (GIF) ---------- */
 .chip.rec::before { content: ''; display: inline-block; width: 1.8vmin; height: 1.8vmin; border-radius: 50%; background: var(--danger); margin-right: 1.2vmin; vertical-align: middle; animation: blink 0.8s steps(1) infinite; }
 
+/* ---------- paying ---------- */
+.pay-amount { font-size: clamp(48px, 12vmin, 180px); font-weight: 900; letter-spacing: -0.02em; line-height: 1; color: var(--ok); }
+.pay-body { display: flex; align-items: center; justify-content: center; gap: 4vmin; flex-wrap: wrap; max-width: 92vw; }
+.pay-body img { width: min(42vmin, 440px); height: min(42vmin, 440px); background: #fff; border-radius: 2vmin; padding: 1.4vmin; image-rendering: crisp-edges; }
+.pay-body img[hidden] { display: none; }
+.pay-body .sub { max-width: 28ch; }
+.pay .progress i { transform: scaleX(1); }
+
 /* ---------- green screen: choosing a background ---------- */
 .pick { padding: 0; background: #000; justify-content: flex-end; }
 .pick-bar { position: relative; z-index: 2; width: 100%; display: grid; gap: 1.6vmin; justify-items: center; padding: 8vmin 3vmin 3vmin; background: linear-gradient(to top, rgb(8 11 16 / 0.96) 55%, rgb(8 11 16 / 0)); }
