@@ -144,6 +144,31 @@ With `gif.enabled`, after the photos the booth shows a short **"Bonus: a GIF!"**
 
 Quality note: the frames come from **live view**, not full-resolution photos (a DSLR cannot shoot stills that fast), so a GIF is screen-sized (a Canon's live view is roughly 960 x 640). It needs live view, so `camera.digicamcontrol.liveView` must be `true`. Because it also needs the camera free, a GIF is never recorded while a photo is being taken.
 
+## Green screen
+
+With `greenScreen.enabled`, guests stand in front of a green backdrop and **choose a background** - a beach, the night sky, your event's artwork - while watching themselves on it live. The photos, the live preview, the GIF, the print and the online gallery all show the new background. The camera's **original photo is never changed** (it keeps its green), so you can always re-key it later.
+
+```json
+"greenScreen": { "enabled": true, "defaultBackdrop": "guest" }
+```
+
+1. Put your own backgrounds (`.jpg` / `.png`, **3000 px wide or more** for a sharp print; at least 400) in the `backgrounds` folder next to the app, or leave `builtinBackgrounds` on to use the three included ones (Sunset, Night sky, Studio grey). Restart the booth after adding pictures. A picture that cannot be used (too small, damaged) is skipped and the reason is in the log.
+2. Open the operator panel, **Green screen** card, and press **Start live tuner**. You see the camera with the background in place. Switch to **Matte** to see exactly what is kept (white) and what is replaced (black).
+3. With **nobody in front of the backdrop**, press **Calibrate on the empty backdrop**: the booth measures how green it really is and suggests settings. Then stand in front yourself, adjust the sliders, **Save**, and use **Take a test photo on this background** as the final check.
+4. **Who chooses?** *Each guest chooses* shows a picker after "Touch to start", with the guest live on each background. *Everyone gets: ...* fixes one background (and skips the picker) - handy for a themed event. A guest who walks away from the picker is returned to the start screen after `greenScreen.pickSeconds`.
+
+**The setup matters more than the settings.** Software can only remove green that is *evenly and strongly* green:
+
+- Use a **matte** chroma-key green sheet, paint or fabric. Stretch it flat: wrinkles make shadows, and shadows are the darker, weaker green that leaks through.
+- Light the **backdrop separately and evenly** (two lights at its sides), and light the guest from the front. Do not rely on the guest's lights to light the backdrop.
+- Stand guests **1.5-2 m in front of the backdrop**. Closer, and green light bounces onto their hair and shoulders ("spill"). The **Remove green glow** setting repairs some of it, not a lot.
+- **No green clothes, jewellery or props**: anything that is green is removed with the backdrop, and light-green things partly vanish. Shiny, white or very light clothes pick up the most glow; fine flyaway hair is the hardest edge.
+- Set the camera to **manual exposure and white balance**, so the green does not change from photo to photo (and settings you tuned stay right). Keep JPEG Large/Fine.
+
+How it works, in one line: each pixel is judged by *how much greener it is than its red and blue*; skin, hair and most clothes are not green at all, the backdrop very much so, and a soft zone in between gives natural edges. It runs on the picture already reduced to the size it is shown or printed at (a 24-megapixel original is never processed in full), so the keying itself takes about 7 ms for a live frame and about 50 ms for a print-size photo (measured on a 4-core test machine; decoding and saving add to that). Each session **remembers the settings it began with**, so a retune during an event never makes one guest's photos inconsistent; the next guest gets the new settings.
+
+Rehearsing without a green screen: set `camera.mock.scene` to `"greenscreen"` (with the mock camera) and the booth films a simulated person in front of an unevenly lit, noisy green backdrop.
+
 ## Configuration
 
 `config.json` is merged over the defaults in `server/config.js`; only the keys you set are needed. A typo is reported at startup, naming the setting, instead of failing at the event.
@@ -169,6 +194,12 @@ Quality note: the frames come from **live view**, not full-resolution photos (a 
 | `sharing.upload.url`, `sharing.upload.secret` | Web host receiver address and shared secret (set the secret with the `BOOTH_UPLOAD_SECRET` environment variable). |
 | `gif.enabled`, `gif.frames`, `gif.intervalMs` | Record a boomerang GIF from live view after the photos: how many frames, and the gap between them in milliseconds. |
 | `gif.width`, `gif.countdownSeconds`, `gif.boomerang` | GIF width in pixels (never enlarged), the "get ready" countdown, and whether it plays forwards then backwards. |
+| `greenScreen.enabled` | Replace a green backdrop with a background the guest picks. |
+| `greenScreen.dir`, `greenScreen.builtinBackgrounds` | Folder with your own `.jpg`/`.png` backgrounds; whether to include the three built-in ones. |
+| `greenScreen.defaultBackdrop` | `"guest"` (each guest chooses) or a background id such as `"builtin-night"` (everyone gets it). Also switchable in the operator panel. |
+| `greenScreen.pickSeconds`, `greenScreen.previewWidth` | Idle time before the picker returns to the start screen; width in pixels of the live keyed preview (lower = smoother on a slow PC). |
+| `greenScreen.key.*` | `sensitivity`, `softness`, `despill`, `edgeBlur`. Best set from the operator panel's tuner, which saves them. |
+| `camera.mock.scene` | Mock camera only: `"portrait"` or `"greenscreen"` (a person in front of a green backdrop, for rehearsal). |
 | `email.enabled`, `email.from`, `email.smtp.*` | Let guests email themselves their photos. Needs `sharing.enabled`. Set the password with `BOOTH_SMTP_PASS`. |
 | `email.subject`, `email.intro` | Subject (`{event}` is replaced) and opening line of the email. |
 | `email.marketingOptIn` | `{ "enabled": true, "label": "..." }` adds an unticked tick-box; only ticked addresses are kept. |
@@ -187,6 +218,7 @@ Quality note: the frames come from **live view**, not full-resolution photos (a 
 - The Windows printing adapter against a stand-in for `pdf-to-printer`.
 - Sharing: QR codes decoded back to the exact link, including a 0.6-inch code on a JPEG-compressed strip, each strip half after the cut, and the code shown on the kiosk screen opened in a phone-sized browser.
 - GIFs: encoded for real and decoded back with an independent reader (frame count, order, boomerang, size, timing, looping, colour fidelity); frozen or missing live view is handled; the web-host receiver accepts the GIFs byte for byte.
+- Green screen: the keyer is judged against synthetic footage with **known ground truth** (a noisy, unevenly lit backdrop with a shadow and dark corners; a person in skin, dark hair and a blue top): 99.5%+ of the backdrop is replaced and the interior of the person comes out unchanged; harsher lighting needs a higher sensitivity and the tests prove the setting does that; green glow on hair is removed; keying measured at ~7 ms for a live frame and ~50 ms for a print-size slot. Plus rotation, mirroring (only the person), calibration, the backgrounds loader, keyed photo previews, **the finished print**, GIF frames and the guest gallery, the live keyed stream, the operator tuner, and per-session settings - and the picker and tuner in a real browser.
 - Email against a **real SMTP server**: the message (link, inline preview, escaped text, no header injection), waiting for the link to go live, temporary vs permanent refusals, a wrong login, a dead connection, restart recovery, rate limits, and that no readable address stays on disk or in logs. The touch-keyboard flow (typo suggestion included) runs in a real browser.
 - The gallery listener exposes only galleries (the booth's API, operator panel and session folders are all unreachable from it).
 - The web-host receiver (`webhost/upload.php`) running under **real PHP**: bad signatures, stale timestamps, path tricks, scripts disguised as images and oversized files are all refused; the queue retries, survives a restart and never publishes a gallery before its pictures.
@@ -200,6 +232,7 @@ Quality note: the frames come from **live view**, not full-resolution photos (a 
 - Scanning a **printed** QR with a real phone camera on DNP paper (decoding was tested on the digital picture with an independent QR reader).
 - GIF **quality** from a real Canon live view (frame rate and resolution depend on your camera, lens and lighting; only the encoder and the recording logic were tested, with synthetic frames).
 - Email **deliverability**: whether Hostinger's (or any) SMTP server accepts the messages, whether Gmail/Outlook put them in spam, your hourly sending limit, and how the HTML email looks in real mail apps (only the message content and delivery to a test server were checked).
+- Green screen on **real footage**: a real green sheet, your lights and a real Canon's noise, colour and live-view quality. The keyer is tested on simulated footage, which is cleaner and more regular than a real backdrop, so expect to spend ten minutes with the tuner. The live keyed preview's frame rate and delay on your PC and camera are also unmeasured (only the mock camera was used).
 - Typing comfort on your real touch screen size (the keyboard is sized for screens from about 600 px tall up).
 - Local mode on a real venue network (Windows firewall prompt, client isolation, the phone actually reaching the PC).
 - The web host's `.htaccess` rules (hiding `config.php`, blocking folder listings) and the host's own PHP settings; only the PHP script itself was tested. See the checks in `webhost/README.md`.
@@ -209,7 +242,8 @@ Quality note: the frames come from **live view**, not full-resolution photos (a 
 - **The booth cannot see printer problems.** "Done" means the job was handed to the Windows print queue. Out of paper, no ribbon or a jam are not reported back, so a guest can be told "sent to the printer" while nothing prints. Watch the printer and the Windows print queue.
 - One camera, one photo at a time.
 - Pausing live view around each shot adds a second or two before the preview returns.
-- Not included yet: green screen, GIF/boomerang, QR/email/SMS sharing, multiple printers.
+- Green screen cannot tell a green garment from the backdrop, and fine hair against an unevenly lit backdrop will look rougher than against a well-lit one (see the setup advice above).
+- Not included yet: SMS sharing, multiple printers.
 
 ## Troubleshooting
 
@@ -226,6 +260,11 @@ Quality note: the frames come from **live view**, not full-resolution photos (a 
 | Strip cut slices through a photo | The driver is not on its 2-inch-cut paper size; set `printer.paperSize`. |
 | Prints are cropped or have white edges | Check `printer.scale` (`fit` / `noscale`) and the driver's borderless setting. |
 | Footer text is missing or shows boxes | System fonts unavailable: use a PNG overlay with the text baked in. |
+| Green screen: green shows through in the corners or around shadows | Raise **Sensitivity** in the tuner, or (better) light the backdrop more evenly. **Calibrate on the empty backdrop** with nobody in front. |
+| Green screen: parts of a person disappear or look see-through | Lower **Sensitivity**; check for green clothing; stand further from the backdrop so less green light lands on them. |
+| Green screen: a green halo around hair or shoulders | Raise **Remove green glow**, move the guest away from the backdrop, narrow the **Edge softness**. |
+| Green screen: tuner says "No live view picture yet" | Live view is not running: check `camera.digicamcontrol.liveView` and that digiCamControl's live view works on its own. |
+| Green screen: a background is missing from the picker | It was too small (under 400 px wide), damaged or not .jpg/.png - the reason is in `logs/booth.log`. Restart the booth after adding pictures. |
 | Port already in use | Another copy of the booth is running. Close it, or change `port`. |
 
 ## Development

@@ -314,6 +314,104 @@ try {
     fs.rmSync(work2, { recursive: true, force: true });
   }
 
+  // ------------------------------------------------------------------ green screen scenario
+  log('green screen: pick a background while watching yourself on it, photos and print come out with no green');
+  const work3 = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-e2e-green-'));
+  const config3 = validateConfig(
+    deepMerge(DEFAULTS, {
+      storage: { dir: path.join(work3, 'events') },
+      event: { name: 'Sarah & James Wedding' },
+      ui: { countdownSeconds: 1, shotPreviewSeconds: 1, reviewSeconds: 60, doneSeconds: 30, errorSeconds: 60 },
+      camera: { mock: { captureDelayMs: 100, scene: 'greenscreen' } },
+      printer: { dryRunDelayMs: 1500, estimatedSeconds: 2 },
+      greenScreen: { enabled: true, dir: path.join(work3, 'backgrounds') },
+    }),
+  );
+  const booth3 = await createBooth(config3, { logger: createLogger({ quiet: true }), settingsFile: path.join(work3, 'runtime-settings.json') });
+  const server3 = await new Promise((resolve) => { const s = booth3.app.listen(0, '127.0.0.1', () => resolve(s)); });
+  const base3 = `http://127.0.0.1:${server3.address().port}`;
+  /** Share of pixels that are clearly green (greener than red and blue by 25+). */
+  const greenShareOf = async (bytes) => {
+    const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    let n = 0;
+    for (let p = 0; p < data.length; p += 3) if (data[p + 1] - Math.max(data[p], data[p + 2]) > 25) n += 1;
+    return n / (info.width * info.height);
+  };
+  const imageOf = async (selector) => Buffer.from(await (await fetch(new URL(await page.getAttribute(selector, 'src'), base3))).arrayBuffer());
+  try {
+    await page.goto(base3);
+    await page.waitForSelector('body[data-ready="true"]');
+    assert.match(await page.textContent('#eventInfo'), /on a background you choose/);
+    await page.click('#startBtn');
+    await onScreen('pick');
+    assert.equal(await page.locator('.pick-thumb').count(), 3, 'the three built-in backgrounds are offered');
+    await page.waitForFunction(() => document.querySelector('#pickImg').naturalWidth > 0, null, { timeout: 15000 });
+    assert.match(await page.getAttribute('#pickImg', 'src'), /stream\?bg=builtin-sunset/);
+    assert.ok((await greenShareOf(await page.locator('#pickImg').screenshot())) < 0.02, 'the live picture shows the guest on the background, not on green');
+    await snap('greenscreen-pick', 700);
+
+    await page.locator('.pick-thumb').nth(1).click(); // Night sky
+    assert.equal(await page.locator('.pick-thumb').nth(1).getAttribute('aria-pressed'), 'true');
+    await page.waitForFunction(() => /bg=builtin-night/.test(document.querySelector('#pickImg').getAttribute('src')));
+    await page.waitForFunction(() => document.querySelector('#pickImg').naturalWidth > 0, null, { timeout: 15000 });
+    await snap('greenscreen-pick-night', 700);
+
+    await page.click('#pickGo');
+    await onScreen('countdown');
+    assert.match(await page.getAttribute('#liveImg', 'src'), /stream\?session=\d{8}-\d{6}-[0-9a-f]{4}&mirror=1/, 'the countdown preview follows the session and mirrors only the person');
+    assert.equal(await page.locator('#live.mirror').count(), 0, 'and the whole picture is NOT mirrored on top of that');
+    await page.waitForFunction(() => document.querySelector('#liveImg').naturalWidth > 0, null, { timeout: 15000 });
+    await snap('greenscreen-countdown', 500);
+
+    await onScreen('shot');
+    assert.ok((await greenShareOf(await imageOf('#shotImg'))) < 0.01, 'the photo just taken has no green');
+    await snap('greenscreen-photo');
+    await onScreen('review', 60000);
+    assert.ok((await greenShareOf(await imageOf('#finalImg'))) < 0.005, 'the finished layout has no green');
+    await snap('greenscreen-review');
+    await page.click('#printBtn');
+    await onScreen('done', 30000);
+    const only = (await (await fetch(`${base3}/api/operator/sessions`, { headers: { 'x-operator-pin': config3.operatorPin } })).json()).sessions;
+    const saved3 = JSON.parse(fs.readFileSync(path.join(config3.storage.dir, booth3.settings.eventSlug, only[0].id, 'session.json'), 'utf8'));
+    assert.equal(saved3.background.id, 'builtin-night', 'the session remembers the chosen background');
+    assert.ok((await greenShareOf(path.join(config3.storage.dir, booth3.settings.eventSlug, only[0].id, 'originals', 'shot-1-a1.jpg'))) > 0.3, 'while the original is still the untouched green photo');
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    log('green screen: the operator tuner shows the matte, calibrates, saves');
+    await page.goto(`${base3}/operator.html`);
+    await page.fill('#pin', config3.operatorPin);
+    await page.click('#pinForm button[type=submit]');
+    await page.waitForSelector('#dash:not([hidden])');
+    await page.waitForFunction(() => document.querySelector('#gsText').textContent === 'Green screen is on');
+    await page.click('#gsToggle');
+    await page.waitForFunction(() => !document.querySelector('#gsImg').hidden && document.querySelector('#gsImg').naturalWidth > 0, null, { timeout: 20000 });
+    await page.click('.seg-btn[data-view="matte"]');
+    await page.waitForTimeout(900);
+    await page.locator('#gsCard').scrollIntoViewIfNeeded();
+    step += 1;
+    await page.locator('#gsCard').screenshot({ path: path.join(shotsDir, `${String(step).padStart(2, '0')}-operator-greenscreen-tuner.jpg`), type: 'jpeg', quality: 82 });
+    console.log(`  screenshot docs/screens/${String(step).padStart(2, '0')}-operator-greenscreen-tuner.jpg`);
+
+    await page.click('#gsCalibrate');
+    await page.waitForFunction(() => /standing in front|not green/i.test(document.querySelector('#gsMsg').textContent), null, { timeout: 15000 });
+    await page.click('.seg-btn[data-view="composite"]');
+    await page.locator('#gs-sensitivity').fill('80');
+    assert.equal(await page.textContent('#gs-sensitivity-out'), '80');
+    await page.click('#gsSave');
+    await page.waitForFunction(() => /Saved/.test(document.querySelector('#gsMsg').textContent));
+    assert.equal(booth3.settings.key.sensitivity, 80, 'the slider value was saved on the booth');
+    await page.click('#gsToggle');
+    assert.equal(await page.textContent('#gsToggle'), 'Start live tuner');
+    await page.click('#gsTestPhoto');
+    await page.waitForSelector('#gsPhotoImg:not([hidden])', { timeout: 20000 });
+    assert.ok((await greenShareOf(await imageOf('#gsPhotoImg'))) < 0.005, 'the test photo is shown with its background replaced');
+  } finally {
+    server3.closeAllConnections();
+    server3.close();
+    fs.rmSync(work3, { recursive: true, force: true });
+  }
+
   assert.deepEqual(problems, [], `browser reported problems:\n${problems.join('\n')}\nfailed requests:\n${failedRequests.join('\n')}`);
   console.log('\nE2E PASSED');
 } catch (err) {

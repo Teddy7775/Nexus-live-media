@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateKey } from './greenscreen.js';
 
 export const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -30,7 +31,8 @@ export const DEFAULTS = Object.freeze({
     // "mock" generates test photos (no hardware needed). "digicamcontrol" drives a real DSLR.
     driver: 'mock',
     // Only used by the mock driver. failEveryNth: 3 makes every 3rd photo fail, to rehearse the error screen.
-    mock: { captureDelayMs: 400, failEveryNth: 0 },
+    // scene: "portrait" = a coloured picture with a silhouette; "greenscreen" = a person in front of a green backdrop.
+    mock: { captureDelayMs: 400, failEveryNth: 0, scene: 'portrait' },
     digicamcontrol: {
       baseUrl: 'http://127.0.0.1:5513',
       captureTimeoutMs: 45000,
@@ -98,6 +100,21 @@ export const DEFAULTS = Object.freeze({
     width: 640,
     countdownSeconds: 2,
     boomerang: true, // play forwards then backwards
+  },
+  // Replace a green backdrop with a picture the guest chooses (needs a green sheet/wall, even lighting and a Canon with live view).
+  greenScreen: {
+    enabled: false,
+    // Your own backgrounds: put .jpg/.png files (at least 400 px wide, ideally 3000 px) in this folder.
+    dir: 'backgrounds',
+    builtinBackgrounds: true,
+    // "guest" = each guest picks their own background. Or a background's id (e.g. "builtin-night"): everyone gets that one.
+    defaultBackdrop: 'guest',
+    // The guest picking a background is sent back to the start screen after this many seconds without a tap.
+    pickSeconds: 60,
+    // Width of the live keyed preview in pixels (lower = smoother on a slow PC).
+    previewWidth: 640,
+    // How the green is judged. Easiest to set from the operator panel (Green screen card), which also saves them.
+    key: { sensitivity: 50, softness: 30, despill: 1, edgeBlur: 0.8 },
   },
   email: {
     enabled: false,
@@ -197,6 +214,16 @@ export function validateConfig(cfg) {
     need(cfg.camera.digicamcontrol?.liveView === true, 'gif.enabled needs live view: set camera.digicamcontrol.liveView to true');
   }
 
+  need(['portrait', 'greenscreen'].includes(cfg.camera?.mock?.scene), 'camera.mock.scene must be "portrait" or "greenscreen"');
+  const gs = cfg.greenScreen ?? {};
+  need(typeof gs.enabled === 'boolean', 'greenScreen.enabled must be true or false');
+  need(typeof gs.dir === 'string' && gs.dir.length > 0, 'greenScreen.dir must be a folder path');
+  need(typeof gs.builtinBackgrounds === 'boolean', 'greenScreen.builtinBackgrounds must be true or false');
+  need(typeof gs.defaultBackdrop === 'string' && gs.defaultBackdrop.length > 0, 'greenScreen.defaultBackdrop must be "guest" or a background id');
+  need(posNum(gs.pickSeconds) && gs.pickSeconds >= 5, 'greenScreen.pickSeconds must be a number >= 5');
+  need(Number.isInteger(gs.previewWidth) && gs.previewWidth >= 240 && gs.previewWidth <= 1280, 'greenScreen.previewWidth must be an integer from 240 to 1280');
+  for (const problem of validateKey(gs.key)) problems.push(`greenScreen.key: ${problem}`);
+
   const em = cfg.email ?? {};
   need(typeof em.enabled === 'boolean', 'email.enabled must be true or false');
   if (em.enabled) {
@@ -224,6 +251,12 @@ export function configWarnings(cfg) {
   if (cfg.printer.mode === 'dryrun') warnings.push('printer.mode is "dryrun": nothing will be sent to a printer');
   if (cfg.camera.driver === 'digicamcontrol' && /[\s]|[^\x00-\x7F]/.test(cfg.storage.dir)) {
     warnings.push('storage.dir contains spaces or non-ASCII characters; digiCamControl may mishandle such paths - use a simple path like C:\\booth\\events');
+  }
+  if (cfg.greenScreen.enabled && cfg.camera.driver === 'mock' && cfg.camera.mock.scene !== 'greenscreen') {
+    warnings.push('greenScreen is on but the mock camera scene is "portrait" (no green backdrop to remove): set camera.mock.scene to "greenscreen" to rehearse');
+  }
+  if (cfg.greenScreen.enabled && cfg.camera.driver === 'digicamcontrol' && !cfg.camera.digicamcontrol.liveView) {
+    warnings.push('greenScreen is on but camera.digicamcontrol.liveView is off: guests will not see themselves on the new background before the photo');
   }
   if (cfg.sharing.enabled && cfg.sharing.mode === 'local') {
     warnings.push(`sharing.mode is "local": guests can only open their link while their phone is on the same network as this PC (listening on port ${cfg.lan.port}; Windows may ask to allow it)`);
@@ -264,5 +297,6 @@ export function loadConfig({ file, rootDir = ROOT_DIR } = {}) {
   if (env.BOOTH_SMTP_PASS) fromEnv.email = { smtp: { pass: env.BOOTH_SMTP_PASS } };
   const merged = validateConfig(deepMerge(deepMerge(DEFAULTS, user), fromEnv));
   const storageDir = path.resolve(rootDir, merged.storage.dir);
-  return { ...merged, storage: { ...merged.storage, dir: storageDir }, _meta: { configPath, rootDir, usedFile: fs.existsSync(configPath) } };
+  const backgroundsDir = path.resolve(rootDir, merged.greenScreen.dir);
+  return { ...merged, storage: { ...merged.storage, dir: storageDir }, greenScreen: { ...merged.greenScreen, dir: backgroundsDir }, _meta: { configPath, rootDir, usedFile: fs.existsSync(configPath) } };
 }

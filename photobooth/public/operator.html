@@ -81,6 +81,49 @@
           <ul id="mails" class="plain small"></ul>
         </section>
 
+        <section class="card wide" aria-labelledby="h-gs" id="gsCard">
+          <h2 id="h-gs">Green screen</h2>
+          <p class="status"><span id="gsDot" class="dot"></span><span id="gsText">…</span></p>
+          <p class="muted" id="gsDetail"></p>
+          <div id="gsBody" hidden>
+            <div class="tuner">
+              <div class="tuner-view">
+                <div class="tuner-frame"><img id="gsImg" alt="Live keyed picture from the camera" hidden><p id="gsPlaceholder" class="muted">The live picture appears here once you press Start live tuner.</p></div>
+                <div class="actions">
+                  <button id="gsToggle" class="btn primary" type="button">Start live tuner</button>
+                  <div class="seg" role="group" aria-label="What to show">
+                    <button type="button" class="btn seg-btn" data-view="composite" aria-pressed="true">Result</button>
+                    <button type="button" class="btn seg-btn" data-view="matte" aria-pressed="false">Matte (white = kept)</button>
+                    <button type="button" class="btn seg-btn" data-view="raw" aria-pressed="false">Camera</button>
+                  </div>
+                </div>
+                <p id="gsLiveMsg" class="msg" role="status" hidden></p>
+              </div>
+              <div class="tuner-controls">
+                <label class="field"><span>Try it on</span><select id="gsBackground"></select></label>
+                <div id="gsSliders"></div>
+                <div class="actions">
+                  <button id="gsCalibrate" class="btn" type="button">Calibrate on the empty backdrop</button>
+                  <button id="gsSave" class="btn primary" type="button">Save these settings</button>
+                  <button id="gsReset" class="btn" type="button">Reset</button>
+                </div>
+                <p id="gsMsg" class="msg" role="status" hidden></p>
+              </div>
+            </div>
+            <h3>Who chooses the background?</h3>
+            <div class="actions">
+              <select id="gsBackdrop" aria-label="Background mode"></select>
+              <button id="gsBackdropSave" class="btn" type="button">Apply</button>
+            </div>
+            <p id="gsBackdropMsg" class="msg" role="status" hidden></p>
+            <h3>Check with a real photo</h3>
+            <div class="actions"><button id="gsTestPhoto" class="btn" type="button">Take a test photo on this background</button></div>
+            <p id="gsPhotoMsg" class="msg" role="status" hidden></p>
+            <img id="gsPhotoImg" class="preview" alt="Test photo on the chosen background" hidden>
+            <p class="muted small" id="gsFolder"></p>
+          </div>
+        </section>
+
         <section class="card" aria-labelledby="h-set">
           <h2 id="h-set">Event settings</h2>
           <form id="settingsForm">

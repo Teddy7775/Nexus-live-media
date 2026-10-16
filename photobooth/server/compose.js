@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { qrPng } from './qr.js';
+import { keyComposite } from './greenscreen.js';
 
 const FONT_STACK = "Arial, Helvetica, 'DejaVu Sans', sans-serif";
 
@@ -56,8 +57,10 @@ async function assertReadable(file, label) {
 /**
  * Builds the final print image and a screen-size preview.
  * `shotFiles[n]` is the photo for shot n (JPEG from the camera).
+ * `keying` ({ background(width, height) -> raw RGB, key }) replaces a green backdrop in every photo with a picture. It is applied
+ * at each slot's own print size, after the photo has been reduced to fit - so the keyer sees clean, small pixels, not 24 megapixels.
  */
-export async function composeTemplate({ template, shotFiles, event, outFile, previewFile, previewWidth = 1200, templatesDir, qrUrl = null, now = new Date(), jpegQuality = 95 }) {
+export async function composeTemplate({ template, shotFiles, event, outFile, previewFile, previewWidth = 1200, templatesDir, qrUrl = null, keying = null, now = new Date(), jpegQuality = 95 }) {
   const { width, height, dpi = 300, background = '#ffffff' } = template.canvas;
 
   for (let n = 0; n < template.shots; n++) {
@@ -76,7 +79,8 @@ export async function composeTemplate({ template, shotFiles, event, outFile, pre
         .removeAlpha()
         .raw()
         .toBuffer({ resolveWithObject: true });
-      slotCache.set(key, { data, info });
+      const pixels = keying ? await keyComposite({ fg: data, bg: await keying.background(info.width, info.height), width: info.width, height: info.height, key: keying.key }) : data;
+      slotCache.set(key, { data: pixels, info });
     }
     const { data, info } = slotCache.get(key);
     layers.push({ input: data, raw: { width: info.width, height: info.height, channels: info.channels }, left: slot.x, top: slot.y });

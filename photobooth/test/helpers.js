@@ -72,3 +72,29 @@ export async function waitFor(check, { timeoutMs = 3000, intervalMs = 20 } = {})
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 }
+
+/** Reads the first complete JPEG from a motion-JPEG stream, then hangs up. */
+export async function firstStreamFrame(url, { timeoutMs = 8000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (res.status !== 200) throw Object.assign(new Error(`stream answered ${res.status}`), { status: res.status });
+    const reader = res.body.getReader();
+    let buf = Buffer.alloc(0);
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) throw new Error('the stream ended before a picture arrived');
+      buf = Buffer.concat([buf, Buffer.from(value)]);
+      const headerEnd = buf.indexOf('\r\n\r\n');
+      if (headerEnd < 0) continue;
+      const length = Number(/Content-Length: (\d+)/i.exec(buf.toString('latin1', 0, headerEnd))?.[1]);
+      if (buf.length >= headerEnd + 4 + length) {
+        controller.abort();
+        return buf.subarray(headerEnd + 4, headerEnd + 4 + length);
+      }
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+}

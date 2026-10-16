@@ -9,6 +9,7 @@ import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
 import { qrSvg } from './qr.js';
 import { GifError, encodeGif, grabFrames } from './gif.js';
+import { DEFAULT_KEY, keyToJpeg, mergeKey, suggestKeyFromJpeg } from './greenscreen.js';
 import { buildShareBundle, computeShareState, shareUrl } from './share.js';
 import { EmailRejected, buildEmail, classifySmtpError } from './email.js';
 import { isValidEmail, maskEmail, normalizeEmail } from '../public/email-utils.js';
@@ -37,7 +38,7 @@ const clampCopies = (value, fallback) => {
   return Math.min(10, Math.max(1, n));
 };
 
-export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null }) {
+export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null, backgrounds = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '10kb' }));
@@ -66,6 +67,56 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     return err;
   };
 
+  // ------------------------------------------------------------ green screen
+  const greenOn = Boolean(backgrounds);
+  const previewWidth = config.greenScreen.previewWidth;
+  const backgroundPixels = (id) => (w, h) => backgrounds.raw(id, w, h);
+  const thumbUrl = (id) => `/api/greenscreen/backgrounds/${encodeURIComponent(id)}/thumb.jpg`;
+  const requireGreen = () => {
+    if (!greenOn) throw new HttpError(409, 'greenscreen_disabled', 'Green screen is not turned on (greenScreen.enabled in config.json)');
+  };
+
+  /** What a new session gets: the operator's fixed background if there is one, otherwise the guest's pick (or the first). */
+  function chooseBackground(requested) {
+    if (!greenOn) return null;
+    const fixed = settings.backdrop !== 'guest' && backgrounds.has(settings.backdrop) ? settings.backdrop : null;
+    const wanted = requested === undefined || requested === null ? backgrounds.firstId() : requested;
+    const id = fixed ?? wanted;
+    if (typeof id !== 'string' || !backgrounds.has(id)) throw new HttpError(400, 'bad_background', 'That background does not exist');
+    return { id, name: backgrounds.get(id).name, key: { ...settings.key } };
+  }
+
+  /** How to key this session's pictures, or null when it has no background. */
+  function keyingFor(session) {
+    if (!session.background) return null;
+    if (!backgrounds?.has(session.background.id)) throw new ComposeError(`The background "${session.background.name}" is no longer available`);
+    return { background: backgroundPixels(session.background.id), key: session.background.key };
+  }
+
+  /** The screen-size picture of one photo: the original, or the original with its backdrop replaced. */
+  async function writePreview(session, sourceFile, destFile, width) {
+    const keying = keyingFor(session);
+    if (!keying) return makePreview(sourceFile, destFile, width);
+    await fs.mkdir(path.dirname(destFile), { recursive: true });
+    await fs.writeFile(destFile, await keyToJpeg({ source: sourceFile, background: keying.background, width, key: keying.key, quality: 85 }));
+    return destFile;
+  }
+
+  /** One current live-view picture (the camera's live view is started if nobody is watching it). */
+  async function grabLiveFrame() {
+    await liveView.acquire();
+    try {
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const frame = await camera.liveFrame();
+        if (frame) return frame;
+        await sleep(150);
+      }
+    } finally {
+      liveView.release();
+    }
+    throw new HttpError(503, 'no_live_view', 'No live view picture yet. Is the camera connected and live view switched on?');
+  }
+
   const sessionView = (session) => ({
     id: session.id,
     templateId: session.templateId,
@@ -73,6 +124,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     status: session.status,
     shots: session.shots.map((s) => ({ index: s.index, attempt: s.attempt, previewUrl: store.mediaUrl(session, s.preview) })),
     finalPreviewUrl: finalPreviewUrl(session),
+    background: session.background ? { id: session.background.id, name: session.background.name } : null,
   });
 
   const finalPreviewUrl = (session) => (session.final ? `${store.mediaUrl(session, session.final.preview)}?v=${session.final.version}` : null);
@@ -117,6 +169,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         previewFile: store.resolve(session, 'final-preview.jpg'),
         templatesDir,
         qrUrl: sharingOn && config.sharing.qrOnPrint ? shareLink(session) : null,
+        keying: keyingFor(session),
         now: new Date(session.createdAt),
       });
     } catch (err) {
@@ -162,16 +215,37 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       sharing: { enabled: sharingOn, mode: config.sharing.mode, shareSeconds: config.sharing.shareSeconds, wifiHint: config.sharing.wifiHint },
       gif: { enabled: config.gif.enabled, countdownSeconds: config.gif.countdownSeconds, frames: config.gif.frames, intervalMs: config.gif.intervalMs },
       email: { enabled: Boolean(emailQueue), maxPerSession: config.email.maxPerSession, marketingOptIn: config.email.marketingOptIn },
+      greenScreen: greenOn
+        ? {
+            enabled: true,
+            // Guests choose when the operator has not fixed one - and when there is actually something to choose between.
+            guestChoice: settings.backdrop === 'guest' && backgrounds.list().length > 1,
+            backdrop: settings.backdrop === 'guest' ? backgrounds.firstId() : settings.backdrop,
+            pickSeconds: config.greenScreen.pickSeconds,
+            backgrounds: backgrounds.list().map((b) => ({ id: b.id, name: b.name, thumbUrl: thumbUrl(b.id) })),
+          }
+        : { enabled: false },
     });
   });
+
+  app.get(
+    '/api/greenscreen/backgrounds/:id/thumb.jpg',
+    wrap(async (req, res) => {
+      requireGreen();
+      const jpeg = await backgrounds.thumb(req.params.id);
+      if (!jpeg) throw new HttpError(404, 'no_background', 'No such background');
+      res.set({ 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' }).send(jpeg);
+    }),
+  );
 
   app.post(
     '/api/sessions',
     wrap(async (req, res) => {
       const template = settings.activeTemplate;
-      const session = await store.create({ eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots, share: sharingOn });
+      const background = chooseBackground(req.body?.background);
+      const session = await store.create({ eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots, share: sharingOn, background });
       if (session.share) await shareIndex?.set(session.share.token, { eventSlug: session.eventSlug, sessionId: session.id });
-      logger.info(`session ${session.id} started (${template.id}, event ${settings.eventSlug})`);
+      logger.info(`session ${session.id} started (${template.id}, event ${settings.eventSlug}${background ? `, background ${background.id}` : ''})`);
       res.status(201).json({ ...sessionView(session), template: templateView(template) });
     }),
   );
@@ -201,7 +275,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           throw toHttp(err);
         }
         const previewRel = path.join('previews', `${baseName}.jpg`);
-        await makePreview(result.file, store.resolve(session, previewRel), 1600);
+        await writePreview(session, result.file, store.resolve(session, previewRel), 1600);
         const entry = { index, attempt, file: path.relative(store.sessionDir(session), result.file), preview: previewRel };
         session.shots = [...session.shots.filter((s) => s.index !== index), entry].sort((a, b) => a.index - b.index);
         // A different photo invalidates the finished picture and its print file.
@@ -239,6 +313,8 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         } finally {
           liveView.release();
         }
+        const keying = keyingFor(session);
+        if (keying) frames = await Promise.all(frames.map((source) => keyToJpeg({ source, background: keying.background, width: config.gif.width, key: keying.key, quality: 88 })));
         const bytes = await encodeGif({ frames, width: config.gif.width, delayMs: config.gif.intervalMs, boomerang: config.gif.boomerang, loop: true });
         await fs.writeFile(store.resolve(session, 'animation.gif'), bytes);
         const version = Date.now();
@@ -327,24 +403,50 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     }),
   );
 
-  /** Live preview as a motion-JPEG stream (a plain <img src> in the browser). */
+  /**
+   * Live preview as a motion-JPEG stream (a plain <img src> in the browser).
+   * With green screen: ?session=<id> keys it onto that session's background with that session's settings (what the guest
+   * sees is what gets printed); ?bg=<id> does the same for a guest who is still choosing. &mirror=1 flips only the person.
+   */
   app.get('/api/camera/stream', async (req, res) => {
+    let open = true;
+    req.on('close', () => {
+      open = false;
+    });
+    let keying = null;
+    if (greenOn && (req.query.session || req.query.bg)) {
+      const session = req.query.session ? await store.find(String(req.query.session)) : null;
+      if (session?.background && backgrounds.has(session.background.id)) keying = { id: session.background.id, key: session.background.key };
+      else if (!req.query.session && backgrounds.has(String(req.query.bg))) keying = { id: String(req.query.bg), key: settings.key };
+      if (!keying) return res.status(404).json({ error: 'bad_background', message: 'That background does not exist' });
+    }
+    const mirror = Boolean(keying) && req.query.mirror === '1';
     res.writeHead(200, {
       'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
       Pragma: 'no-cache',
       Connection: 'keep-alive',
     });
-    let open = true;
-    req.on('close', () => {
-      open = false;
-    });
     await liveView.acquire();
     try {
       let last = null;
+      let warned = false;
       while (open) {
         const frame = await camera.liveFrame();
-        const current = frame ?? last;
+        let current = last;
+        if (frame) {
+          current = frame;
+          if (keying) {
+            try {
+              current = await keyToJpeg({ source: frame, background: backgroundPixels(keying.id), width: previewWidth, key: keying.key, mirror, quality: 72 });
+            } catch (err) {
+              // A damaged live frame (it happens) must not end the preview: show the previous picture instead.
+              if (!warned) logger.warn(`live preview keying failed: ${err.message}`);
+              warned = true;
+              current = last;
+            }
+          }
+        }
         if (current && open && !res.writableNeedDrain) {
           res.write(`--frame\r\nContent-Type: image/jpeg\r\nContent-Length: ${current.length}\r\n\r\n`);
           res.write(current);
@@ -357,6 +459,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       liveView.release();
       res.end();
     }
+    return undefined;
   });
 
   // ------------------------------------------------------------- operator API
@@ -389,6 +492,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           uploads: uploadQueue ? uploadQueue.list().filter((i) => i.status !== 'done').slice(0, 12) : [],
         },
         email: { enabled: Boolean(emailQueue), from: emailQueue ? config.email.from : null, host: emailQueue ? config.email.smtp.host : null, queue: emailQueue ? emailQueue.list().slice(0, 12) : [], marketingOptIn: config.email.marketingOptIn.enabled },
+        greenScreen: greenOn ? { enabled: true, key: { ...settings.key }, defaults: { ...DEFAULT_KEY }, backdrop: settings.backdrop, backgrounds: backgrounds.list().map((b) => ({ ...b, thumbUrl: thumbUrl(b.id) })), folder: config.greenScreen.dir } : { enabled: false },
         queue: queue.list().slice(0, 8),
         warnings: configWarnings(config),
       });
@@ -402,6 +506,36 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       if (!result.ok) throw new HttpError(400, 'bad_settings', result.problems.join('; '));
       logger.info(`operator changed settings: ${JSON.stringify(req.body)}`);
       res.json({ settings: { ...settings.values } });
+    }),
+  );
+
+  /** One keyed live picture with settings that are NOT yet saved: what the operator sees while moving the sliders. */
+  app.post(
+    '/api/operator/greenscreen/frame',
+    wrap(async (req, res) => {
+      requireGreen();
+      const { view = 'composite', background, key: patch = {}, mirror = false } = req.body ?? {};
+      if (!['composite', 'matte', 'raw'].includes(view)) throw new HttpError(400, 'bad_view', 'view must be composite, matte or raw');
+      const id = background ?? backgrounds.list().find((b) => b.id === settings.backdrop)?.id ?? backgrounds.firstId();
+      if (!backgrounds.has(id)) throw new HttpError(400, 'bad_background', 'That background does not exist');
+      const merged = mergeKey(settings.key, patch);
+      if (merged.problems) throw new HttpError(400, 'bad_key', merged.problems.join('; '));
+      if (capturing) throw new HttpError(409, 'busy', 'A guest is using the camera right now');
+      const frame = await grabLiveFrame();
+      const jpeg = await keyToJpeg({ source: frame, background: backgroundPixels(id), width: previewWidth, key: merged.key, view, mirror: mirror === true, quality: 78 });
+      res.set({ 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' }).send(jpeg);
+    }),
+  );
+
+  /** Looks at the EMPTY backdrop and suggests settings (they are shown to the operator, not saved until they say so). */
+  app.post(
+    '/api/operator/greenscreen/calibrate',
+    wrap(async (req, res) => {
+      requireGreen();
+      if (capturing) throw new HttpError(409, 'busy', 'A guest is using the camera right now');
+      const suggestion = await suggestKeyFromJpeg(await grabLiveFrame());
+      logger.info(`operator calibrated the backdrop: ${suggestion.ok ? `sensitivity ${suggestion.sensitivity}, softness ${suggestion.softness}` : 'could not (see advice)'}`);
+      res.json(suggestion);
     }),
   );
 
@@ -471,7 +605,14 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           throw toHttp(err);
         }
         await makePreview(result.file, path.join(dir, `${baseName}-preview.jpg`), 1600);
-        res.json({ previewUrl: `/media/_tests/${baseName}-preview.jpg`, file: result.file });
+        // With green screen: also show the photo with its backdrop replaced, using the settings as they are now.
+        let keyedPreviewUrl = null;
+        const wanted = req.body?.background;
+        if (greenOn && wanted !== undefined && backgrounds.has(wanted)) {
+          await fs.writeFile(path.join(dir, `${baseName}-keyed.jpg`), await keyToJpeg({ source: result.file, background: backgroundPixels(wanted), width: 1600, key: settings.key, quality: 85 }));
+          keyedPreviewUrl = `/media/_tests/${baseName}-keyed.jpg`;
+        }
+        res.json({ previewUrl: `/media/_tests/${baseName}-preview.jpg`, keyedPreviewUrl, file: result.file });
       } finally {
         capturing = false;
       }

@@ -14,6 +14,7 @@ import { createLanApp } from './lan.js';
 import { ShareIndex, computeShareState, shareBaseUrl } from './share.js';
 import { UploadQueue, WebHostUploader } from './uploader.js';
 import { EmailQueue, Mailer, appendOptIn } from './email.js';
+import { Backgrounds } from './greenscreen.js';
 
 const version = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8')).version;
 
@@ -39,7 +40,21 @@ export async function createBooth(
     throw new ConfigError([`activeTemplate "${config.activeTemplate}" does not exist. Available: ${[...templates.keys()].join(', ')}`]);
   }
 
-  const settings = await new RuntimeSettings({ config, templates, file: settingsFile }).load();
+  // Green screen: the pictures guests can choose from. Loaded (and checked) before the settings, which refer to them.
+  let backgrounds = null;
+  if (config.greenScreen.enabled) {
+    backgrounds = await new Backgrounds({ dir: config.greenScreen.dir, builtin: config.greenScreen.builtinBackgrounds, logger }).load();
+    if (backgrounds.list().length === 0) {
+      throw new ConfigError([`greenScreen.enabled is on but there are no backgrounds: put .jpg or .png files in ${config.greenScreen.dir}, or set greenScreen.builtinBackgrounds to true`]);
+    }
+    if (config.greenScreen.defaultBackdrop !== 'guest' && !backgrounds.has(config.greenScreen.defaultBackdrop)) {
+      logger.warn(`greenScreen.defaultBackdrop "${config.greenScreen.defaultBackdrop}" does not match any background - guests will choose. Available: ${backgrounds.list().map((b) => b.id).join(', ')}`);
+    }
+    await backgrounds.warm();
+    logger.info(`green screen: ${backgrounds.list().length} backgrounds (${backgrounds.list().map((b) => b.id).join(', ')})`);
+  }
+
+  const settings = await new RuntimeSettings({ config, templates, file: settingsFile, backgrounds }).load();
   const camera = injectedCamera ?? createCamera(config, { logger });
   await camera.init();
   const liveView = new LiveViewController(camera, { logger });
@@ -100,9 +115,9 @@ export async function createBooth(
     }).load();
   }
 
-  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue });
+  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds });
   const lanApp = createLanApp({ shareIndex, store, logger });
-  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue };
+  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds };
 }
 
 async function main() {

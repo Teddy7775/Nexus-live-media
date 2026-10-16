@@ -104,14 +104,26 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // -------------------------------------------------------------- live preview
 
-function startLive() {
+/**
+ * With a green-screen session the server draws the guest on their background and (when mirroring) flips only the guest,
+ * so the picture must NOT be mirrored again here - that would flip the background's writing too.
+ */
+function liveUrl({ session = null, background = null } = {}) {
+  const mirror = app.state.ui.mirrorPreview ? '&mirror=1' : '';
+  if (session?.background) return `/api/camera/stream?session=${session.id}${mirror}&ts=${Date.now()}`;
+  if (background) return `/api/camera/stream?bg=${encodeURIComponent(background)}${mirror}&ts=${Date.now()}`;
+  return `/api/camera/stream?ts=${Date.now()}`;
+}
+
+function startLive(session = null) {
   const live = $('#live');
-  live.classList.toggle('mirror', app.state.ui.mirrorPreview);
-  $('#liveImg').src = `/api/camera/stream?ts=${Date.now()}`;
+  live.classList.toggle('mirror', app.state.ui.mirrorPreview && !session?.background);
+  $('#liveImg').src = liveUrl({ session });
 }
 
 function stopLive() {
   $('#liveImg').removeAttribute('src'); // closes the stream so the camera can leave live view
+  $('#pickImg').removeAttribute('src');
 }
 
 function flash() {
@@ -292,7 +304,8 @@ function renderAttract() {
   const { event, template, printer } = app.state;
   $('#eventName').textContent = event.name;
   const outcome = printer.enabled ? 'printed on the spot' : 'saved for you';
-  $('#eventInfo').textContent = `${plural(template.shots, 'photo')}, ${outcome}`;
+  const chooser = app.state.greenScreen?.enabled && app.state.greenScreen.guestChoice ? ' - on a background you choose' : '';
+  $('#eventInfo').textContent = `${plural(template.shots, 'photo')}, ${outcome}${chooser}`;
 }
 
 async function goAttract() {
@@ -335,7 +348,7 @@ async function countdown(session, index, signal) {
   $('#hint').textContent = index === 0 ? 'Get ready — look at the camera!' : 'Next pose!';
   $('#count').textContent = '';
   show('countdown');
-  startLive();
+  startLive(session);
   await delay(600, signal); // let the preview appear before numbers start
   for (let n = ui.countdownSeconds; n >= 1; n -= 1) {
     setCount(String(n));
@@ -372,7 +385,7 @@ async function gifPhase(session, signal) {
   $('#hint').textContent = 'Get ready to move - make it fun!';
   $('#count').textContent = '';
   show('countdown');
-  startLive();
+  startLive(session);
   await delay(600, signal); // let the preview appear
   for (let n = gif.countdownSeconds; n >= 1; n -= 1) {
     setCount(String(n));
@@ -487,8 +500,54 @@ async function doneScreen(printed, signal) {
   await pickHeld(signal, [[$('#doneBtn'), 'done']], seconds * 1000);
 }
 
+/**
+ * Green screen: the guest sees themselves live on each background and taps the one they like.
+ * Resolves with the chosen background's id. Walking away (no tap for a while) sends the booth back to the start screen.
+ */
+async function pickBackground(signal) {
+  const { greenScreen: gs } = app.state;
+  let selected = gs.backdrop ?? gs.backgrounds[0].id;
+  const thumbs = $('#pickThumbs');
+  const buttons = new Map();
+  thumbs.replaceChildren();
+  for (const b of gs.backgrounds) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pick-thumb';
+    const img = document.createElement('img');
+    img.src = b.thumbUrl;
+    img.alt = '';
+    button.append(img, document.createTextNode(b.name));
+    thumbs.append(button);
+    buttons.set(b.id, button);
+  }
+  const choose = (id) => {
+    selected = id;
+    for (const [bid, button] of buttons) button.setAttribute('aria-pressed', String(bid === id));
+    // Until the first live picture arrives (or if the camera has no live view) the chosen background itself shows through.
+    $('#pickLive').style.background = `center / cover url("${gs.backgrounds.find((b) => b.id === id).thumbUrl}")`;
+    $('#pickImg').src = liveUrl({ background: id });
+  };
+  show('pick');
+  choose(selected);
+  try {
+    for (;;) {
+      const pairs = [[$('#pickGo'), 'go'], ...[...buttons].map(([id, button]) => [button, id])];
+      const choice = await pick(signal, pairs, gs.pickSeconds * 1000);
+      if (choice === 'timeout') throw new FlowCancelled();
+      if (choice === 'go') return selected;
+      choose(choice); // a tap on a background: switch to it, and the idle timer starts again
+    }
+  } finally {
+    $('#pickImg').removeAttribute('src');
+  }
+}
+
 async function guestFlow(signal) {
-  const session = await guarded(signal, () => api('POST', '/api/sessions'));
+  const gs = app.state.greenScreen;
+  let background = null;
+  if (gs?.enabled) background = gs.guestChoice ? await pickBackground(signal) : gs.backdrop;
+  const session = await guarded(signal, () => api('POST', '/api/sessions', background ? { background } : undefined));
   app.session = session;
   email.sent = [];
   updateEmailButton();

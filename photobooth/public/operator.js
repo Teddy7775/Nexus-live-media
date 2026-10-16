@@ -7,6 +7,7 @@ const PIN_KEY = 'booth-operator-pin';
 let pin = null;
 let pollTimer = null;
 let templates = [];
+let gs = null; // the last green-screen status from the server
 
 function h(tag, props = {}, ...children) {
   const el = document.createElement(tag);
@@ -78,6 +79,7 @@ function renderStatus(s) {
 
   renderSharing(s.sharing);
   renderMail(s.email);
+  renderGreenScreen(s.greenScreen);
 
   templates = s.templates;
   const select = $('#template');
@@ -155,6 +157,214 @@ function renderMail(m) {
       : [h('li', {}, m.enabled ? 'Nothing waiting' : '-')]),
   );
 }
+
+// ----------------------------------------------------------------- green screen
+
+const SLIDERS = [
+  { key: 'sensitivity', label: 'Sensitivity', min: 1, max: 100, step: 1, help: 'Higher removes more green. Raise it if green shows through in dark corners or shadows; lower it if parts of a person disappear.' },
+  { key: 'softness', label: 'Edge softness', min: 5, max: 100, step: 1, help: 'Wider = softer, more natural hair and edges. Narrower = crisper but harsher.' },
+  { key: 'despill', label: 'Remove green glow', min: 0, max: 1, step: 0.05, help: 'Takes the green tint off hair and shoulders (green light bouncing off the backdrop).' },
+  { key: 'edgeBlur', label: 'Edge smoothing', min: 0, max: 4, step: 0.1, help: 'Smooths jagged outlines. Too much makes a halo.' },
+];
+const tuner = { running: false, view: 'composite', dirty: false, timer: null, stopAt: 0, url: null, built: false };
+
+function tunerKey() {
+  const key = {};
+  for (const sl of SLIDERS) key[sl.key] = Number($(`#gs-${sl.key}`).value);
+  return key;
+}
+
+function showSliderValues() {
+  for (const sl of SLIDERS) $(`#gs-${sl.key}-out`).textContent = $(`#gs-${sl.key}`).value;
+}
+
+function setSliders(key) {
+  for (const sl of SLIDERS) $(`#gs-${sl.key}`).value = key[sl.key];
+  showSliderValues();
+}
+
+function buildTuner() {
+  if (tuner.built) return;
+  tuner.built = true;
+  $('#gsSliders').replaceChildren(
+    ...SLIDERS.map((sl) =>
+      h(
+        'div',
+        { class: 'slider' },
+        h('label', { for: `gs-${sl.key}` }, sl.label, h('output', { id: `gs-${sl.key}-out` })),
+        h('input', {
+          id: `gs-${sl.key}`,
+          type: 'range',
+          min: String(sl.min),
+          max: String(sl.max),
+          step: String(sl.step),
+          oninput: () => {
+            tuner.dirty = true;
+            showSliderValues();
+          },
+        }),
+        h('small', {}, sl.help),
+      ),
+    ),
+  );
+}
+
+function renderGreenScreen(g) {
+  gs = g;
+  if (!g.enabled) {
+    stopTuner();
+    dot($('#gsDot'), '');
+    $('#gsText').textContent = 'Green screen is off';
+    $('#gsDetail').textContent = 'Turn it on in config.json (greenScreen.enabled) to let guests pick a background. It needs a green sheet or wall, even lighting, and live view on the camera.';
+    $('#gsBody').hidden = true;
+    return;
+  }
+  buildTuner();
+  dot($('#gsDot'), 'ok');
+  $('#gsText').textContent = 'Green screen is on';
+  $('#gsDetail').textContent = `${g.backgrounds.length} backgrounds. Changes you save apply to the next guest.`;
+  $('#gsBody').hidden = false;
+  $('#gsFolder').textContent = `Your own backgrounds: put .jpg or .png pictures (3000 px wide or more looks best on a print) in ${g.folder} and restart the booth.`;
+
+  if (!tuner.dirty && !$('#gsSliders').contains(document.activeElement)) setSliders(g.key);
+
+  const options = g.backgrounds.map((b) => h('option', { value: b.id }, b.name));
+  const tryOn = $('#gsBackground');
+  const keepTry = tryOn.value;
+  tryOn.replaceChildren(...options);
+  tryOn.value = g.backgrounds.some((b) => b.id === keepTry) ? keepTry : g.backgrounds[0].id;
+
+  const mode = $('#gsBackdrop');
+  if (document.activeElement !== mode) {
+    mode.replaceChildren(h('option', { value: 'guest' }, 'Each guest chooses'), ...g.backgrounds.map((b) => h('option', { value: b.id }, `Everyone gets: ${b.name}`)));
+    mode.value = g.backdrop;
+  }
+}
+
+async function tunerTick() {
+  if (!tuner.running) return;
+  let wait = 250;
+  try {
+    if (document.hidden || Date.now() > tuner.stopAt) throw Object.assign(new Error(document.hidden ? 'Paused while this tab is hidden.' : 'Stopped after 5 minutes to let the camera rest.'), { stop: true });
+    const res = await fetch('/api/operator/greenscreen/frame', {
+      method: 'POST',
+      headers: { 'x-operator-pin': pin ?? '', 'content-type': 'application/json' },
+      body: JSON.stringify({ view: tuner.view, background: $('#gsBackground').value, key: tunerKey() }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw Object.assign(new Error(data.message || 'The camera did not answer'), { retry: res.status === 409 || res.status === 503 });
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    $('#gsImg').src = url;
+    $('#gsImg').hidden = false;
+    $('#gsPlaceholder').hidden = true;
+    if (tuner.url) URL.revokeObjectURL(tuner.url);
+    tuner.url = url;
+    say($('#gsLiveMsg'), '');
+  } catch (err) {
+    if (err.stop || !err.retry) {
+      stopTuner(err.message);
+      return;
+    }
+    say($('#gsLiveMsg'), `${err.message} Trying again…`, 'error');
+    wait = 2000;
+  }
+  if (tuner.running) tuner.timer = setTimeout(tunerTick, wait);
+}
+
+function startTuner() {
+  tuner.running = true;
+  tuner.stopAt = Date.now() + 5 * 60 * 1000;
+  $('#gsToggle').textContent = 'Stop live tuner';
+  say($('#gsLiveMsg'), 'Starting the camera…');
+  tunerTick();
+}
+
+function stopTuner(message) {
+  clearTimeout(tuner.timer);
+  tuner.running = false;
+  $('#gsToggle').textContent = 'Start live tuner';
+  if (message) say($('#gsLiveMsg'), message, 'error');
+  else say($('#gsLiveMsg'), '');
+}
+
+$('#gsToggle').addEventListener('click', () => (tuner.running ? stopTuner() : startTuner()));
+
+for (const button of document.querySelectorAll('.seg-btn')) {
+  button.addEventListener('click', () => {
+    tuner.view = button.dataset.view;
+    for (const other of document.querySelectorAll('.seg-btn')) other.setAttribute('aria-pressed', String(other === button));
+  });
+}
+
+$('#gsCalibrate').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  say($('#gsMsg'), 'Looking at the backdrop - keep everyone out of the picture…');
+  try {
+    const r = await api('POST', '/api/operator/greenscreen/calibrate');
+    if (r.ok) {
+      setSliders({ ...tunerKey(), sensitivity: r.sensitivity, softness: r.softness });
+      tuner.dirty = true;
+      say($('#gsMsg'), `${r.advice} Suggested sensitivity ${r.sensitivity} and softness ${r.softness}: check the picture, then save.`, r.warn ? 'error' : 'ok');
+    } else {
+      say($('#gsMsg'), r.advice, 'error');
+    }
+  } catch (err) {
+    say($('#gsMsg'), err.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('#gsSave').addEventListener('click', async () => {
+  say($('#gsMsg'), 'Saving…');
+  try {
+    await api('POST', '/api/operator/settings', { key: tunerKey() });
+    tuner.dirty = false;
+    say($('#gsMsg'), 'Saved. The next guest will use these settings.', 'ok');
+    await refreshStatus();
+  } catch (err) {
+    say($('#gsMsg'), err.message, 'error');
+  }
+});
+
+$('#gsReset').addEventListener('click', () => {
+  if (!gs?.enabled) return;
+  setSliders(gs.defaults);
+  tuner.dirty = true;
+  say($('#gsMsg'), 'Back to the standard settings (not saved yet).');
+});
+
+$('#gsBackdropSave').addEventListener('click', async () => {
+  say($('#gsBackdropMsg'), 'Applying…');
+  try {
+    await api('POST', '/api/operator/settings', { backdrop: $('#gsBackdrop').value });
+    say($('#gsBackdropMsg'), $('#gsBackdrop').value === 'guest' ? 'Guests will choose their own background.' : 'Every guest now gets that background.', 'ok');
+    await refreshStatus();
+  } catch (err) {
+    say($('#gsBackdropMsg'), err.message, 'error');
+  }
+});
+
+$('#gsTestPhoto').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  say($('#gsPhotoMsg'), 'Taking a photo…');
+  $('#gsPhotoImg').hidden = true;
+  try {
+    const r = await api('POST', '/api/operator/test-capture', { background: $('#gsBackground').value });
+    say($('#gsPhotoMsg'), 'This is the photo as a guest would get it, with the SAVED settings (save first if you just changed the sliders).', 'ok');
+    $('#gsPhotoImg').src = r.keyedPreviewUrl ?? r.previewUrl;
+    $('#gsPhotoImg').hidden = false;
+  } catch (err) {
+    say($('#gsPhotoMsg'), err.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
 
 async function mailAction(method, url) {
   try {
@@ -323,6 +533,7 @@ $('#settingsForm').addEventListener('submit', async (e) => {
 // -------------------------------------------------------------- lock / unlock
 
 function lock(message) {
+  stopTuner();
   sessionStorage.removeItem(PIN_KEY);
   pin = null;
   clearInterval(pollTimer);

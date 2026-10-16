@@ -104,3 +104,35 @@ test('loadConfig explains a JSON typo instead of crashing with a stack trace', (
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('green screen settings are validated, with messages that name the setting', () => {
+  assert.doesNotThrow(() => validateConfig(make({ greenScreen: { enabled: true, key: { sensitivity: 70 } } })));
+  const bad = problemsOf({ greenScreen: { enabled: true, pickSeconds: 1, previewWidth: 50, defaultBackdrop: '', key: { sensitivity: 500, softness: 0, despill: 3, edgeBlur: 'a lot' } } }).join('|');
+  assert.match(bad, /greenScreen\.pickSeconds/);
+  assert.match(bad, /greenScreen\.previewWidth/);
+  assert.match(bad, /greenScreen\.defaultBackdrop/);
+  assert.match(bad, /greenScreen\.key: sensitivity must be a number from 1 to 100/);
+  assert.match(bad, /greenScreen\.key: softness/);
+  assert.match(bad, /greenScreen\.key: despill/);
+  assert.match(bad, /greenScreen\.key: edgeBlur/);
+  assert.match(problemsOf({ camera: { mock: { scene: 'sunset' } } }).join('|'), /camera\.mock\.scene must be "portrait" or "greenscreen"/);
+});
+
+test('green screen: the backgrounds folder is resolved against the app folder, and rehearsal hints appear only when they matter', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'cfg-test-'));
+  try {
+    fs.writeFileSync(path.join(root, 'config.json'), JSON.stringify({ greenScreen: { enabled: true, dir: 'my-backdrops' } }));
+    const cfg = loadConfig({ rootDir: root });
+    assert.equal(cfg.greenScreen.dir, path.join(root, 'my-backdrops'));
+    assert.match(configWarnings(cfg).join('|'), /mock camera scene is "portrait".*"greenscreen" to rehearse/);
+
+    const rehearsal = make({ greenScreen: { enabled: true }, camera: { mock: { scene: 'greenscreen' } } });
+    assert.doesNotMatch(configWarnings(rehearsal).join('|'), /greenScreen/);
+    assert.doesNotMatch(configWarnings(make({})).join('|'), /greenScreen/, 'nothing is said when green screen is off');
+
+    const noLive = make({ greenScreen: { enabled: true }, camera: { driver: 'digicamcontrol', digicamcontrol: { liveView: false } } });
+    assert.match(configWarnings(noLive).join('|'), /liveView is off/);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
