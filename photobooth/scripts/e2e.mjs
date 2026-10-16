@@ -12,6 +12,7 @@ import path from 'node:path';
 import net from 'node:net';
 import jsQR from 'jsqr';
 import sharp from 'sharp';
+import { startFakeSmtp } from '../test/fakeSmtp.js';
 import { chromium } from 'playwright-core';
 import { DEFAULTS, ROOT_DIR, deepMerge, validateConfig } from '../server/config.js';
 import { createBooth } from '../server/index.js';
@@ -56,6 +57,14 @@ const failedRequests = [];
 page.on('response', (res) => {
   if (res.status() >= 400) failedRequests.push(`${res.status()} ${res.request().method()} ${res.url().replace(base, '')}`);
 });
+
+const waitForMail = async (smtp, count, timeoutMs = 15000) => {
+  const deadline = Date.now() + timeoutMs;
+  while (smtp.state.messages.length < count) {
+    if (Date.now() > deadline) throw new Error('the email never arrived at the SMTP server');
+    await new Promise((r) => setTimeout(r, 50));
+  }
+};
 
 let step = 0;
 // Wait for the 0.25 s screen cross-fade to finish so the screenshot shows the screen, not a blend of two.
@@ -192,10 +201,11 @@ try {
   assert.match(await page.textContent('#eventInfo'), /2 photos/);
   await snap('attract-after-settings');
 
-  // ------------------------------------------------------------------ sharing scenario
-  log('sharing: QR on screen -> scan it -> the guest gallery opens on a phone');
+  // ------------------------------------------------------------------ sharing + email scenario
+  log('sharing + email: type an address on the touch keyboard, scan the QR on a phone');
   const freePort = () => new Promise((resolve) => { const s = net.createServer().listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
   const lanPort = await freePort();
+  const smtp = await startFakeSmtp();
   const work2 = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-e2e-share-'));
   const config2 = validateConfig(
     deepMerge(DEFAULTS, {
@@ -203,8 +213,9 @@ try {
       event: { name: 'Sarah & James Wedding' },
       ui: { countdownSeconds: 1, shotPreviewSeconds: 1, reviewSeconds: 60, doneSeconds: 8, errorSeconds: 60 },
       camera: { mock: { captureDelayMs: 100 } },
-      printer: { dryRunDelayMs: 2500, estimatedSeconds: 3 },
-      sharing: { enabled: true, mode: 'local', publicBaseUrl: `http://127.0.0.1:${lanPort}`, shareSeconds: 20, wifiHint: 'Join the Wi-Fi network NexusGuests first.' },
+      printer: { dryRunDelayMs: 3500, estimatedSeconds: 4 },
+      sharing: { enabled: true, mode: 'local', publicBaseUrl: `http://127.0.0.1:${lanPort}`, shareSeconds: 30, wifiHint: 'Join the Wi-Fi network NexusGuests first.' },
+      email: { enabled: true, from: 'Nexus Booth <booth@test.local>', smtp: smtp.smtp(), marketingOptIn: { enabled: true, label: 'Keep me posted about future events' } },
     }),
   );
   const booth2 = await createBooth(config2, { logger: createLogger({ quiet: true }), settingsFile: path.join(work2, 'runtime-settings.json') });
@@ -218,6 +229,10 @@ try {
     await pg.screenshot({ path: path.join(shotsDir, `${String(step).padStart(2, '0')}-${name}.jpg`), type: 'jpeg', quality: 82 });
     console.log(`  screenshot docs/screens/${String(step).padStart(2, '0')}-${name}.jpg`);
   };
+  // Tap keys on the on-screen keyboard exactly as a guest would.
+  const typeOnKeyboard = async (pg, text) => {
+    for (const ch of text) await pg.click(`#keyboard .key[data-key="${ch}"]`);
+  };
   try {
     const page2 = await context.newPage();
     page2.on('pageerror', (err) => problems.push(`page error (sharing): ${err.message}`));
@@ -230,13 +245,43 @@ try {
     await page2.waitForSelector('#sharePanel:not([hidden])');
     await page2.waitForFunction(() => document.querySelector('#shareStatus').classList.contains('ok'), null, { timeout: 15000 });
     assert.match(await page2.textContent('#shareStatus'), /Ready.*scan.*Join the Wi-Fi network NexusGuests first\./);
-    await snapPage(page2, 'share-while-printing');
+    await snapPage(page2, 'share-while-printing', 250);
 
-    // "Scan" the QR exactly as it is shown on the kiosk screen.
+    // --- email, while the print is still coming out
+    await page2.click('#emailBtn');
+    await page2.waitForSelector('#emailOverlay:not([hidden])');
+    assert.equal(await page2.isDisabled('#emailSend'), true, 'Send is disabled until the address is valid');
+    await snapPage(page2, 'email-keyboard', 150);
+    await typeOnKeyboard(page2, 'ana@gmial.com');
+    assert.equal(await page2.textContent('#emailText'), 'ana@gmial.com');
+    await page2.waitForSelector('#emailSuggest:not([hidden])');
+    assert.equal((await page2.textContent('#emailSuggest')).trim(), 'Did you mean ana@gmail.com?');
+    await snapPage(page2, 'email-did-you-mean', 150);
+    await page2.click('#emailSuggest');
+    assert.equal(await page2.textContent('#emailText'), 'ana@gmail.com');
+    await page2.check('#optIn');
+
+    // The print finishes while the guest is still on the email screen: the kiosk must NOT jump to "Thank you".
+    await page2.waitForTimeout(4200);
+    assert.equal(await page2.evaluate(() => document.body.dataset.screen), 'printing', 'the screen waits while the guest is typing');
+    assert.equal(await page2.locator('#emailOverlay').isVisible(), true);
+
+    await page2.click('#emailSend');
+    await page2.waitForSelector('#emailOverlay', { state: 'hidden' });
+    await page2.waitForSelector('body[data-screen="done"]', { timeout: 15000 });
+    assert.match(await page2.textContent('#emailSent'), /Sent to a\*\*\*@gmail\.com/);
+    await waitForMail(smtp, 1);
+    const mail = smtp.state.messages[0];
+    assert.equal(mail.to.value[0].address, 'ana@gmail.com', 'the corrected address received the email');
+
+    // --- the QR on screen and the link in the email are the same gallery
     const qrPng = await page2.locator('#qrImg').screenshot();
     const { data, info } = await sharp(qrPng).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const scanned = jsQR(new Uint8ClampedArray(data), info.width, info.height)?.data;
     assert.ok(scanned && scanned.startsWith(`http://127.0.0.1:${lanPort}/s/`), `the on-screen QR decodes to a gallery link (got ${scanned})`);
+    assert.ok(mail.text.includes(scanned), 'the email links to the same gallery as the QR code');
+    const optIn = path.join(config2.storage.dir, booth2.settings.eventSlug, 'optin-emails.csv');
+    assert.match(fs.readFileSync(optIn, 'utf8'), /ana@gmail\.com,/, 'the guest who ticked the box was recorded');
 
     const phonePage = await phone.newPage();
     phonePage.on('pageerror', (err) => problems.push(`page error (gallery): ${err.message}`));
@@ -246,16 +291,16 @@ try {
     assert.ok((await phonePage.locator('img').count()) >= 4, 'final picture plus the individual photos');
     await snapPage(phonePage, 'guest-gallery-phone', 200);
 
-    await page2.waitForSelector('body[data-screen="done"]', { timeout: 30000 });
-    assert.equal(await page2.locator('#doneShareSlot #sharePanel').isVisible(), true, 'the QR stays on the thank-you screen');
-    await snapPage(page2, 'done-with-qr');
+    await snapPage(page2, 'done-with-qr', 250);
     await page2.close();
   } finally {
     await phone.close();
+    booth2.emailQueue?.stop();
     lanServer2.closeAllConnections();
     lanServer2.close();
     server2.closeAllConnections();
     server2.close();
+    await smtp.close();
     fs.rmSync(work2, { recursive: true, force: true });
   }
 

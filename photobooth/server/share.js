@@ -38,6 +38,20 @@ export function shareBaseUrl(config, { lanIp = lanAddress() } = {}) {
 
 export const shareUrl = (baseUrl, token) => `${baseUrl}/s/${token}/`;
 
+/**
+ * Is the guest's link live? "local": once the gallery folder for the current picture is built.
+ * "upload": once the web host holds that exact picture version. (A retake changes the version, so an old upload never counts.)
+ */
+export function computeShareState({ config, session, uploadItem = null, shareBase }) {
+  if (!config.sharing.enabled || !session?.share) return { enabled: false };
+  const version = session.final?.version;
+  const mode = config.sharing.mode;
+  const built = Boolean(version) && session.share.builtVersion === version;
+  const ready = mode === 'local' ? built : Boolean(version) && session.share.uploadedVersion === version;
+  const failed = !ready && uploadItem?.status === 'failed';
+  return { enabled: true, mode, ready, state: ready ? 'ready' : failed ? 'failed' : 'preparing', error: failed ? uploadItem.error : null, url: shareUrl(shareBase, session.share.token) };
+}
+
 export const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 /** A self-contained, JavaScript-free page: opens fast on a phone, works from any static web host. */

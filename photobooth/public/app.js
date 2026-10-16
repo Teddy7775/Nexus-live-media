@@ -1,10 +1,14 @@
 // Guest-facing photo booth. One guest at a time moves through: attract -> countdown/photo (x N) -> review -> print -> done.
 // Everything the guest waits on is cancellable, so "Start over" or an error timeout can never leave a stray timer running.
 
+import { createKeyboard } from './keyboard.js';
+import { isValidEmail, maskEmail, normalizeEmail, suggestEmail } from './email-utils.js';
+
 const $ = (selector) => document.querySelector(selector);
 const screens = [...document.querySelectorAll('.screen')];
 
-const app = { state: null, flow: null };
+const app = { state: null, flow: null, session: null };
+const email = { open: false, value: '', sent: [], waiters: [], confirmedTypo: false, stopKeyboard: null, sending: false };
 
 class FlowCancelled extends Error {}
 
@@ -27,6 +31,26 @@ function delay(ms, signal) {
       resolve();
     }, ms);
     signal.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+/** Like pick(), but while the email screen is open the timeout never fires (the guest is typing), then it starts afresh. */
+async function pickHeld(signal, pairs, timeoutMs) {
+  for (;;) {
+    const choice = await pick(signal, pairs, timeoutMs);
+    if (choice !== 'timeout' || !email.open) return choice;
+    await emailClosed(signal);
+  }
+}
+
+/** Resolves when the email screen is closed (immediately if it is not open). */
+function emailClosed(signal) {
+  if (!email.open) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new FlowCancelled());
+    email.waiters.push(resolve);
+    signal?.addEventListener('abort', () => reject(new FlowCancelled()), { once: true });
+    return undefined;
   });
 }
 
@@ -134,6 +158,7 @@ function startShare(session, signal) {
     }
     $('#qrImg').src = `data:image/svg+xml;utf8,${encodeURIComponent(state.qrSvg)}`;
     $('#sharePanel').hidden = false;
+    updateEmailButton();
     for (;;) {
       if (state.ready) return setStatus(`Ready - scan the code with your phone camera.${hint ? ` ${hint}` : ''}`, 'ok');
       if (state.state === 'failed') return setStatus('Your link could not be created. Please ask the attendant.', 'bad');
@@ -154,6 +179,108 @@ function placeSharePanel(slotSelector) {
   if (!app.state.sharing?.enabled) return;
   $(slotSelector).append(panel);
 }
+
+// ------------------------------------------------------------ email entry
+
+function updateEmailButton() {
+  const enabled = app.state.email?.enabled && app.state.sharing?.enabled;
+  $('#emailBtn').hidden = !(enabled && email.sent.length < app.state.email.maxPerSession);
+  $('#emailSent').hidden = email.sent.length === 0;
+  $('#emailSent').textContent = email.sent.length ? `Sent to ${email.sent.join(', ')}. It can take a minute - check your spam folder too.` : '';
+}
+
+function renderEmail() {
+  const value = email.value;
+  $('#emailText').textContent = value;
+  $('#emailSend').disabled = email.sending || !isValidEmail(value);
+  const suggestion = suggestEmail(value);
+  const suggest = $('#emailSuggest');
+  suggest.hidden = !suggestion;
+  suggest.textContent = suggestion ? `Did you mean ${suggestion}?` : '';
+  suggest.dataset.value = suggestion ?? '';
+}
+
+function setEmailHint(text) {
+  $('#emailHint').textContent = text;
+}
+
+function openEmail() {
+  if (!app.session || email.open) return;
+  const opt = app.state.email.marketingOptIn;
+  email.open = true;
+  email.value = '';
+  email.confirmedTypo = false;
+  email.sending = false;
+  $('#optIn').checked = false;
+  $('#optInRow').hidden = !opt?.enabled;
+  $('#optInLabel').textContent = opt?.label ?? '';
+  $('#emailPrivacy').textContent = opt?.enabled ? 'We use your email to send these photos. We only keep it if you tick the box above.' : 'We use your email only to send these photos, and we do not keep it.';
+  setEmailHint('');
+  email.stopKeyboard = createKeyboard({ container: $('#keyboard'), onKey: onEmailKey });
+  $('#emailOverlay').hidden = false;
+  renderEmail();
+}
+
+function closeEmail() {
+  if (!email.open) return;
+  email.open = false;
+  email.stopKeyboard?.();
+  email.stopKeyboard = null;
+  $('#emailOverlay').hidden = true;
+  for (const resolve of email.waiters.splice(0)) resolve();
+}
+
+function onEmailKey(key) {
+  if (key.type === 'char') email.value = (email.value + key.value).slice(0, 254);
+  else if (key.type === 'backspace') email.value = email.value.slice(0, -1);
+  else email.value = '';
+  email.confirmedTypo = false;
+  setEmailHint('');
+  renderEmail();
+}
+
+async function submitEmail() {
+  if (email.sending || !isValidEmail(email.value)) return;
+  // A likely typo ("...@gmial.com") is the most common reason a guest never receives their photos: ask once.
+  if (suggestEmail(email.value) && !email.confirmedTypo) {
+    email.confirmedTypo = true;
+    setEmailHint('Please double-check the address. Tap Send again if it is right.');
+    return;
+  }
+  email.sending = true;
+  renderEmail();
+  setEmailHint('Sending…');
+  try {
+    const result = await api('POST', `/api/sessions/${app.session.id}/email`, { email: normalizeEmail(email.value), optIn: $('#optIn').checked });
+    if (!email.sent.includes(result.masked)) email.sent.push(result.masked);
+    closeEmail();
+    updateEmailButton();
+  } catch (error) {
+    email.sending = false;
+    setEmailHint(error.message || 'That did not work. Please try again.');
+    renderEmail();
+  }
+}
+
+$('#emailBtn').addEventListener('click', openEmail);
+$('#emailCancel').addEventListener('click', closeEmail);
+$('#emailSend').addEventListener('click', submitEmail);
+$('#emailSuggest').addEventListener('click', () => {
+  email.value = $('#emailSuggest').dataset.value;
+  email.confirmedTypo = false;
+  setEmailHint('');
+  renderEmail();
+});
+// A real keyboard works too (handy for staff and for testing).
+document.addEventListener('keydown', (event) => {
+  if (!email.open || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (event.key === 'Escape') closeEmail();
+  else if (event.key === 'Enter') submitEmail();
+  else if (event.key === 'Backspace') onEmailKey({ type: 'backspace' });
+  else if (/^[a-zA-Z0-9@._+-]$/.test(event.key)) onEmailKey({ type: 'char', value: event.key.toLowerCase() });
+  else return;
+  event.preventDefault();
+});
 
 // ------------------------------------------------------------------ screens
 
@@ -307,7 +434,8 @@ async function printFlow(session, signal) {
     for (;;) {
       await delay(700, signal);
       const { job } = await api('GET', `/api/print/jobs/${queued.job.id}`);
-      if (job.status === 'done') return;
+      // Finished printing: if the guest is mid-way through typing their email, wait for them before the thank-you screen.
+      if (job.status === 'done') return emailClosed(signal);
       if (job.status === 'error') throw new Error('Your photos are saved, but they could not be printed.');
       if (Date.now() > deadline) throw new Error('The printer is taking too long.');
     }
@@ -322,11 +450,14 @@ async function doneScreen(printed, signal) {
   show('done');
   // With a QR code on screen, give guests time to scan it.
   const seconds = sharing?.enabled ? Math.max(ui.doneSeconds, sharing.shareSeconds) : ui.doneSeconds;
-  await pick(signal, [[$('#doneBtn'), 'done']], seconds * 1000);
+  await pickHeld(signal, [[$('#doneBtn'), 'done']], seconds * 1000);
 }
 
 async function guestFlow(signal) {
   const session = await guarded(signal, () => api('POST', '/api/sessions'));
+  app.session = session;
+  email.sent = [];
+  updateEmailButton();
   const shots = [];
   for (let i = 0; i < session.shotsNeeded; i += 1) await takePhoto(session, i, shots, signal);
 
@@ -360,6 +491,9 @@ async function runGuestFlow() {
     if (!(error instanceof FlowCancelled)) console.error(error);
   } finally {
     app.flow = null;
+    closeEmail();
+    app.session = null;
+    email.sent = [];
     $('#sharePanel').hidden = true;
     $('#qrImg').removeAttribute('src');
     goAttract();

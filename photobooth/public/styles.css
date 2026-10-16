@@ -213,3 +213,32 @@ h2 { font-size: clamp(28px, 5vmin, 80px); font-weight: 800; letter-spacing: -0.0
 .share-status.ok { color: var(--ok); }
 .share-status.bad { color: var(--danger); }
 @media (orientation: portrait) { .share { flex-direction: column; text-align: center; } }
+
+/* ---------- email entry ---------- */
+/* Everything here is sized from the screen HEIGHT, so the whole screen (title, keyboard, buttons) fits without scrolling
+   on tablets as small as ~600 px tall as well as on a full-HD kiosk. */
+.btn.compact { min-height: 52px; padding: 1.2vmin 3.4vmin; font-size: clamp(16px, 2.4vmin, 32px); margin-top: 1.4vmin; }
+.overlay { position: fixed; inset: 0; z-index: 40; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 1.2vh 2vw; overflow: auto; }
+.overlay[hidden] { display: none; }
+.email-card { width: min(96vw, 1100px); display: flex; flex-direction: column; align-items: center; gap: 1vh; text-align: center; }
+.email-card h2 { font-size: clamp(20px, 3.8vh, 52px); }
+.email-field { width: 100%; min-height: clamp(46px, 7.4vh, 88px); display: flex; align-items: center; justify-content: center; padding: 0.8vh 2vw; border-radius: 1.6vh; background: var(--surface); border: 3px solid var(--accent); font-size: clamp(20px, 4vh, 56px); font-weight: 700; word-break: break-all; }
+.caret { width: 3px; height: 1.1em; background: var(--accent); margin-left: 0.6vh; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.email-hint { min-height: 1.3em; color: var(--danger); font-size: clamp(14px, 2.3vh, 30px); font-weight: 700; }
+.suggest { font: inherit; font-weight: 700; font-size: clamp(15px, 2.5vh, 34px); color: #04070c; background: var(--accent); border: 0; border-radius: 999px; padding: 0.9vh 2.6vw; cursor: pointer; }
+.suggest[hidden] { display: none; }
+.keyboard { width: 100%; display: flex; flex-direction: column; gap: 0.9vh; }
+.key-row { display: flex; justify-content: center; gap: 0.7vw; }
+.key { font: inherit; font-weight: 700; flex: 1 1 0; max-width: min(9.4vh, 8vw); min-width: 0; min-height: clamp(40px, 7vh, 80px); font-size: clamp(17px, 3.2vh, 44px); color: var(--text); background: var(--surface-2); border: 2px solid var(--line); border-radius: 1.3vh; cursor: pointer; }
+.key:active { background: var(--accent); color: #04070c; transform: scale(0.96); }
+.key.wide { max-width: min(14vh, 12vw); flex-grow: 1.4; }
+.key.domain { max-width: none; font-size: clamp(13px, 2.3vh, 30px); background: #20283a; }
+.key.action { color: var(--danger); }
+.key:focus-visible { outline: 4px solid #fff; outline-offset: 2px; }
+.optin { display: flex; align-items: center; gap: 1.2vh; font-size: clamp(14px, 2.3vh, 30px); font-weight: 600; cursor: pointer; }
+.optin[hidden] { display: none; }
+.optin input { width: 3vh; height: 3vh; min-width: 22px; min-height: 22px; accent-color: var(--accent); }
+.email-privacy { color: var(--muted); font-size: clamp(12px, 1.8vh, 22px); max-width: 64ch; }
+.email-card .row { gap: 2vw; }
+.email-card .btn { min-height: clamp(48px, 7vh, 72px); padding: 1vh 5vw; font-size: clamp(18px, 3vh, 40px); }

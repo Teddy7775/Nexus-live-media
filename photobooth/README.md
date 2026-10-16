@@ -112,6 +112,28 @@ Turn on `sharing.enabled` and every guest gets a **private web page with their p
 
 **Upload mode caveats.** The QR printed on a photo points at your web host, so if the venue has no internet it will not open until the PC reconnects and the queue catches up (the operator panel shows what is waiting). Always test with real mobile data.
 
+## Email: send the photos to the guest's inbox
+
+With `email.enabled`, the QR panel gets an **Email me my photos** button. The guest types their address on a built-in touch keyboard (no physical keyboard needed), the booth asks "Did you mean ...@gmail.com?" for common typos, and the email goes out **as soon as their gallery link is live**: never before, so nobody receives a link that does not open yet. The email has the link, a button and a small preview of the photos. It needs `sharing` turned on, because it contains that link.
+
+```json
+"email": {
+  "enabled": true,
+  "from": "Nexus Booth <booth@yourdomain.com>",
+  "smtp": { "host": "smtp.hostinger.com", "port": 465, "secure": true, "user": "booth@yourdomain.com" }
+}
+```
+
+Set the mailbox password as the environment variable **`BOOTH_SMTP_PASS`** so it is not in a file. Create a mailbox on your own domain for this (the host and port above are typical for Hostinger; confirm them in your hosting panel). In the operator panel's **Email** card, press **Check mail login**, then **Send test email** to your own address, before every event.
+
+**Privacy, by design**
+- The address is used **only to send the photos**. Once sent it is erased from disk; only a salted hash is kept for 24 hours (for the limits below). Addresses never appear in logs or in the operator panel in full (`j***@gmail.com`).
+- Marketing is **opt-in only**: with `email.marketingOptIn.enabled` a tick-box (unticked) appears, and only addresses of guests who ticked it are saved, to `optin-emails.csv` in the event folder. The rules about marketing emails differ by country (for example GDPR, CAN-SPAM, CASL), so get proper advice before using that list.
+- The kiosk cannot be used to spam: up to `maxPerSession` addresses per guest, `maxPerAddressPerHour` per address, repeats ignored.
+- If sending fails because the venue connection is down, it keeps retrying (and survives a reboot) for `maxAgeHours`; a refused address or a wrong login fails at once and shows in the Email card with the reason, with **Retry** and **Dismiss**.
+
+Deliverability matters more than code here: send from a mailbox on your own domain, make sure your host has SPF/DKIM set up for it, and test with real Gmail and Outlook addresses (and check their spam folders). Shared hosting plans also limit how many emails you may send per hour; check your plan.
+
 ## Configuration
 
 `config.json` is merged over the defaults in `server/config.js`; only the keys you set are needed. A typo is reported at startup, naming the setting, instead of failing at the event.
@@ -135,6 +157,10 @@ Turn on `sharing.enabled` and every guest gets a **private web page with their p
 | `sharing.autoUpload`, `sharing.qrOnPrint` | Upload every session right away (needed for the printed QR to work); print a QR on layouts that have room. |
 | `sharing.wifiHint`, `sharing.shareSeconds` | Text under the QR in local mode; how long the QR stays on the thank-you screen. |
 | `sharing.upload.url`, `sharing.upload.secret` | Web host receiver address and shared secret (set the secret with the `BOOTH_UPLOAD_SECRET` environment variable). |
+| `email.enabled`, `email.from`, `email.smtp.*` | Let guests email themselves their photos. Needs `sharing.enabled`. Set the password with `BOOTH_SMTP_PASS`. |
+| `email.subject`, `email.intro` | Subject (`{event}` is replaced) and opening line of the email. |
+| `email.marketingOptIn` | `{ "enabled": true, "label": "..." }` adds an unticked tick-box; only ticked addresses are kept. |
+| `email.maxPerSession`, `maxPerAddressPerHour`, `maxAgeHours` | Anti-spam limits and how long to keep retrying. |
 | `lan.host`, `lan.port` | The small network listener for galleries (default port 3001). Nothing else is exposed. |
 
 ## What has and hasn't been verified
@@ -148,6 +174,7 @@ Turn on `sharing.enabled` and every guest gets a **private web page with their p
 - The digiCamControl adapter against a stand-in server that follows digiCamControl's own source code: command format, `OK`-vs-error replies, RAW rejection, timeouts, live view pause/resume.
 - The Windows printing adapter against a stand-in for `pdf-to-printer`.
 - Sharing: QR codes decoded back to the exact link, including a 0.6-inch code on a JPEG-compressed strip, each strip half after the cut, and the code shown on the kiosk screen opened in a phone-sized browser.
+- Email against a **real SMTP server**: the message (link, inline preview, escaped text, no header injection), waiting for the link to go live, temporary vs permanent refusals, a wrong login, a dead connection, restart recovery, rate limits, and that no readable address stays on disk or in logs. The touch-keyboard flow (typo suggestion included) runs in a real browser.
 - The gallery listener exposes only galleries (the booth's API, operator panel and session folders are all unreachable from it).
 - The web-host receiver (`webhost/upload.php`) running under **real PHP**: bad signatures, stale timestamps, path tricks, scripts disguised as images and oversized files are all refused; the queue retries, survives a restart and never publishes a gallery before its pictures.
 
@@ -158,6 +185,8 @@ Turn on `sharing.enabled` and every guest gets a **private web page with their p
 - Footer text rendering on Windows (it uses system fonts; a transparent PNG overlay with the text baked in avoids this entirely).
 - `start-booth.bat` and kiosk mode on a real Windows PC.
 - Scanning a **printed** QR with a real phone camera on DNP paper (decoding was tested on the digital picture with an independent QR reader).
+- Email **deliverability**: whether Hostinger's (or any) SMTP server accepts the messages, whether Gmail/Outlook put them in spam, your hourly sending limit, and how the HTML email looks in real mail apps (only the message content and delivery to a test server were checked).
+- Typing comfort on your real touch screen size (the keyboard is sized for screens from about 600 px tall up).
 - Local mode on a real venue network (Windows firewall prompt, client isolation, the phone actually reaching the PC).
 - The web host's `.htaccess` rules (hiding `config.php`, blocking folder listings) and the host's own PHP settings; only the PHP script itself was tested. See the checks in `webhost/README.md`.
 

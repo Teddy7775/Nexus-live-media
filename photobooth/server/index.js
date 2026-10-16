@@ -11,8 +11,9 @@ import { SessionStore } from './store.js';
 import { RuntimeSettings } from './settings.js';
 import { createApp } from './app.js';
 import { createLanApp } from './lan.js';
-import { ShareIndex, shareBaseUrl } from './share.js';
+import { ShareIndex, computeShareState, shareBaseUrl } from './share.js';
 import { UploadQueue, WebHostUploader } from './uploader.js';
+import { EmailQueue, Mailer, appendOptIn } from './email.js';
 
 const version = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8')).version;
 
@@ -26,6 +27,7 @@ export async function createBooth(
     camera: injectedCamera,
     printer: injectedPrinter,
     uploader: injectedUploader,
+    mailer: injectedMailer,
     shareBase: injectedShareBase,
   } = {},
 ) {
@@ -70,9 +72,37 @@ export async function createBooth(
     }).load();
   }
 
-  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue });
+  // Email: a durable queue that waits for the guest's link to be live, retries, and never keeps an address after sending.
+  let mailer = null;
+  let emailQueue = null;
+  if (config.email.enabled) {
+    const em = config.email;
+    mailer = injectedMailer ?? new Mailer({ smtp: em.smtp, from: em.from });
+    emailQueue = await new EmailQueue({
+      mailer,
+      file: path.join(queuesDir, 'email-queue.json'),
+      logger,
+      limits: { maxPerSession: em.maxPerSession, maxPerAddressPerHour: em.maxPerAddressPerHour },
+      intro: em.intro,
+      subject: em.subject,
+      brandName: config.sharing.brandName,
+      maxAgeMs: em.maxAgeHours * 3600_000,
+      isShareReady: async (item) => {
+        const session = await store.find(item.sessionId);
+        if (!session) return false;
+        const uploadItem = uploadQueue?.list().find((i) => i.sessionId === session.id && i.version === session.final?.version) ?? null;
+        return computeShareState({ config, session, uploadItem, shareBase }).ready;
+      },
+      // The one place an address is kept longer: only for a guest who ticked the marketing opt-in.
+      onSent: async (item) => {
+        if (item.optIn && item.eventSlug) await appendOptIn({ file: path.join(store.eventDir(item.eventSlug), 'optin-emails.csv'), email: item.to, eventName: item.eventName });
+      },
+    }).load();
+  }
+
+  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue });
   const lanApp = createLanApp({ shareIndex, store, logger });
-  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue };
+  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue };
 }
 
 async function main() {
@@ -114,6 +144,7 @@ async function main() {
     server.close();
     lanServer?.close();
     booth.uploadQueue?.stop();
+    booth.emailQueue?.stop();
     await booth.camera.close().catch(() => {});
     process.exit(0);
   };

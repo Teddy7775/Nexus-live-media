@@ -7,7 +7,9 @@ import { ComposeError, composeTemplate, makePreview, renderTestPattern } from '.
 import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
 import { qrSvg } from './qr.js';
-import { buildShareBundle, shareUrl } from './share.js';
+import { buildShareBundle, computeShareState, shareUrl } from './share.js';
+import { EmailRejected, buildEmail, classifySmtpError } from './email.js';
+import { isValidEmail, maskEmail, normalizeEmail } from '../public/email-utils.js';
 
 class HttpError extends Error {
   constructor(status, code, message, detail) {
@@ -33,7 +35,7 @@ const clampCopies = (value, fallback) => {
   return Math.min(10, Math.max(1, n));
 };
 
-export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null }) {
+export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '10kb' }));
@@ -95,14 +97,8 @@ export function createApp({ config, settings, templates, templateProblems = [], 
 
   /** What the kiosk needs to know: is the guest's link live yet? */
   function shareState(session) {
-    if (!sharingOn || !session.share) return { enabled: false };
-    const version = session.final?.version;
-    const mode = config.sharing.mode;
-    const built = Boolean(version) && session.share.builtVersion === version;
-    const ready = mode === 'local' ? built : Boolean(version) && session.share.uploadedVersion === version;
-    const item = uploadQueue?.list().find((i) => i.sessionId === session.id && i.version === version);
-    const failed = !ready && item?.status === 'failed';
-    return { enabled: true, mode, ready, state: ready ? 'ready' : failed ? 'failed' : 'preparing', error: failed ? item.error : null, url: shareLink(session) };
+    const uploadItem = uploadQueue?.list().find((i) => i.sessionId === session.id && i.version === session.final?.version) ?? null;
+    return computeShareState({ config, session, uploadItem, shareBase });
   }
 
   async function ensureComposed(session) {
@@ -162,6 +158,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         estimatedSeconds: config.printer.estimatedSeconds,
       },
       sharing: { enabled: sharingOn, mode: config.sharing.mode, shareSeconds: config.sharing.shareSeconds, wifiHint: config.sharing.wifiHint },
+      email: { enabled: Boolean(emailQueue), maxPerSession: config.email.maxPerSession, marketingOptIn: config.email.marketingOptIn },
     });
   });
 
@@ -254,6 +251,32 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     }),
   );
 
+  app.post(
+    '/api/sessions/:id/email',
+    wrap(async (req, res) => {
+      if (!emailQueue) throw new HttpError(409, 'email_disabled', 'Email is turned off');
+      const session = await requireSession(req.params.id);
+      await ensureComposed(session);
+      await ensureShareBundle(session, { upload: true }); // make sure the link the email points to will go live
+      let result;
+      try {
+        result = emailQueue.enqueue({
+          sessionId: session.id,
+          email: req.body?.email,
+          shareUrl: shareLink(session),
+          eventName: session.eventName,
+          eventSlug: session.eventSlug,
+          previewFile: store.resolve(session, session.final.preview),
+          optIn: config.email.marketingOptIn.enabled && req.body?.optIn === true,
+        });
+      } catch (err) {
+        if (err instanceof EmailRejected) throw new HttpError(err.status, err.code, err.message);
+        throw err;
+      }
+      res.json({ queued: true, masked: result.masked, duplicate: result.duplicate });
+    }),
+  );
+
   app.get(
     '/api/sessions/:id/share',
     wrap(async (req, res) => {
@@ -323,6 +346,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           autoUpload: config.sharing.autoUpload,
           uploads: uploadQueue ? uploadQueue.list().filter((i) => i.status !== 'done').slice(0, 12) : [],
         },
+        email: { enabled: Boolean(emailQueue), from: emailQueue ? config.email.from : null, host: emailQueue ? config.email.smtp.host : null, queue: emailQueue ? emailQueue.list().slice(0, 12) : [], marketingOptIn: config.email.marketingOptIn.enabled },
         queue: queue.list().slice(0, 8),
         warnings: configWarnings(config),
       });
@@ -338,6 +362,44 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       res.json({ settings: { ...settings.values } });
     }),
   );
+
+  app.post(
+    '/api/operator/check-email',
+    wrap(async (req, res) => {
+      if (!mailer) throw new HttpError(409, 'email_disabled', 'Email is not enabled (email.enabled in config.json)');
+      res.json(await mailer.verify());
+    }),
+  );
+
+  app.post(
+    '/api/operator/test-email',
+    wrap(async (req, res) => {
+      if (!mailer) throw new HttpError(409, 'email_disabled', 'Email is not enabled (email.enabled in config.json)');
+      const to = normalizeEmail(req.body?.to);
+      if (!isValidEmail(to)) throw new HttpError(400, 'invalid_email', 'That does not look like an email address');
+      const dir = path.join(config.storage.dir, '_tests');
+      const sample = path.join(dir, 'test-email-preview.jpg');
+      await renderTestPattern({ width: 600, height: 900, dpi: 300, label: 'TEST EMAIL' }, sample);
+      const content = buildEmail({ eventName: settings.eventName, intro: config.email.intro, url: `${shareBase || 'https://example.com'}/s/test-link/`, subject: `[Test] ${config.email.subject}`, brandName: config.sharing.brandName });
+      try {
+        await mailer.send({ to, ...content, attachments: [{ filename: 'photos.jpg', path: sample, cid: 'photos-preview' }] });
+        logger.info(`operator sent a test email to ${maskEmail(to)}`);
+        res.json({ ok: true, detail: `Test email sent to ${maskEmail(to)}. Check that inbox (and its spam folder).` });
+      } catch (err) {
+        res.json({ ok: false, detail: classifySmtpError(err).message });
+      }
+    }),
+  );
+
+  app.post('/api/operator/email/:id/retry', (req, res, next) => {
+    if (!emailQueue?.retry(req.params.id)) return next(new HttpError(404, 'no_email', 'No such failed email'));
+    return res.json({ ok: true });
+  });
+
+  app.delete('/api/operator/email/:id', (req, res, next) => {
+    if (!emailQueue?.dismiss(req.params.id)) return next(new HttpError(404, 'no_email', 'No such failed email'));
+    return res.json({ ok: true });
+  });
 
   app.post(
     '/api/operator/check-upload',

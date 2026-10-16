@@ -77,6 +77,7 @@ function renderStatus(s) {
   );
 
   renderSharing(s.sharing);
+  renderMail(s.email);
 
   templates = s.templates;
   const select = $('#template');
@@ -122,6 +123,72 @@ function renderSharing(sh) {
       : [h('li', {}, sh.enabled ? 'Nothing waiting' : '-')]),
   );
 }
+
+function renderMail(m) {
+  const failed = m.queue.filter((i) => i.status === 'failed').length;
+  const waiting = m.queue.length - failed;
+  if (!m.enabled) {
+    dot($('#mailDot'), '');
+    $('#mailText').textContent = 'Email is off';
+    $('#mailDetail').textContent = 'Turn it on in config.json (email.enabled) to let guests email themselves their photos.';
+  } else {
+    dot($('#mailDot'), failed ? 'bad' : waiting ? 'warn' : 'ok');
+    $('#mailText').textContent = failed ? `${failed} email(s) failed` : waiting ? `${waiting} email(s) waiting` : 'Email ready';
+    $('#mailDetail').textContent = `Sending as ${m.from} through ${m.host}.${m.marketingOptIn ? ' Guests can tick a box to hear about future events; only those addresses are kept (optin-emails.csv in the event folder).' : ' Addresses are not kept after sending.'}`;
+  }
+  $('#checkMail').hidden = !m.enabled;
+  $('#testMailForm').hidden = !m.enabled;
+  $('#mails').replaceChildren(
+    ...(m.queue.length
+      ? m.queue.map((i) =>
+          h(
+            'li',
+            {},
+            h('span', { class: `badge ${i.status === 'failed' ? 'error' : i.status === 'sending' ? 'printing' : i.status}` }, i.status),
+            `${i.to} (try ${i.attempts})`,
+            i.error ? h('div', { class: 'muted' }, i.error) : null,
+            i.status === 'failed'
+              ? h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => mailAction('POST', `/api/operator/email/${i.id}/retry`) }, 'Retry'), h('button', { class: 'btn', type: 'button', onclick: () => mailAction('DELETE', `/api/operator/email/${i.id}`) }, 'Dismiss'))
+              : null,
+          ),
+        )
+      : [h('li', {}, m.enabled ? 'Nothing waiting' : '-')]),
+  );
+}
+
+async function mailAction(method, url) {
+  try {
+    await api(method, url);
+    await refreshStatus();
+  } catch (err) {
+    say($('#mailMsg'), err.message, 'error');
+  }
+}
+
+$('#checkMail').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  say($('#mailMsg'), 'Contacting the mail server…');
+  try {
+    const result = await api('POST', '/api/operator/check-email');
+    say($('#mailMsg'), result.detail, result.ok ? 'ok' : 'error');
+  } catch (err) {
+    say($('#mailMsg'), err.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('#testMailForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  say($('#mailMsg'), 'Sending…');
+  try {
+    const result = await api('POST', '/api/operator/test-email', { to: $('#testMailTo').value });
+    say($('#mailMsg'), result.detail, result.ok ? 'ok' : 'error');
+  } catch (err) {
+    say($('#mailMsg'), err.message, 'error');
+  }
+});
 
 async function retryUpload(id) {
   try {

@@ -73,6 +73,8 @@
           <div class="share-text">
             <p class="share-title">Get your photos on your phone</p>
             <p class="share-status" id="shareStatus" aria-live="polite"></p>
+            <button id="emailBtn" class="btn secondary compact" type="button" hidden>Email me my photos</button>
+            <p class="share-status ok" id="emailSent" aria-live="polite" hidden></p>
           </div>
         </div>
       </div>
@@ -95,6 +97,23 @@
       <div class="row">
         <button id="retryBtn" class="btn" type="button">Try again</button>
         <button id="homeBtn" class="btn secondary" type="button">Start over</button>
+      </div>
+    </section>
+
+    <!-- Email entry: opens over whatever screen the guest is on -->
+    <section id="emailOverlay" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="emailTitle">
+      <div class="email-card">
+        <h2 id="emailTitle">Where should we send your photos?</h2>
+        <div class="email-field" id="emailField"><span id="emailText"></span><span class="caret" aria-hidden="true"></span></div>
+        <p class="email-hint" id="emailHint" role="alert"></p>
+        <button id="emailSuggest" class="suggest" type="button" hidden></button>
+        <div id="keyboard" class="keyboard"></div>
+        <label id="optInRow" class="optin" hidden><input type="checkbox" id="optIn"><span id="optInLabel"></span></label>
+        <p class="email-privacy" id="emailPrivacy"></p>
+        <div class="row">
+          <button id="emailSend" class="btn" type="button" disabled>Send my photos</button>
+          <button id="emailCancel" class="btn secondary" type="button">Cancel</button>
+        </div>
       </div>
     </section>
 

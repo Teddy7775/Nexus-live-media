@@ -67,6 +67,20 @@
           <ul id="uploads" class="plain small"></ul>
         </section>
 
+        <section class="card" aria-labelledby="h-mail" id="mailCard">
+          <h2 id="h-mail">Email</h2>
+          <p class="status"><span id="mailDot" class="dot"></span><span id="mailText">…</span></p>
+          <p class="muted" id="mailDetail"></p>
+          <div class="actions"><button id="checkMail" class="btn" type="button" hidden>Check mail login</button></div>
+          <form id="testMailForm" hidden>
+            <label class="field"><span>Send a test email to</span><input id="testMailTo" type="email" autocomplete="off" placeholder="you@example.com"></label>
+            <button class="btn" type="submit">Send test email</button>
+          </form>
+          <p id="mailMsg" class="msg" role="status" hidden></p>
+          <h3>Email queue</h3>
+          <ul id="mails" class="plain small"></ul>
+        </section>
+
         <section class="card" aria-labelledby="h-set">
           <h2 id="h-set">Event settings</h2>
           <form id="settingsForm">
