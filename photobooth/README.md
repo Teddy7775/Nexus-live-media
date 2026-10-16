@@ -93,6 +93,25 @@ Switch layouts in the operator panel. **Your own layouts** are plain JSON in `te
 
 `overlay` is a PNG in `templates/` with exactly the canvas size. `{event}`, `{date}` and `{time}` are filled in. A layout with a mistake (a slot off the canvas, a photo no slot uses, a missing overlay) is skipped at startup with the reason shown in the operator panel; it never takes the booth down. Landscape canvases are rotated to fit the portrait-fed 4x6 sheet.
 
+## Sharing: QR codes and guest galleries
+
+Turn on `sharing.enabled` and every guest gets a **private web page with their photos**. A QR code for it appears on the screen while the print comes out (and stays on the thank-you screen), and is **printed on the photo** (on each strip, so both halves work after the 2-inch cut). Phones need no app.
+
+| | `local` | `upload` |
+|---|---|---|
+| Where the gallery lives | on the booth PC | on your web host (see [`webhost/README.md`](webhost/README.md)) |
+| Guest's phone needs | to be on the **same Wi-Fi** as the PC | normal mobile data or any Wi-Fi |
+| Internet at the venue | not needed | **needed** (uploads queue and retry if it drops) |
+| Best for | an event where you provide the Wi-Fi | most events |
+
+```json
+"sharing": { "enabled": true, "mode": "local", "wifiHint": "Join the Wi-Fi network NexusGuests first." }
+```
+
+**Local mode caveats.** Windows will ask to allow the booth through its firewall the first time (allow *Private* networks). Many venue and hotel Wi-Fi networks use *client isolation*, which stops phones from reaching your PC at all; bring your own router, or use `upload` mode. Only the galleries are exposed on the network (port `lan.port`, default 3001); the camera, printer and operator controls stay on this PC only.
+
+**Upload mode caveats.** The QR printed on a photo points at your web host, so if the venue has no internet it will not open until the PC reconnects and the queue catches up (the operator panel shows what is waiting). Always test with real mobile data.
+
 ## Configuration
 
 `config.json` is merged over the defaults in `server/config.js`; only the keys you set are needed. A typo is reported at startup, naming the setting, instead of failing at the event.
@@ -111,6 +130,12 @@ Switch layouts in the operator panel. **Your own layouts** are plain JSON in `te
 | `printer.copies`, `enabled`, `autoPrint` | Copies per guest, printing on/off, print automatically when the review timer ends. |
 | `ui.*` | Countdown length, how long each screen stays, retakes, mirrored preview, flash. |
 | `storage.dir` | Where events are saved. |
+| `sharing.enabled`, `sharing.mode` | Guest galleries and QR codes: `local` (served by this PC) or `upload` (your web host). |
+| `sharing.publicBaseUrl` | The address phones use. Upload mode: `https://yourdomain.com/booth`. Local mode: leave empty to use this PC's network address. |
+| `sharing.autoUpload`, `sharing.qrOnPrint` | Upload every session right away (needed for the printed QR to work); print a QR on layouts that have room. |
+| `sharing.wifiHint`, `sharing.shareSeconds` | Text under the QR in local mode; how long the QR stays on the thank-you screen. |
+| `sharing.upload.url`, `sharing.upload.secret` | Web host receiver address and shared secret (set the secret with the `BOOTH_UPLOAD_SECRET` environment variable). |
+| `lan.host`, `lan.port` | The small network listener for galleries (default port 3001). Nothing else is exposed. |
 
 ## What has and hasn't been verified
 
@@ -122,6 +147,9 @@ Switch layouts in the operator panel. **Your own layouts** are plain JSON in `te
 - The guest and operator screens in a real browser (landscape and portrait), including the error screen and recovery.
 - The digiCamControl adapter against a stand-in server that follows digiCamControl's own source code: command format, `OK`-vs-error replies, RAW rejection, timeouts, live view pause/resume.
 - The Windows printing adapter against a stand-in for `pdf-to-printer`.
+- Sharing: QR codes decoded back to the exact link, including a 0.6-inch code on a JPEG-compressed strip, each strip half after the cut, and the code shown on the kiosk screen opened in a phone-sized browser.
+- The gallery listener exposes only galleries (the booth's API, operator panel and session folders are all unreachable from it).
+- The web-host receiver (`webhost/upload.php`) running under **real PHP**: bad signatures, stale timestamps, path tricks, scripts disguised as images and oversized files are all refused; the queue retries, survives a restart and never publishes a gallery before its pictures.
 
 **NOT verified: needs your hardware, so do the checklist above:**
 
@@ -129,6 +157,9 @@ Switch layouts in the operator panel. **Your own layouts** are plain JSON in `te
 - Real printing to a DNP printer, including the exact paper-size names and the 2-inch cut.
 - Footer text rendering on Windows (it uses system fonts; a transparent PNG overlay with the text baked in avoids this entirely).
 - `start-booth.bat` and kiosk mode on a real Windows PC.
+- Scanning a **printed** QR with a real phone camera on DNP paper (decoding was tested on the digital picture with an independent QR reader).
+- Local mode on a real venue network (Windows firewall prompt, client isolation, the phone actually reaching the PC).
+- The web host's `.htaccess` rules (hiding `config.php`, blocking folder listings) and the host's own PHP settings; only the PHP script itself was tested. See the checks in `webhost/README.md`.
 
 **Known limitations**
 

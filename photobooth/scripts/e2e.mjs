@@ -9,6 +9,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import net from 'node:net';
+import jsQR from 'jsqr';
+import sharp from 'sharp';
 import { chromium } from 'playwright-core';
 import { DEFAULTS, ROOT_DIR, deepMerge, validateConfig } from '../server/config.js';
 import { createBooth } from '../server/index.js';
@@ -188,6 +191,73 @@ try {
   assert.equal(await page.textContent('#eventName'), 'Acme <b>Gala</b> & Co');
   assert.match(await page.textContent('#eventInfo'), /2 photos/);
   await snap('attract-after-settings');
+
+  // ------------------------------------------------------------------ sharing scenario
+  log('sharing: QR on screen -> scan it -> the guest gallery opens on a phone');
+  const freePort = () => new Promise((resolve) => { const s = net.createServer().listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
+  const lanPort = await freePort();
+  const work2 = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-e2e-share-'));
+  const config2 = validateConfig(
+    deepMerge(DEFAULTS, {
+      storage: { dir: path.join(work2, 'events') },
+      event: { name: 'Sarah & James Wedding' },
+      ui: { countdownSeconds: 1, shotPreviewSeconds: 1, reviewSeconds: 60, doneSeconds: 8, errorSeconds: 60 },
+      camera: { mock: { captureDelayMs: 100 } },
+      printer: { dryRunDelayMs: 2500, estimatedSeconds: 3 },
+      sharing: { enabled: true, mode: 'local', publicBaseUrl: `http://127.0.0.1:${lanPort}`, shareSeconds: 20, wifiHint: 'Join the Wi-Fi network NexusGuests first.' },
+    }),
+  );
+  const booth2 = await createBooth(config2, { logger: createLogger({ quiet: true }), settingsFile: path.join(work2, 'runtime-settings.json') });
+  const server2 = await new Promise((resolve) => { const s = booth2.app.listen(0, '127.0.0.1', () => resolve(s)); });
+  const lanServer2 = await new Promise((resolve) => { const s = booth2.lanApp.listen(lanPort, '127.0.0.1', () => resolve(s)); });
+  const base2 = `http://127.0.0.1:${server2.address().port}`;
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const snapPage = async (pg, name, settleMs = 450) => {
+    await pg.waitForTimeout(settleMs);
+    step += 1;
+    await pg.screenshot({ path: path.join(shotsDir, `${String(step).padStart(2, '0')}-${name}.jpg`), type: 'jpeg', quality: 82 });
+    console.log(`  screenshot docs/screens/${String(step).padStart(2, '0')}-${name}.jpg`);
+  };
+  try {
+    const page2 = await context.newPage();
+    page2.on('pageerror', (err) => problems.push(`page error (sharing): ${err.message}`));
+    await page2.goto(base2);
+    await page2.waitForSelector('body[data-ready="true"]');
+    await page2.click('#startBtn');
+    await page2.waitForSelector('body[data-screen="review"]', { timeout: 60000 });
+    await page2.click('#printBtn');
+    await page2.waitForSelector('body[data-screen="printing"]');
+    await page2.waitForSelector('#sharePanel:not([hidden])');
+    await page2.waitForFunction(() => document.querySelector('#shareStatus').classList.contains('ok'), null, { timeout: 15000 });
+    assert.match(await page2.textContent('#shareStatus'), /Ready.*scan.*Join the Wi-Fi network NexusGuests first\./);
+    await snapPage(page2, 'share-while-printing');
+
+    // "Scan" the QR exactly as it is shown on the kiosk screen.
+    const qrPng = await page2.locator('#qrImg').screenshot();
+    const { data, info } = await sharp(qrPng).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const scanned = jsQR(new Uint8ClampedArray(data), info.width, info.height)?.data;
+    assert.ok(scanned && scanned.startsWith(`http://127.0.0.1:${lanPort}/s/`), `the on-screen QR decodes to a gallery link (got ${scanned})`);
+
+    const phonePage = await phone.newPage();
+    phonePage.on('pageerror', (err) => problems.push(`page error (gallery): ${err.message}`));
+    await phonePage.goto(scanned);
+    assert.match(await phonePage.title(), /Sarah & James Wedding - your photos/);
+    await phonePage.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0));
+    assert.ok((await phonePage.locator('img').count()) >= 4, 'final picture plus the individual photos');
+    await snapPage(phonePage, 'guest-gallery-phone', 200);
+
+    await page2.waitForSelector('body[data-screen="done"]', { timeout: 30000 });
+    assert.equal(await page2.locator('#doneShareSlot #sharePanel').isVisible(), true, 'the QR stays on the thank-you screen');
+    await snapPage(page2, 'done-with-qr');
+    await page2.close();
+  } finally {
+    await phone.close();
+    lanServer2.closeAllConnections();
+    lanServer2.close();
+    server2.closeAllConnections();
+    server2.close();
+    fs.rmSync(work2, { recursive: true, force: true });
+  }
 
   assert.deepEqual(problems, [], `browser reported problems:\n${problems.join('\n')}\nfailed requests:\n${failedRequests.join('\n')}`);
   console.log('\nE2E PASSED');

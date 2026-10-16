@@ -1,7 +1,10 @@
 {
   "port": 3000,
   "operatorPin": "CHANGE-ME-TO-SOMETHING-ONLY-YOU-KNOW",
-  "event": { "name": "Nexus Photo Booth", "slug": "default" },
+  "event": {
+    "name": "Nexus Photo Booth",
+    "slug": "default"
+  },
   "activeTemplate": "strip-2x6-x2",
   "camera": {
     "driver": "digicamcontrol",
@@ -15,7 +18,10 @@
     "mode": "windows",
     "name": "DNP DS620",
     "paperSize": "",
-    "copies": 1
+    "copies": 1,
+    "estimatedSeconds": 15
   },
-  "storage": { "dir": "C:\\booth\\events" }
+  "storage": {
+    "dir": "C:\\booth\\events"
+  }
 }

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
+import { qrPng } from './qr.js';
 
 const FONT_STACK = "Arial, Helvetica, 'DejaVu Sans', sans-serif";
 
@@ -56,7 +57,7 @@ async function assertReadable(file, label) {
  * Builds the final print image and a screen-size preview.
  * `shotFiles[n]` is the photo for shot n (JPEG from the camera).
  */
-export async function composeTemplate({ template, shotFiles, event, outFile, previewFile, previewWidth = 1200, templatesDir, now = new Date(), jpegQuality = 95 }) {
+export async function composeTemplate({ template, shotFiles, event, outFile, previewFile, previewWidth = 1200, templatesDir, qrUrl = null, now = new Date(), jpegQuality = 95 }) {
   const { width, height, dpi = 300, background = '#ffffff' } = template.canvas;
 
   for (let n = 0; n < template.shots; n++) {
@@ -90,6 +91,11 @@ export async function composeTemplate({ template, shotFiles, event, outFile, pre
       throw new ComposeError(`Overlay ${template.overlay} is ${meta.width}x${meta.height} but the template canvas is ${width}x${height}`);
     }
     layers.push({ input: overlayFile, left: 0, top: 0 });
+  }
+
+  // The guest's gallery QR code (white-backed, so it scans on any background). Skipped when sharing is off.
+  if (qrUrl && template.qr?.length) {
+    for (const q of template.qr) layers.push({ input: await qrPng(qrUrl, { size: q.size, margin: 2 }), left: q.x, top: q.y });
   }
 
   const textSvg = buildTextSvg(template, { event, now });

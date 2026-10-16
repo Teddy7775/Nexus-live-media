@@ -10,6 +10,9 @@ import { PrintQueue } from './printQueue.js';
 import { SessionStore } from './store.js';
 import { RuntimeSettings } from './settings.js';
 import { createApp } from './app.js';
+import { createLanApp } from './lan.js';
+import { ShareIndex, shareBaseUrl } from './share.js';
+import { UploadQueue, WebHostUploader } from './uploader.js';
 
 const version = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8')).version;
 
@@ -22,11 +25,13 @@ export async function createBooth(
     settingsFile = path.join(ROOT_DIR, 'runtime-settings.json'),
     camera: injectedCamera,
     printer: injectedPrinter,
+    uploader: injectedUploader,
+    shareBase: injectedShareBase,
   } = {},
 ) {
   fs.mkdirSync(config.storage.dir, { recursive: true });
 
-  const { templates, problems: templateProblems } = loadTemplates({ templatesDir });
+  const { templates, problems: templateProblems } = loadTemplates({ templatesDir, qr: config.sharing.enabled && config.sharing.qrOnPrint });
   for (const p of templateProblems) logger.warn(`template ${p.file} ignored: ${p.issues.join('; ')}`);
   if (!templates.has(config.activeTemplate)) {
     throw new ConfigError([`activeTemplate "${config.activeTemplate}" does not exist. Available: ${[...templates.keys()].join(', ')}`]);
@@ -40,8 +45,34 @@ export async function createBooth(
   const queue = new PrintQueue(printer, { logger });
   const store = new SessionStore({ rootDir: config.storage.dir });
 
-  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public') });
-  return { app, camera, printer, queue, store, settings, logger, templates };
+  // Sharing: a token index, a minimal network listener for galleries, and (upload mode) the durable upload queue.
+  const queuesDir = path.join(config.storage.dir, '_queues');
+  const shareIndex = await new ShareIndex({ file: path.join(queuesDir, 'share-index.json') }).load();
+  const shareBase = injectedShareBase ?? (config.sharing.enabled ? shareBaseUrl(config) : '');
+  let uploader = null;
+  let uploadQueue = null;
+  if (config.sharing.enabled && config.sharing.mode === 'upload') {
+    const { url, secret, timeoutMs, maxAgeHours } = config.sharing.upload;
+    uploader = injectedUploader ?? new WebHostUploader({ url, secret, timeoutMs });
+    uploadQueue = await new UploadQueue({
+      uploader,
+      file: path.join(queuesDir, 'upload-queue.json'),
+      logger,
+      maxAgeMs: maxAgeHours * 3600_000,
+      onUploaded: async (sessionId, uploadedVersion) => {
+        const session = await store.find(sessionId);
+        if (session?.share && (session.share.uploadedVersion ?? -1) < uploadedVersion) {
+          session.share.uploadedVersion = uploadedVersion;
+          session.share.uploadedAt = new Date().toISOString();
+          await store.save(session);
+        }
+      },
+    }).load();
+  }
+
+  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue });
+  const lanApp = createLanApp({ shareIndex, store, logger });
+  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue };
 }
 
 async function main() {
@@ -64,6 +95,15 @@ async function main() {
     for (const w of configWarnings(config)) logger.warn(w);
     if (!config._meta.usedFile) logger.warn(`no ${path.basename(config._meta.configPath)} found - using defaults (copy config.example.json to config.json)`);
   });
+  // Galleries for guests' phones: a separate listener that exposes nothing but /s/<token>/ (local mode only).
+  let lanServer = null;
+  if (config.sharing.enabled && config.sharing.mode === 'local') {
+    lanServer = booth.lanApp.listen(config.lan.port, config.lan.host, () => logger.info(`guest galleries are served at ${booth.shareBase}/s/<token>/ (listening on ${config.lan.host}:${config.lan.port})`));
+    lanServer.on('error', (err) => {
+      logger.error(err.code === 'EADDRINUSE' ? `Gallery port ${config.lan.port} is already in use (config: lan.port)` : err.message);
+      process.exit(1);
+    });
+  }
   server.on('error', (err) => {
     logger.error(err.code === 'EADDRINUSE' ? `Port ${config.port} is already in use - is another copy of the booth running?` : err.message);
     process.exit(1);
@@ -72,6 +112,8 @@ async function main() {
   const shutdown = async (signal) => {
     logger.info(`${signal} received, shutting down`);
     server.close();
+    lanServer?.close();
+    booth.uploadQueue?.stop();
     await booth.camera.close().catch(() => {});
     process.exit(0);
   };

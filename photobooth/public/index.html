@@ -66,6 +66,16 @@
       <p class="big">Printing your photos…</p>
       <p class="sub" id="printMsg"></p>
       <div class="progress" aria-hidden="true"><i id="printBar"></i></div>
+      <div id="printShareSlot" class="share-slot">
+        <!-- The same panel moves between this screen and the thank-you screen so the QR code stays up. -->
+        <div id="sharePanel" class="share" hidden>
+          <img id="qrImg" alt="QR code to open your photos on your phone">
+          <div class="share-text">
+            <p class="share-title">Get your photos on your phone</p>
+            <p class="share-status" id="shareStatus" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- 7. Done -->
@@ -73,6 +83,7 @@
       <div class="check" aria-hidden="true"></div>
       <p class="big" id="doneTitle">Thank you!</p>
       <p class="sub" id="doneMsg"></p>
+      <div id="doneShareSlot" class="share-slot"></div>
       <button id="doneBtn" class="btn secondary" type="button">Finish</button>
     </section>
 

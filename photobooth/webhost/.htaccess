@@ -1,0 +1,5 @@
+# Keep the secret unreachable even if the web server is misconfigured to serve it.
+<FilesMatch "^(config(\.sample)?\.php|cleanup\.php)$">
+  Require all denied
+</FilesMatch>
+Options -Indexes

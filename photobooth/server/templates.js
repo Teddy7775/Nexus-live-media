@@ -6,13 +6,14 @@ import path from 'node:path';
  *   id, name, shots (how many photos to take), canvas {width,height,dpi,background},
  *   slots [{shot,x,y,width,height}], overlay (optional PNG, same size as canvas),
  *   text [{text,x,y,size,weight,color,anchor,maxWidth}]  - {event}, {date}, {time} are replaced.
+ *   qr   [{x,y,size}]  - where to print the guest's gallery QR code (only drawn when sharing is on).
  * Built-in templates use exactly the same format as user templates in ./templates/*.json.
  */
 
 const ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
 
 /** 4x6 inch portrait sheet holding two identical 2x6 strips side by side (printer cuts them apart). */
-function stripTemplate() {
+function stripTemplate({ qr = false } = {}) {
   const W = 1200;
   const H = 1800;
   const stripW = W / 2;
@@ -29,11 +30,19 @@ function stripTemplate() {
   }
   const footerTop = top + 3 * slotH + 2 * (gap);
   const text = [];
+  const qrs = [];
   for (const strip of [0, 1]) {
     const cx = strip * stripW + stripW / 2;
-    // Footer area is footerTop..H; these offsets centre the two-line block in it.
-    text.push({ text: '{event}', x: cx, y: footerTop + 235, size: 58, weight: 700, color: '#111111', anchor: 'middle', maxWidth: slotW });
-    text.push({ text: '{date}', x: cx, y: footerTop + 315, size: 34, weight: 400, color: '#555555', anchor: 'middle', maxWidth: slotW });
+    if (qr) {
+      // Name, date, then a 190 px (0.63 in) QR - big enough to scan from a 2x6 strip.
+      text.push({ text: '{event}', x: cx, y: footerTop + 85, size: 54, weight: 700, color: '#111111', anchor: 'middle', maxWidth: slotW });
+      text.push({ text: '{date}', x: cx, y: footerTop + 140, size: 32, weight: 400, color: '#555555', anchor: 'middle', maxWidth: slotW });
+      qrs.push({ x: cx - 95, y: footerTop + 175, size: 190 });
+    } else {
+      // Footer area is footerTop..H; these offsets centre the two-line block in it.
+      text.push({ text: '{event}', x: cx, y: footerTop + 235, size: 58, weight: 700, color: '#111111', anchor: 'middle', maxWidth: slotW });
+      text.push({ text: '{date}', x: cx, y: footerTop + 315, size: 34, weight: 400, color: '#555555', anchor: 'middle', maxWidth: slotW });
+    }
   }
   return {
     id: 'strip-2x6-x2',
@@ -43,11 +52,12 @@ function stripTemplate() {
     canvas: { width: W, height: H, dpi: 300, background: '#ffffff' },
     slots,
     text,
+    ...(qrs.length ? { qr: qrs } : {}),
   };
 }
 
 /** One full-bleed 6x4 landscape photo with a thin caption bar. */
-function singleTemplate() {
+function singleTemplate({ qr = false } = {}) {
   const W = 1800;
   const H = 1200;
   return {
@@ -58,13 +68,16 @@ function singleTemplate() {
     canvas: { width: W, height: H, dpi: 300, background: '#000000' },
     slots: [{ shot: 0, x: 0, y: 0, width: W, height: H }],
     text: [
-      { text: '{event}  -  {date}', x: W / 2, y: H - 36, size: 44, weight: 600, color: '#ffffff', anchor: 'middle', maxWidth: W - 120, shadow: true },
+      qr
+        ? { text: '{event}  -  {date}', x: 50, y: H - 36, size: 44, weight: 600, color: '#ffffff', anchor: 'start', maxWidth: W - 360, shadow: true }
+        : { text: '{event}  -  {date}', x: W / 2, y: H - 36, size: 44, weight: 600, color: '#ffffff', anchor: 'middle', maxWidth: W - 120, shadow: true },
     ],
+    ...(qr ? { qr: [{ x: W - 240, y: H - 240, size: 200 }] } : {}),
   };
 }
 
 /** Two stacked 3:2 photos on a 4x6 portrait sheet with a footer. */
-function duoTemplate() {
+function duoTemplate({ qr = false } = {}) {
   const W = 1200;
   const H = 1800;
   const margin = 50;
@@ -80,15 +93,22 @@ function duoTemplate() {
     shots: 2,
     canvas: { width: W, height: H, dpi: 300, background: '#ffffff' },
     slots,
-    text: [
-      { text: '{event}', x: W / 2, y: footerTop + 105, size: 64, weight: 700, color: '#111111', anchor: 'middle', maxWidth: slotW },
-      { text: '{date}', x: W / 2, y: footerTop + 170, size: 36, weight: 400, color: '#555555', anchor: 'middle', maxWidth: slotW },
-    ],
+    text: qr
+      ? [
+          { text: '{event}', x: margin, y: footerTop + 105, size: 60, weight: 700, color: '#111111', anchor: 'start', maxWidth: slotW - 230 },
+          { text: '{date}', x: margin, y: footerTop + 170, size: 36, weight: 400, color: '#555555', anchor: 'start', maxWidth: slotW - 230 },
+        ]
+      : [
+          { text: '{event}', x: W / 2, y: footerTop + 105, size: 64, weight: 700, color: '#111111', anchor: 'middle', maxWidth: slotW },
+          { text: '{date}', x: W / 2, y: footerTop + 170, size: 36, weight: 400, color: '#555555', anchor: 'middle', maxWidth: slotW },
+        ],
+    ...(qr ? { qr: [{ x: W - margin - 200, y: footerTop + 27, size: 200 }] } : {}),
   };
 }
 
-export function builtinTemplates() {
-  return [stripTemplate(), singleTemplate(), duoTemplate()];
+/** With { qr: true } the built-in layouts reserve room for the guest's gallery QR code. */
+export function builtinTemplates({ qr = false } = {}) {
+  return [stripTemplate({ qr }), singleTemplate({ qr }), duoTemplate({ qr })];
 }
 
 const isInt = (v) => Number.isInteger(v);
@@ -133,6 +153,13 @@ export function validateTemplate(t, { templatesDir } = {}) {
     }
   }
 
+  (t.qr ?? []).forEach((q, i) => {
+    const where = `qr[${i}]`;
+    const ok = [q?.x, q?.y, q?.size].every(isInt) && q.size >= 80 && q.size <= 1200 && q.x >= 0 && q.y >= 0;
+    need(ok, `${where}: x, y and size must be whole numbers (size 80-1200)`);
+    if (ok && isInt(c.width) && isInt(c.height)) need(q.x + q.size <= c.width && q.y + q.size <= c.height, `${where} extends outside the ${c.width}x${c.height} canvas`);
+  });
+
   (t.text ?? []).forEach((item, i) => {
     const where = `text[${i}]`;
     need(typeof item?.text === 'string', `${where}.text must be a string`);
@@ -145,10 +172,10 @@ export function validateTemplate(t, { templatesDir } = {}) {
 }
 
 /** Built-ins first, then every valid *.json in the templates folder (same id = user template wins). */
-export function loadTemplates({ templatesDir } = {}) {
+export function loadTemplates({ templatesDir, qr = false } = {}) {
   const templates = new Map();
   const problems = [];
-  for (const t of builtinTemplates()) {
+  for (const t of builtinTemplates({ qr })) {
     const issues = validateTemplate(t);
     if (issues.length) throw new Error(`Built-in template ${t.id} is invalid: ${issues.join('; ')}`);
     templates.set(t.id, t);

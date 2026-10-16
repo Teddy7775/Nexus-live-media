@@ -106,6 +106,55 @@ function setCount(text, { word = false } = {}) {
   el.classList.add('pop');
 }
 
+// ------------------------------------------------------------ share (QR code)
+
+/**
+ * Starts sharing for this session: shows the QR code at once (the link is known immediately) and keeps the status line
+ * honest while the gallery is prepared or uploaded. Failures here never block printing - they only change the message.
+ */
+function startShare(session, signal) {
+  const { sharing } = app.state;
+  if (!sharing?.enabled) return null;
+  const status = $('#shareStatus');
+  const setStatus = (text, kind = '') => {
+    status.textContent = text;
+    status.className = `share-status ${kind}`.trim();
+  };
+  const hint = sharing.mode === 'local' ? (sharing.wifiHint || 'Your phone must be on the venue Wi-Fi.') : '';
+  const waiting = `Preparing your link…${hint ? ` ${hint}` : ''}`;
+
+  return (async () => {
+    setStatus('Preparing your link…');
+    let state;
+    try {
+      state = await api('POST', `/api/sessions/${session.id}/share`);
+    } catch {
+      setStatus('Sharing is not available right now. Please ask the attendant.', 'bad');
+      return;
+    }
+    $('#qrImg').src = `data:image/svg+xml;utf8,${encodeURIComponent(state.qrSvg)}`;
+    $('#sharePanel').hidden = false;
+    for (;;) {
+      if (state.ready) return setStatus(`Ready - scan the code with your phone camera.${hint ? ` ${hint}` : ''}`, 'ok');
+      if (state.state === 'failed') return setStatus('Your link could not be created. Please ask the attendant.', 'bad');
+      setStatus(waiting);
+      try {
+        await delay(1500, signal);
+        state = { ...state, ...(await api('GET', `/api/sessions/${session.id}/share`)) };
+      } catch (error) {
+        if (error instanceof FlowCancelled) return;
+        // a failed poll just means "try again": the guest is not blocked by it
+      }
+    }
+  })();
+}
+
+function placeSharePanel(slotSelector) {
+  const panel = $('#sharePanel');
+  if (!app.state.sharing?.enabled) return;
+  $(slotSelector).append(panel);
+}
+
 // ------------------------------------------------------------------ screens
 
 async function loadState() {
@@ -240,6 +289,7 @@ async function review(session, shots, signal) {
 
 async function printFlow(session, signal) {
   const { printer } = app.state;
+  placeSharePanel('#printShareSlot');
   show('printing');
   const bar = $('#printBar');
   bar.style.transition = 'none';
@@ -265,10 +315,14 @@ async function printFlow(session, signal) {
 }
 
 async function doneScreen(printed, signal) {
+  const { ui, sharing } = app.state;
   $('#doneTitle').textContent = 'Thank you!';
   $('#doneMsg').textContent = printed ? 'Your photos have been sent to the printer.' : 'Your photos have been saved.';
+  placeSharePanel('#doneShareSlot');
   show('done');
-  await pick(signal, [[$('#doneBtn'), 'done']], app.state.ui.doneSeconds * 1000);
+  // With a QR code on screen, give guests time to scan it.
+  const seconds = sharing?.enabled ? Math.max(ui.doneSeconds, sharing.shareSeconds) : ui.doneSeconds;
+  await pick(signal, [[$('#doneBtn'), 'done']], seconds * 1000);
 }
 
 async function guestFlow(signal) {
@@ -277,12 +331,15 @@ async function guestFlow(signal) {
   for (let i = 0; i < session.shotsNeeded; i += 1) await takePhoto(session, i, shots, signal);
 
   let printed = false;
+  let sharing = null;
   for (;;) {
     const result = await review(session, shots, signal);
     if (result.action === 'retake') {
       await takePhoto(session, result.index, shots, signal);
       continue;
     }
+    // Start sharing now so the QR code is ready while the photos print (or on the thank-you screen).
+    sharing = startShare(session, signal);
     if (result.action === 'print') {
       await printFlow(session, signal);
       printed = true;
@@ -290,6 +347,7 @@ async function guestFlow(signal) {
     break;
   }
   await doneScreen(printed, signal);
+  void sharing; // runs to completion on its own; it stops when the flow is cancelled
 }
 
 async function runGuestFlow() {
@@ -302,6 +360,8 @@ async function runGuestFlow() {
     if (!(error instanceof FlowCancelled)) console.error(error);
   } finally {
     app.flow = null;
+    $('#sharePanel').hidden = true;
+    $('#qrImg').removeAttribute('src');
     goAttract();
   }
 }

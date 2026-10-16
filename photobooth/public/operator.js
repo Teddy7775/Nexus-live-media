@@ -76,6 +76,8 @@ function renderStatus(s) {
       : [h('li', {}, 'No prints yet')]),
   );
 
+  renderSharing(s.sharing);
+
   templates = s.templates;
   const select = $('#template');
   if (document.activeElement !== select) {
@@ -90,6 +92,59 @@ function renderStatus(s) {
   }
   $('#slug').textContent = s.settings.eventSlug;
 }
+
+function renderSharing(sh) {
+  $('#shareCard').hidden = false;
+  const failed = sh.uploads.filter((u) => u.status === 'failed').length;
+  const waiting = sh.uploads.filter((u) => u.status !== 'failed').length;
+  if (!sh.enabled) {
+    dot($('#shareDot'), '');
+    $('#shareText').textContent = 'Sharing is off';
+    $('#shareDetail').textContent = 'Turn it on in config.json (sharing.enabled) to get QR codes and guest galleries.';
+  } else {
+    dot($('#shareDot'), failed ? 'bad' : waiting ? 'warn' : 'ok');
+    $('#shareText').textContent = failed ? 'Some uploads failed' : waiting ? `${waiting} gallery upload(s) waiting` : 'Sharing ready';
+    $('#shareDetail').textContent = sh.mode === 'local' ? `Local galleries at ${sh.baseUrl} - phones must be on this network.` : `Uploading galleries to ${sh.baseUrl}${sh.autoUpload ? '' : ' (on request only)'}.${sh.qrOnPrint && waiting ? ' QR codes on prints will not work until these finish uploading.' : ''}`;
+  }
+  $('#checkUpload').hidden = !(sh.enabled && sh.mode === 'upload');
+  $('#uploads').replaceChildren(
+    ...(sh.uploads.length
+      ? sh.uploads.map((u) =>
+          h(
+            'li',
+            {},
+            h('span', { class: `badge ${u.status === 'failed' ? 'error' : u.status}` }, u.status),
+            `${u.sessionId.slice(-9)} (${u.uploaded}/${u.files} files, try ${u.attempts})`,
+            u.error ? h('div', { class: 'muted' }, u.error) : null,
+            u.status === 'failed' ? h('button', { class: 'btn', type: 'button', onclick: () => retryUpload(u.id) }, 'Retry') : null,
+          ),
+        )
+      : [h('li', {}, sh.enabled ? 'Nothing waiting' : '-')]),
+  );
+}
+
+async function retryUpload(id) {
+  try {
+    await api('POST', `/api/operator/uploads/${id}/retry`);
+    await refreshStatus();
+  } catch (err) {
+    say($('#uploadMsg'), err.message, 'error');
+  }
+}
+
+$('#checkUpload').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  say($('#uploadMsg'), 'Contacting the web host…');
+  try {
+    const result = await api('POST', '/api/operator/check-upload');
+    say($('#uploadMsg'), result.detail, result.ok ? 'ok' : 'error');
+  } catch (err) {
+    say($('#uploadMsg'), err.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
 
 function describeTemplate() {
   const t = templates.find((x) => x.id === $('#template').value);

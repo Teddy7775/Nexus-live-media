@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { newShareToken } from './share.js';
 
 export const SESSION_ID = /^\d{8}-\d{6}-[0-9a-f]{4}$/;
 const EVENT_SLUG = /^[A-Za-z0-9_-]{1,64}$/;
@@ -57,7 +58,7 @@ export class SessionStore {
     return `/media/${encodeURIComponent(session.eventSlug)}/${session.id}/${relative.split(path.sep).join('/')}`;
   }
 
-  async create({ eventSlug, eventName, templateId, shotsNeeded, now = new Date() }) {
+  async create({ eventSlug, eventName, templateId, shotsNeeded, share = false, now = new Date() }) {
     const session = {
       id: newSessionId(now),
       eventSlug,
@@ -70,6 +71,9 @@ export class SessionStore {
       final: null, // { file, preview }
       pdf: null,
       prints: [], // [{ jobId, copies, at }]
+      // Private gallery address (only when sharing is on). builtVersion/uploadedVersion = which picture version the
+      // gallery folder / the web host currently holds, so a retake is noticed and re-published.
+      share: share ? { token: newShareToken(), builtVersion: null, uploadedVersion: null, uploadedAt: null, files: [] } : null,
     };
     await fs.mkdir(path.join(this.sessionDir(session), 'originals'), { recursive: true });
     await fs.mkdir(path.join(this.sessionDir(session), 'previews'), { recursive: true });

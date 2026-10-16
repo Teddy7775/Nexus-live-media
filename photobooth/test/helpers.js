@@ -6,7 +6,7 @@ import { createBooth } from '../server/index.js';
 import { createLogger } from '../server/logger.js';
 
 /** Starts a complete booth (mock camera, dry-run printer by default) on a random port with its own temp folder. */
-export async function startBooth({ overrides = {}, camera, printer } = {}) {
+export async function startBooth({ overrides = {}, camera, printer, uploader } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-test-'));
   const base = { storage: { dir: path.join(dir, 'events') }, camera: { mock: { captureDelayMs: 5 } }, printer: { dryRunDelayMs: 20 } };
   const config = validateConfig(deepMerge(DEFAULTS, deepMerge(base, overrides)));
@@ -15,11 +15,17 @@ export async function startBooth({ overrides = {}, camera, printer } = {}) {
     settingsFile: path.join(dir, 'runtime-settings.json'),
     camera,
     printer,
+    uploader,
   });
   const server = await new Promise((resolve) => {
     const s = booth.app.listen(0, '127.0.0.1', () => resolve(s));
   });
   const url = `http://127.0.0.1:${server.address().port}`;
+  // The guest-gallery listener (what phones reach), on its own port, exactly as in production.
+  const lanServer = await new Promise((resolve) => {
+    const s = booth.lanApp.listen(0, '127.0.0.1', () => resolve(s));
+  });
+  const lanUrl = `http://127.0.0.1:${lanServer.address().port}`;
 
   const api = async (method, route, body, headers = {}) => {
     const res = await fetch(url + route, {
@@ -42,10 +48,14 @@ export async function startBooth({ overrides = {}, camera, printer } = {}) {
     ...booth,
     config,
     url,
+    lanUrl,
     dir,
     api,
     operator,
     async close() {
+      booth.uploadQueue?.stop();
+      lanServer.closeAllConnections();
+      await new Promise((resolve) => lanServer.close(resolve));
       server.closeAllConnections();
       await new Promise((resolve) => server.close(resolve));
       fs.rmSync(dir, { recursive: true, force: true });

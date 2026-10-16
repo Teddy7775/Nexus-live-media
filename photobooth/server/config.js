@@ -60,6 +60,48 @@ export const DEFAULTS = Object.freeze({
   storage: {
     dir: 'events',
   },
+  // A small network listener for things phones and a second station must reach. The booth's own API above stays
+  // on localhost; only the gallery (and later the station) is exposed here. Only started when something needs it.
+  lan: {
+    host: '0.0.0.0',
+    port: 3001,
+  },
+  sharing: {
+    enabled: false,
+    // "local": this PC serves each guest's gallery (guests must be on the same network, no internet needed).
+    // "upload": photos are pushed to your own web host (works from anywhere, needs internet at the venue).
+    mode: 'local',
+    // Address guests' phones use. Upload mode: your site, e.g. https://example.com/booth (no trailing slash).
+    // Local mode: leave empty to use this PC's network address, e.g. http://192.168.1.50:3001.
+    publicBaseUrl: '',
+    // Upload every finished session right away (needed for the QR code printed on the photos to work).
+    autoUpload: true,
+    // Print a QR code on layouts that have room for one.
+    qrOnPrint: true,
+    // How long the share screen stays up when the guest is not printing.
+    shareSeconds: 45,
+    brandName: '',
+    // Local mode only: shown under the QR code, e.g. "Join the Wi-Fi network NexusGuests first".
+    wifiHint: '',
+    upload: {
+      url: '', // e.g. https://example.com/booth/upload.php
+      secret: '', // same value as in the web host's config.php. Better set via BOOTH_UPLOAD_SECRET.
+      timeoutMs: 30000,
+      maxAgeHours: 72, // give up on a session that cannot be uploaded for this long
+    },
+  },
+  email: {
+    enabled: false,
+    from: '', // e.g. Nexus Booth <booth@example.com> - must be the mailbox you log in with
+    smtp: { host: '', port: 465, secure: true, user: '', pass: '' }, // pass: better set via BOOTH_SMTP_PASS
+    subject: 'Your photos from {event}',
+    intro: 'Thanks for celebrating with us! Your photos are ready:',
+    // Adds a tick-box on the email screen. Addresses are only kept when the guest ticks it.
+    marketingOptIn: { enabled: false, label: 'Keep me posted about future events' },
+    maxPerSession: 3,
+    maxPerAddressPerHour: 3,
+    maxAgeHours: 24, // give up on an email that cannot be sent for this long
+  },
 });
 
 export class ConfigError extends Error {
@@ -81,6 +123,8 @@ export function deepMerge(base, override) {
 }
 
 const SLUG = /^[A-Za-z0-9_-]{1,64}$/;
+const BASE_URL = /^https?:\/\/[^\s/]+(\/[^\s]*[^\s/])?$/;
+const UPLOAD_URL = /^(https:\/\/[^\s/]+\S*|http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\S*)$/;
 
 export function validateConfig(cfg) {
   const problems = [];
@@ -118,6 +162,36 @@ export function validateConfig(cfg) {
   need(Number.isInteger(cfg.printer?.copies) && cfg.printer.copies >= 1 && cfg.printer.copies <= 10, 'printer.copies must be an integer from 1 to 10');
   need(typeof cfg.storage?.dir === 'string' && cfg.storage.dir.length > 0, 'storage.dir must be a folder path');
 
+  need(Number.isInteger(cfg.lan?.port) && cfg.lan.port >= 1 && cfg.lan.port <= 65535 && cfg.lan.port !== cfg.port, 'lan.port must be an integer from 1 to 65535 and different from port');
+  need(typeof cfg.lan?.host === 'string' && cfg.lan.host.length > 0, 'lan.host must be a non-empty string');
+
+  const sh = cfg.sharing ?? {};
+  need(typeof sh.enabled === 'boolean', 'sharing.enabled must be true or false');
+  need(['local', 'upload'].includes(sh.mode), 'sharing.mode must be "local" or "upload"');
+  need(typeof sh.publicBaseUrl === 'string' && (sh.publicBaseUrl === '' || BASE_URL.test(sh.publicBaseUrl)), 'sharing.publicBaseUrl must look like https://example.com/booth (no trailing slash)');
+  need(posNum(sh.shareSeconds) && sh.shareSeconds >= 5, 'sharing.shareSeconds must be a number >= 5');
+  if (sh.enabled && sh.mode === 'upload') {
+    const u = sh.upload ?? {};
+    need(typeof u.url === 'string' && UPLOAD_URL.test(u.url), 'sharing.upload.url must be an https:// address (e.g. https://example.com/booth/upload.php)');
+    need(typeof u.secret === 'string' && u.secret.length >= 16, 'sharing.upload.secret must be at least 16 characters (or set BOOTH_UPLOAD_SECRET)');
+    need(typeof sh.publicBaseUrl === 'string' && /^https:\/\//.test(sh.publicBaseUrl), 'sharing.publicBaseUrl is required in upload mode and must start with https://');
+    need(posNum(u.timeoutMs) && u.timeoutMs > 0, 'sharing.upload.timeoutMs must be a positive number');
+  }
+
+  const em = cfg.email ?? {};
+  need(typeof em.enabled === 'boolean', 'email.enabled must be true or false');
+  if (em.enabled) {
+    need(sh.enabled === true, 'email.enabled needs sharing.enabled (the email contains the link to the photos)');
+    need(typeof em.smtp?.host === 'string' && em.smtp.host.length > 0, 'email.smtp.host is required (e.g. smtp.hostinger.com)');
+    need(Number.isInteger(em.smtp?.port) && em.smtp.port >= 1 && em.smtp.port <= 65535, 'email.smtp.port must be an integer from 1 to 65535');
+    need(typeof em.smtp?.user === 'string' && em.smtp.user.length > 0, 'email.smtp.user is required');
+    need(typeof em.smtp?.pass === 'string' && em.smtp.pass.length > 0, 'email.smtp.pass is required (or set BOOTH_SMTP_PASS)');
+    need(typeof em.from === 'string' && /@/.test(em.from), 'email.from must contain an email address, e.g. Nexus Booth <booth@example.com>');
+  }
+  need(typeof em.subject === 'string' && em.subject.length > 0, 'email.subject must be a non-empty string');
+  need(Number.isInteger(em.maxPerSession) && em.maxPerSession >= 1 && em.maxPerSession <= 20, 'email.maxPerSession must be an integer from 1 to 20');
+  need(Number.isInteger(em.maxPerAddressPerHour) && em.maxPerAddressPerHour >= 1 && em.maxPerAddressPerHour <= 50, 'email.maxPerAddressPerHour must be an integer from 1 to 50');
+
   if (problems.length) throw new ConfigError(problems);
   return cfg;
 }
@@ -132,7 +206,25 @@ export function configWarnings(cfg) {
   if (cfg.camera.driver === 'digicamcontrol' && /[\s]|[^\x00-\x7F]/.test(cfg.storage.dir)) {
     warnings.push('storage.dir contains spaces or non-ASCII characters; digiCamControl may mishandle such paths - use a simple path like C:\\booth\\events');
   }
+  if (cfg.sharing.enabled && cfg.sharing.mode === 'local') {
+    warnings.push(`sharing.mode is "local": guests can only open their link while their phone is on the same network as this PC (listening on port ${cfg.lan.port}; Windows may ask to allow it)`);
+  }
+  if (cfg.sharing.enabled && cfg.sharing.mode === 'upload' && cfg.sharing.upload.secret && !process.env.BOOTH_UPLOAD_SECRET) {
+    warnings.push('the upload secret is stored in config.json; consider the BOOTH_UPLOAD_SECRET environment variable instead');
+  }
+  if (cfg.email.enabled && cfg.email.smtp.pass && !process.env.BOOTH_SMTP_PASS) {
+    warnings.push('the SMTP password is stored in config.json; consider the BOOTH_SMTP_PASS environment variable instead');
+  }
   return warnings;
+}
+
+/** The configuration with every secret hidden - safe to show in the operator panel or write to a log. */
+export function redactedConfig(cfg) {
+  const copy = JSON.parse(JSON.stringify(cfg));
+  copy.operatorPin = '***';
+  if (copy.sharing?.upload?.secret) copy.sharing.upload.secret = '***';
+  if (copy.email?.smtp?.pass) copy.email.smtp.pass = '***';
+  return copy;
 }
 
 export function loadConfig({ file, rootDir = ROOT_DIR } = {}) {
@@ -146,7 +238,12 @@ export function loadConfig({ file, rootDir = ROOT_DIR } = {}) {
     }
     if (!isPlainObject(user)) throw new ConfigError([`${configPath} must contain a JSON object`]);
   }
-  const merged = validateConfig(deepMerge(DEFAULTS, user));
+  const env = process.env;
+  const fromEnv = {};
+  if (env.BOOTH_OPERATOR_PIN) fromEnv.operatorPin = env.BOOTH_OPERATOR_PIN;
+  if (env.BOOTH_UPLOAD_SECRET) fromEnv.sharing = { upload: { secret: env.BOOTH_UPLOAD_SECRET } };
+  if (env.BOOTH_SMTP_PASS) fromEnv.email = { smtp: { pass: env.BOOTH_SMTP_PASS } };
+  const merged = validateConfig(deepMerge(deepMerge(DEFAULTS, user), fromEnv));
   const storageDir = path.resolve(rootDir, merged.storage.dir);
   return { ...merged, storage: { ...merged.storage, dir: storageDir }, _meta: { configPath, rootDir, usedFile: fs.existsSync(configPath) } };
 }

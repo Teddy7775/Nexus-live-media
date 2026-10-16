@@ -6,6 +6,8 @@ import { CameraError } from './camera/errors.js';
 import { ComposeError, composeTemplate, makePreview, renderTestPattern } from './compose.js';
 import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
+import { qrSvg } from './qr.js';
+import { buildShareBundle, shareUrl } from './share.js';
 
 class HttpError extends Error {
   constructor(status, code, message, detail) {
@@ -31,7 +33,7 @@ const clampCopies = (value, fallback) => {
   return Math.min(10, Math.max(1, n));
 };
 
-export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir }) {
+export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '10kb' }));
@@ -72,6 +74,37 @@ export function createApp({ config, settings, templates, templateProblems = [], 
   const finalPreviewUrl = (session) => (session.final ? `${store.mediaUrl(session, session.final.preview)}?v=${session.final.version}` : null);
   const templateView = (t) => ({ id: t.id, name: t.name, description: t.description ?? '', shots: t.shots });
 
+  const sharingOn = config.sharing.enabled;
+  const shareLink = (session) => (session.share ? shareUrl(shareBase, session.share.token) : null);
+
+  /** Builds the gallery folder for the current picture and (upload mode) queues it for the web host. */
+  async function ensureShareBundle(session, { upload }) {
+    if (!sharingOn || !session.share || !session.final) return;
+    if (session.share.builtVersion !== session.final.version) {
+      const bundle = await buildShareBundle({ session, sessionDir: store.sessionDir(session), brandName: config.sharing.brandName });
+      session.share.builtVersion = session.final.version;
+      session.share.files = bundle.files;
+      await store.save(session);
+    }
+    if (config.sharing.mode === 'upload' && upload && uploadQueue && session.share.uploadedVersion !== session.final.version) {
+      const version = session.final.version;
+      const queued = uploadQueue.list().some((i) => i.sessionId === session.id && i.version === version && i.status !== 'failed');
+      if (!queued) uploadQueue.enqueue({ sessionId: session.id, token: session.share.token, dir: path.join(store.sessionDir(session), 'share'), files: session.share.files, version });
+    }
+  }
+
+  /** What the kiosk needs to know: is the guest's link live yet? */
+  function shareState(session) {
+    if (!sharingOn || !session.share) return { enabled: false };
+    const version = session.final?.version;
+    const mode = config.sharing.mode;
+    const built = Boolean(version) && session.share.builtVersion === version;
+    const ready = mode === 'local' ? built : Boolean(version) && session.share.uploadedVersion === version;
+    const item = uploadQueue?.list().find((i) => i.sessionId === session.id && i.version === version);
+    const failed = !ready && item?.status === 'failed';
+    return { enabled: true, mode, ready, state: ready ? 'ready' : failed ? 'failed' : 'preparing', error: failed ? item.error : null, url: shareLink(session) };
+  }
+
   async function ensureComposed(session) {
     if (session.status === 'composed' && session.final) return;
     const template = templateFor(session);
@@ -85,6 +118,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         outFile: store.resolve(session, 'final.jpg'),
         previewFile: store.resolve(session, 'final-preview.jpg'),
         templatesDir,
+        qrUrl: sharingOn && config.sharing.qrOnPrint ? shareLink(session) : null,
         now: new Date(session.createdAt),
       });
     } catch (err) {
@@ -93,6 +127,8 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     session.final = { file: 'final.jpg', preview: 'final-preview.jpg', version: Date.now() };
     session.status = 'composed';
     await store.save(session);
+    // Local mode: the gallery is built straight away (cheap). Upload mode: queue it unless uploads are on-demand only.
+    await ensureShareBundle(session, { upload: config.sharing.autoUpload }).catch((err) => logger.error(`share bundle for ${session.id}: ${err.message}`));
   }
 
   async function printSession(session, copies, label) {
@@ -125,6 +161,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         copies: settings.copies,
         estimatedSeconds: config.printer.estimatedSeconds,
       },
+      sharing: { enabled: sharingOn, mode: config.sharing.mode, shareSeconds: config.sharing.shareSeconds, wifiHint: config.sharing.wifiHint },
     });
   });
 
@@ -132,7 +169,8 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     '/api/sessions',
     wrap(async (req, res) => {
       const template = settings.activeTemplate;
-      const session = await store.create({ eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots });
+      const session = await store.create({ eventSlug: settings.eventSlug, eventName: settings.eventName, templateId: template.id, shotsNeeded: template.shots, share: sharingOn });
+      if (session.share) await shareIndex?.set(session.share.token, { eventSlug: session.eventSlug, sessionId: session.id });
       logger.info(`session ${session.id} started (${template.id}, event ${settings.eventSlug})`);
       res.status(201).json({ ...sessionView(session), template: templateView(template) });
     }),
@@ -204,6 +242,26 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     return res.json({ job });
   });
 
+  app.post(
+    '/api/sessions/:id/share',
+    wrap(async (req, res) => {
+      if (!sharingOn) throw new HttpError(409, 'sharing_disabled', 'Sharing is turned off');
+      const session = await requireSession(req.params.id);
+      await ensureComposed(session);
+      await ensureShareBundle(session, { upload: true });
+      const state = shareState(session);
+      res.json({ ...state, qrSvg: await qrSvg(state.url) });
+    }),
+  );
+
+  app.get(
+    '/api/sessions/:id/share',
+    wrap(async (req, res) => {
+      if (!sharingOn) throw new HttpError(409, 'sharing_disabled', 'Sharing is turned off');
+      res.json(shareState(await requireSession(req.params.id)));
+    }),
+  );
+
   /** Live preview as a motion-JPEG stream (a plain <img src> in the browser). */
   app.get('/api/camera/stream', async (req, res) => {
     res.writeHead(200, {
@@ -257,6 +315,14 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         settings: { ...settings.values },
         templates: [...templates.values()].map(templateView),
         templateProblems,
+        sharing: {
+          enabled: sharingOn,
+          mode: config.sharing.mode,
+          baseUrl: sharingOn ? shareBase : null,
+          qrOnPrint: config.sharing.qrOnPrint,
+          autoUpload: config.sharing.autoUpload,
+          uploads: uploadQueue ? uploadQueue.list().filter((i) => i.status !== 'done').slice(0, 12) : [],
+        },
         queue: queue.list().slice(0, 8),
         warnings: configWarnings(config),
       });
@@ -272,6 +338,19 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       res.json({ settings: { ...settings.values } });
     }),
   );
+
+  app.post(
+    '/api/operator/check-upload',
+    wrap(async (req, res) => {
+      if (!uploader) throw new HttpError(409, 'not_upload_mode', 'Uploading to a web host is not enabled (sharing.mode is not "upload")');
+      res.json(await uploader.check());
+    }),
+  );
+
+  app.post('/api/operator/uploads/:id/retry', (req, res, next) => {
+    if (!uploadQueue?.retry(req.params.id)) return next(new HttpError(404, 'no_upload', 'No such upload'));
+    return res.json({ ok: true });
+  });
 
   app.post(
     '/api/operator/test-capture',
