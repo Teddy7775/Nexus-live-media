@@ -70,6 +70,7 @@ export class SessionStore {
       shots: [], // [{ index, attempt, file, preview }]
       final: null, // { file, preview }
       pdf: null,
+      gif: null, // { file, frames, bytes, version } - a short live-view animation, if one was recorded
       prints: [], // [{ jobId, copies, at }]
       // Private gallery address (only when sharing is on). builtVersion/uploadedVersion = which picture version the
       // gallery folder / the web host currently holds, so a retake is noticed and re-published.

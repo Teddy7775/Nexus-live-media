@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { timingSafeEqual } from 'node:crypto';
@@ -7,6 +8,7 @@ import { ComposeError, composeTemplate, makePreview, renderTestPattern } from '.
 import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
 import { qrSvg } from './qr.js';
+import { GifError, encodeGif, grabFrames } from './gif.js';
 import { buildShareBundle, computeShareState, shareUrl } from './share.js';
 import { EmailRejected, buildEmail, classifySmtpError } from './email.js';
 import { isValidEmail, maskEmail, normalizeEmail } from '../public/email-utils.js';
@@ -158,6 +160,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         estimatedSeconds: config.printer.estimatedSeconds,
       },
       sharing: { enabled: sharingOn, mode: config.sharing.mode, shareSeconds: config.sharing.shareSeconds, wifiHint: config.sharing.wifiHint },
+      gif: { enabled: config.gif.enabled, countdownSeconds: config.gif.countdownSeconds, frames: config.gif.frames, intervalMs: config.gif.intervalMs },
       email: { enabled: Boolean(emailQueue), maxPerSession: config.email.maxPerSession, marketingOptIn: config.email.marketingOptIn },
     });
   });
@@ -208,6 +211,45 @@ export function createApp({ config, settings, templates, templateProblems = [], 
         await store.save(session);
         logger.info(`session ${session.id}: photo ${index + 1}/${session.shotsNeeded} taken (attempt ${attempt})`);
         res.json({ index, attempt, previewUrl: store.mediaUrl(session, previewRel), taken: session.shots.length, needed: session.shotsNeeded });
+      } finally {
+        capturing = false;
+      }
+    }),
+  );
+
+  /** Records a short animation from the live view (no still photo is taken, so the camera can keep its live view running). */
+  app.post(
+    '/api/sessions/:id/gif',
+    wrap(async (req, res) => {
+      if (!config.gif.enabled) throw new HttpError(409, 'gif_disabled', 'GIFs are turned off');
+      const session = await requireSession(req.params.id);
+      if (capturing) throw new HttpError(409, 'busy', 'The camera is busy');
+      capturing = true;
+      try {
+        await liveView.acquire(); // makes sure live view is running (the kiosk's preview stream usually already holds it)
+        let frames;
+        try {
+          frames = await grabFrames({ getFrame: () => camera.liveFrame(), count: config.gif.frames, intervalMs: config.gif.intervalMs });
+        } catch (err) {
+          if (err instanceof GifError) {
+            logger.warn(`gif for ${session.id}: ${err.message}`);
+            throw new HttpError(503, err.code, 'The GIF could not be recorded.', err.message);
+          }
+          throw err;
+        } finally {
+          liveView.release();
+        }
+        const bytes = await encodeGif({ frames, width: config.gif.width, delayMs: config.gif.intervalMs, boomerang: config.gif.boomerang, loop: true });
+        await fs.writeFile(store.resolve(session, 'animation.gif'), bytes);
+        const version = Date.now();
+        session.gif = { file: 'animation.gif', frames: frames.length, bytes: bytes.length, version };
+        // New media makes the finished picture (and its gallery) out of date, exactly like a retake.
+        session.status = 'shooting';
+        session.final = null;
+        session.pdf = null;
+        await store.save(session);
+        logger.info(`session ${session.id}: GIF recorded (${frames.length} frames, ${Math.round(bytes.length / 1024)} KB)`);
+        res.json({ ok: true, frames: frames.length, bytes: bytes.length, url: `${store.mediaUrl(session, 'animation.gif')}?v=${version}` });
       } finally {
         capturing = false;
       }

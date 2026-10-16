@@ -90,6 +90,15 @@ export const DEFAULTS = Object.freeze({
       maxAgeHours: 72, // give up on a session that cannot be uploaded for this long
     },
   },
+  // A short animation recorded from the camera's live view right after the photos.
+  gif: {
+    enabled: false,
+    frames: 8,
+    intervalMs: 250, // time between frames (4 per second)
+    width: 640,
+    countdownSeconds: 2,
+    boomerang: true, // play forwards then backwards
+  },
   email: {
     enabled: false,
     from: '', // e.g. Nexus Booth <booth@example.com> - must be the mailbox you log in with
@@ -176,6 +185,16 @@ export function validateConfig(cfg) {
     need(typeof u.secret === 'string' && u.secret.length >= 16, 'sharing.upload.secret must be at least 16 characters (or set BOOTH_UPLOAD_SECRET)');
     need(typeof sh.publicBaseUrl === 'string' && /^https:\/\//.test(sh.publicBaseUrl), 'sharing.publicBaseUrl is required in upload mode and must start with https://');
     need(posNum(u.timeoutMs) && u.timeoutMs > 0, 'sharing.upload.timeoutMs must be a positive number');
+  }
+
+  const gf = cfg.gif ?? {};
+  need(typeof gf.enabled === 'boolean', 'gif.enabled must be true or false');
+  need(Number.isInteger(gf.frames) && gf.frames >= 3 && gf.frames <= 16, 'gif.frames must be an integer from 3 to 16');
+  need(Number.isInteger(gf.intervalMs) && gf.intervalMs >= 100 && gf.intervalMs <= 1000, 'gif.intervalMs must be an integer from 100 to 1000');
+  need(Number.isInteger(gf.width) && gf.width >= 240 && gf.width <= 1280, 'gif.width must be an integer from 240 to 1280');
+  need(Number.isInteger(gf.countdownSeconds) && gf.countdownSeconds >= 0 && gf.countdownSeconds <= 5, 'gif.countdownSeconds must be an integer from 0 to 5');
+  if (gf.enabled && cfg.camera?.driver === 'digicamcontrol') {
+    need(cfg.camera.digicamcontrol?.liveView === true, 'gif.enabled needs live view: set camera.digicamcontrol.liveView to true');
   }
 
   const em = cfg.email ?? {};

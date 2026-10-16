@@ -360,6 +360,39 @@ async function takePhoto(session, index, shots, signal) {
   });
 }
 
+/**
+ * Bonus: a short animated GIF recorded from the live view. It is an extra - if it cannot be made, the guest never knows:
+ * we log it and carry on to the review.
+ */
+async function gifPhase(session, signal) {
+  const { gif } = app.state;
+  const chip = $('#shotChip');
+  chip.classList.remove('rec');
+  chip.textContent = 'Bonus: a GIF!';
+  $('#hint').textContent = 'Get ready to move - make it fun!';
+  $('#count').textContent = '';
+  show('countdown');
+  startLive();
+  await delay(600, signal); // let the preview appear
+  for (let n = gif.countdownSeconds; n >= 1; n -= 1) {
+    setCount(String(n));
+    await delay(1000, signal);
+  }
+  setCount('Go!', { word: true });
+  chip.textContent = 'Recording…';
+  chip.classList.add('rec');
+  $('#hint').textContent = 'Keep moving!';
+  try {
+    await api('POST', `/api/sessions/${session.id}/gif`);
+    session.hasGif = true;
+  } catch (error) {
+    console.warn('GIF skipped:', error.message);
+  } finally {
+    chip.classList.remove('rec');
+    stopLive();
+  }
+}
+
 /** Resolves with { action: 'print' | 'done' | 'retake', index? }. */
 async function review(session, shots, signal) {
   const { ui, printer } = app.state;
@@ -371,7 +404,8 @@ async function review(session, shots, signal) {
 
   const canPrint = printer.enabled;
   $('#reviewTitle').textContent = 'Looking good!';
-  $('#reviewSub').textContent = canPrint ? 'Happy with them? Tap to print.' : 'Your photos are saved.';
+  const gifNote = session.hasGif ? (app.state.sharing?.enabled ? ' Your GIF will be in your online gallery.' : ' Your GIF is saved too.') : '';
+  $('#reviewSub').textContent = (canPrint ? 'Happy with them? Tap to print.' : 'Your photos are saved.') + gifNote;
   $('#printBtn').textContent = canPrint ? 'Print my photos' : 'Done';
 
   const pairs = [[$('#printBtn'), { action: canPrint ? 'print' : 'done' }]];
@@ -460,6 +494,7 @@ async function guestFlow(signal) {
   updateEmailButton();
   const shots = [];
   for (let i = 0; i < session.shotsNeeded; i += 1) await takePhoto(session, i, shots, signal);
+  if (app.state.gif?.enabled) await gifPhase(session, signal);
 
   let printed = false;
   let sharing = null;

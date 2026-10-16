@@ -242,3 +242,6 @@ h2 { font-size: clamp(28px, 5vmin, 80px); font-weight: 800; letter-spacing: -0.0
 .email-privacy { color: var(--muted); font-size: clamp(12px, 1.8vh, 22px); max-width: 64ch; }
 .email-card .row { gap: 2vw; }
 .email-card .btn { min-height: clamp(48px, 7vh, 72px); padding: 1vh 5vw; font-size: clamp(18px, 3vh, 40px); }
+
+/* ---------- recording indicator (GIF) ---------- */
+.chip.rec::before { content: ''; display: inline-block; width: 1.8vmin; height: 1.8vmin; border-radius: 50%; background: var(--danger); margin-right: 1.2vmin; vertical-align: middle; animation: blink 0.8s steps(1) infinite; }

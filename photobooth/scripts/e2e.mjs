@@ -215,6 +215,7 @@ try {
       camera: { mock: { captureDelayMs: 100 } },
       printer: { dryRunDelayMs: 3500, estimatedSeconds: 4 },
       sharing: { enabled: true, mode: 'local', publicBaseUrl: `http://127.0.0.1:${lanPort}`, shareSeconds: 30, wifiHint: 'Join the Wi-Fi network NexusGuests first.' },
+      gif: { enabled: true, frames: 4, intervalMs: 120, countdownSeconds: 1, width: 480 },
       email: { enabled: true, from: 'Nexus Booth <booth@test.local>', smtp: smtp.smtp(), marketingOptIn: { enabled: true, label: 'Keep me posted about future events' } },
     }),
   );
@@ -239,7 +240,14 @@ try {
     await page2.goto(base2);
     await page2.waitForSelector('body[data-ready="true"]');
     await page2.click('#startBtn');
+    // After the 3 photos comes the bonus GIF, recorded from the live view.
+    await page2.waitForFunction(() => document.querySelector('#shotChip').textContent === 'Bonus: a GIF!', null, { timeout: 60000 });
+    await page2.waitForFunction(() => document.querySelector('#count').textContent === '1');
+    await snapPage(page2, 'gif-countdown', 150);
+    await page2.waitForFunction(() => document.querySelector('#shotChip').textContent === 'Recording…', null, { timeout: 10000 });
+    assert.equal(await page2.locator('#shotChip.rec').count(), 1, 'a recording indicator is shown');
     await page2.waitForSelector('body[data-screen="review"]', { timeout: 60000 });
+    assert.match(await page2.textContent('#reviewSub'), /Your GIF will be in your online gallery/);
     await page2.click('#printBtn');
     await page2.waitForSelector('body[data-screen="printing"]');
     await page2.waitForSelector('#sharePanel:not([hidden])');
@@ -288,7 +296,9 @@ try {
     await phonePage.goto(scanned);
     assert.match(await phonePage.title(), /Sarah & James Wedding - your photos/);
     await phonePage.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0));
-    assert.ok((await phonePage.locator('img').count()) >= 4, 'final picture plus the individual photos');
+    assert.ok((await phonePage.locator('img').count()) >= 5, 'final picture, the GIF and the individual photos');
+    assert.equal(await phonePage.locator('img[src="animation.gif"]').count(), 1, 'the GIF is in the gallery');
+    assert.ok(await phonePage.evaluate(() => document.querySelector('img[src="animation.gif"]').naturalWidth > 0), 'and it loads');
     await snapPage(phonePage, 'guest-gallery-phone', 200);
 
     await snapPage(page2, 'done-with-qr', 250);

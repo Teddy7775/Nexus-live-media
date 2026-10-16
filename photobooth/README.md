@@ -134,6 +134,16 @@ Set the mailbox password as the environment variable **`BOOTH_SMTP_PASS`** so it
 
 Deliverability matters more than code here: send from a mailbox on your own domain, make sure your host has SPF/DKIM set up for it, and test with real Gmail and Outlook addresses (and check their spam folders). Shared hosting plans also limit how many emails you may send per hour; check your plan.
 
+## GIF
+
+With `gif.enabled`, after the photos the booth shows a short **"Bonus: a GIF!"** countdown and records a few frames from the camera's live view, then plays them forwards and backwards (a "boomerang") as an animated GIF. It goes into the guest's online gallery and the QR/email link; it is **not printed**. It is an extra: if it cannot be recorded (live view not running, a frozen live view) the guest simply carries on to the review and the operator log says why.
+
+```json
+"gif": { "enabled": true, "frames": 8, "intervalMs": 250, "countdownSeconds": 2, "width": 640, "boomerang": true }
+```
+
+Quality note: the frames come from **live view**, not full-resolution photos (a DSLR cannot shoot stills that fast), so a GIF is screen-sized (a Canon's live view is roughly 960 x 640). It needs live view, so `camera.digicamcontrol.liveView` must be `true`. Because it also needs the camera free, a GIF is never recorded while a photo is being taken.
+
 ## Configuration
 
 `config.json` is merged over the defaults in `server/config.js`; only the keys you set are needed. A typo is reported at startup, naming the setting, instead of failing at the event.
@@ -157,6 +167,8 @@ Deliverability matters more than code here: send from a mailbox on your own doma
 | `sharing.autoUpload`, `sharing.qrOnPrint` | Upload every session right away (needed for the printed QR to work); print a QR on layouts that have room. |
 | `sharing.wifiHint`, `sharing.shareSeconds` | Text under the QR in local mode; how long the QR stays on the thank-you screen. |
 | `sharing.upload.url`, `sharing.upload.secret` | Web host receiver address and shared secret (set the secret with the `BOOTH_UPLOAD_SECRET` environment variable). |
+| `gif.enabled`, `gif.frames`, `gif.intervalMs` | Record a boomerang GIF from live view after the photos: how many frames, and the gap between them in milliseconds. |
+| `gif.width`, `gif.countdownSeconds`, `gif.boomerang` | GIF width in pixels (never enlarged), the "get ready" countdown, and whether it plays forwards then backwards. |
 | `email.enabled`, `email.from`, `email.smtp.*` | Let guests email themselves their photos. Needs `sharing.enabled`. Set the password with `BOOTH_SMTP_PASS`. |
 | `email.subject`, `email.intro` | Subject (`{event}` is replaced) and opening line of the email. |
 | `email.marketingOptIn` | `{ "enabled": true, "label": "..." }` adds an unticked tick-box; only ticked addresses are kept. |
@@ -174,6 +186,7 @@ Deliverability matters more than code here: send from a mailbox on your own doma
 - The digiCamControl adapter against a stand-in server that follows digiCamControl's own source code: command format, `OK`-vs-error replies, RAW rejection, timeouts, live view pause/resume.
 - The Windows printing adapter against a stand-in for `pdf-to-printer`.
 - Sharing: QR codes decoded back to the exact link, including a 0.6-inch code on a JPEG-compressed strip, each strip half after the cut, and the code shown on the kiosk screen opened in a phone-sized browser.
+- GIFs: encoded for real and decoded back with an independent reader (frame count, order, boomerang, size, timing, looping, colour fidelity); frozen or missing live view is handled; the web-host receiver accepts the GIFs byte for byte.
 - Email against a **real SMTP server**: the message (link, inline preview, escaped text, no header injection), waiting for the link to go live, temporary vs permanent refusals, a wrong login, a dead connection, restart recovery, rate limits, and that no readable address stays on disk or in logs. The touch-keyboard flow (typo suggestion included) runs in a real browser.
 - The gallery listener exposes only galleries (the booth's API, operator panel and session folders are all unreachable from it).
 - The web-host receiver (`webhost/upload.php`) running under **real PHP**: bad signatures, stale timestamps, path tricks, scripts disguised as images and oversized files are all refused; the queue retries, survives a restart and never publishes a gallery before its pictures.
@@ -185,6 +198,7 @@ Deliverability matters more than code here: send from a mailbox on your own doma
 - Footer text rendering on Windows (it uses system fonts; a transparent PNG overlay with the text baked in avoids this entirely).
 - `start-booth.bat` and kiosk mode on a real Windows PC.
 - Scanning a **printed** QR with a real phone camera on DNP paper (decoding was tested on the digital picture with an independent QR reader).
+- GIF **quality** from a real Canon live view (frame rate and resolution depend on your camera, lens and lighting; only the encoder and the recording logic were tested, with synthetic frames).
 - Email **deliverability**: whether Hostinger's (or any) SMTP server accepts the messages, whether Gmail/Outlook put them in spam, your hourly sending limit, and how the HTML email looks in real mail apps (only the message content and delivery to a test server were checked).
 - Typing comfort on your real touch screen size (the keyboard is sized for screens from about 600 px tall up).
 - Local mode on a real venue network (Windows firewall prompt, client isolation, the phone actually reaching the PC).

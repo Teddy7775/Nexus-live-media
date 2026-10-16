@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
 import { UploadQueue, WebHostUploader, signUpload } from '../server/uploader.js';
+import { encodeGif } from '../server/gif.js';
 import { newShareToken } from '../server/share.js';
 import { waitFor } from './helpers.js';
 
@@ -185,4 +186,13 @@ test('a host without config.php (or with the sample secret) refuses to accept up
   } finally {
     fs.writeFileSync(configFile, original);
   }
+});
+
+test('a GIF produced by this booth passes the receiver\'s own image validation, byte for byte', opts, async () => {
+  const token = newShareToken();
+  const frames = await Promise.all(['#ff0000', '#00c800', '#0000ff', '#ffdc00'].map((c) => sharp({ create: { width: 320, height: 240, channels: 3, background: c } }).jpeg().toBuffer()));
+  const gif = await encodeGif({ frames, width: 320, delayMs: 250, boomerang: true });
+  const res = await uploader().uploadFile({ token, name: 'animation.gif', buffer: gif });
+  assert.equal(res.ok, true);
+  assert.deepEqual(fs.readFileSync(path.join(dir, 's', token, 'animation.gif')), gif);
 });
