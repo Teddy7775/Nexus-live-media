@@ -297,3 +297,24 @@ test('sessions from an earlier run can still be found and reprinted after a rest
     await first.close();
   }
 });
+
+test('asking for the same picture, gallery and print at once builds each only once (concurrent builds can crash the booth)', async () => {
+  await withBooth({}, async (booth) => {
+    const session = (await booth.api('POST', '/api/sessions')).json;
+    for (let i = 0; i < session.shotsNeeded; i++) await booth.api('POST', `/api/sessions/${session.id}/shots`);
+    // Four requests for the finished picture and four for a print, all in the same instant.
+    const composes = await Promise.all(Array.from({ length: 4 }, () => booth.api('POST', `/api/sessions/${session.id}/compose`)));
+    assert.deepEqual(composes.map((r) => r.status), [200, 200, 200, 200]);
+    assert.equal(new Set(composes.map((r) => r.json.previewUrl)).size, 1, 'one build: every caller got the same picture version');
+  });
+  await withBooth({}, async (booth) => {
+    const session = (await booth.api('POST', '/api/sessions')).json;
+    for (let i = 0; i < session.shotsNeeded; i++) await booth.api('POST', `/api/sessions/${session.id}/shots`);
+    const prints = await Promise.all(Array.from({ length: 4 }, () => booth.api('POST', `/api/sessions/${session.id}/print`, { copies: 1 })));
+    assert.deepEqual(prints.map((r) => r.status), [200, 200, 200, 200], 'a frantic double tap on Print on a picture that is not built yet');
+    assert.equal(new Set(prints.map((r) => r.json.job.id)).size, 4, 'each tap is its own print job, as before');
+    const stored = JSON.parse(fs.readFileSync(path.join(booth.config.storage.dir, 'default', session.id, 'session.json'), 'utf8'));
+    assert.equal(stored.status, 'composed');
+    assert.equal(stored.prints.length, 4);
+  });
+});

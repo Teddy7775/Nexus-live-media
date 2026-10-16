@@ -9,10 +9,11 @@ const NOT_FOUND = `<!doctype html><html lang="en"><head><meta charset="utf-8"><m
 
 /**
  * The only part of the booth that phones and a second station can reach over the network. It serves guests'
- * galleries (read-only, by unguessable token) and nothing else: the camera, printer and operator controls live on
- * the booth's own localhost-only server. Every failure looks identical, so a stranger learns nothing from probing.
+ * galleries (read-only, by unguessable token) and, when enabled, the PIN-protected station under /station/ - nothing
+ * else: the camera, printer and operator controls live on the booth's own localhost-only server. Every failure outside
+ * the station looks identical, so a stranger learns nothing from probing.
  */
-export function createLanApp({ shareIndex, store, logger }) {
+export function createLanApp({ shareIndex, store, logger, station = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use((req, res, next) => {
@@ -23,6 +24,9 @@ export function createLanApp({ shareIndex, store, logger }) {
   const notFound = (res) => res.status(404).type('html').send(NOT_FOUND);
 
   app.get('/health', (req, res) => res.type('text').send('ok'));
+
+  // The attendant's station (its own PIN, its own router). Absent unless station.enabled.
+  if (station) app.use('/station', station);
 
   app.get('/s/:token/:file?', (req, res) => {
     const { token } = req.params;

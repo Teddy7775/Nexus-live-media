@@ -434,7 +434,7 @@ test('saved key and backdrop survive a restart, and nonsense in the file is igno
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gs-settings-'));
   try {
     const backgrounds = await new Backgrounds({ dir: path.join(dir, 'none') }).load();
-    const config = { activeTemplate: 't', event: { name: 'E', slug: 'e' }, printer: { enabled: true, copies: 1 }, greenScreen: { key: { sensitivity: 50, softness: 30, despill: 1, edgeBlur: 0.8 }, defaultBackdrop: 'guest' } };
+    const config = { activeTemplate: 't', event: { name: 'E', slug: 'e' }, printer: { enabled: true, copies: 1 }, greenScreen: { key: { sensitivity: 50, softness: 30, despill: 1, edgeBlur: 0.8 }, defaultBackdrop: 'guest' }, station: { enabled: false, approval: { enabled: false } } };
     const templates = new Map([['t', {}]]);
     const file = path.join(dir, 'runtime-settings.json');
 

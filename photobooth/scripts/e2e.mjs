@@ -412,6 +412,144 @@ try {
     fs.rmSync(work3, { recursive: true, force: true });
   }
 
+  // ------------------------------------------------------------------ attendant station scenario
+  log('station: a second screen shows the booth live, approves prints, shares and runs the live wall');
+  const work4 = fs.mkdtempSync(path.join(os.tmpdir(), 'booth-e2e-station-'));
+  const lanPort4 = await freePort();
+  const smtp4 = await startFakeSmtp();
+  const STATION_PIN = 'station-pin-9';
+  const config4 = validateConfig(
+    deepMerge(DEFAULTS, {
+      storage: { dir: path.join(work4, 'events') },
+      event: { name: 'Sarah & James Wedding' },
+      ui: { countdownSeconds: 1, shotPreviewSeconds: 1, reviewSeconds: 60, doneSeconds: 60, errorSeconds: 60 },
+      camera: { mock: { captureDelayMs: 100 } },
+      printer: { dryRunDelayMs: 1500, estimatedSeconds: 2 },
+      sharing: { enabled: true, mode: 'local', publicBaseUrl: `http://127.0.0.1:${lanPort4}` },
+      email: { enabled: true, from: 'Nexus Booth <booth@test.local>', smtp: smtp4.smtp() },
+      station: { enabled: true, pin: STATION_PIN, approval: { enabled: true, timeoutSeconds: 90 } },
+    }),
+  );
+  const booth4 = await createBooth(config4, { logger: createLogger({ quiet: true }), settingsFile: path.join(work4, 'runtime-settings.json') });
+  const server4 = await new Promise((resolve) => { const s = booth4.app.listen(0, '127.0.0.1', () => resolve(s)); });
+  const lanServer4 = await new Promise((resolve) => { const s = booth4.lanApp.listen(lanPort4, '127.0.0.1', () => resolve(s)); });
+  const base4 = `http://127.0.0.1:${server4.address().port}`;
+  const stationBase = `http://127.0.0.1:${lanPort4}/station/`;
+  const stationCtx = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+  try {
+    const tablet = await stationCtx.newPage();
+    tablet.on('pageerror', (err) => problems.push(`page error (station): ${err.message}`));
+    tablet.on('console', (msg) => {
+      if (msg.type() === 'error' && !EXPECTED.test(msg.text())) problems.push(`console error (station): ${msg.text()}`);
+    });
+
+    // 1. sign in
+    await tablet.goto(stationBase);
+    await tablet.waitForSelector('#login:not([hidden])');
+    await tablet.fill('#pin', 'wrong-pin-1');
+    await tablet.click('#loginForm button[type=submit]');
+    await tablet.waitForSelector('#loginError:not([hidden])');
+    assert.match(await tablet.textContent('#loginError'), /Wrong PIN/);
+    await snapPage(tablet, 'station-login', 150);
+    await tablet.fill('#pin', STATION_PIN);
+    await tablet.click('#loginForm button[type=submit]');
+    await tablet.waitForSelector('#app:not([hidden])');
+    await tablet.waitForFunction(() => document.querySelector('#conn').textContent === 'Live');
+    assert.equal(await tablet.textContent('#eventName'), 'Sarah & James Wedding');
+    assert.match(await tablet.textContent('#approvalInfo'), /Prints wait for your approval/);
+    await tablet.waitForFunction(() => document.querySelectorAll('#health .pill').length >= 2);
+
+    // 2. a guest takes photos on the kiosk and asks to print
+    await page.goto(base4);
+    await page.waitForSelector('body[data-ready="true"]');
+    await page.click('#startBtn');
+    await onScreen('review', 60000);
+    await tablet.waitForSelector('.session');
+    await page.click('#printBtn');
+    await onScreen('printing');
+    await page.waitForFunction(() => document.querySelector('#printTitle').textContent === 'One moment…');
+    assert.match(await page.textContent('#printMsg'), /attendant is checking/);
+    await snap('station-kiosk-waiting', 400);
+    assert.equal(booth4.queue.list().length, 0, 'nothing has been printed yet');
+
+    // 3. the attendant sees the finished picture, picks 2 copies and approves
+    await tablet.waitForSelector('.approval');
+    await tablet.waitForFunction(() => document.querySelector('.approval img'));
+    assert.ok(await tablet.evaluate(() => document.querySelector('.approval img').complete));
+    assert.match(await tablet.textContent('.approval .wait'), /Guest waiting/);
+    await tablet.click('.approval .stepper button[aria-label="More copies"]');
+    assert.equal(await tablet.textContent('.approval output'), '2×');
+    await snapPage(tablet, 'station-approval', 400);
+    await tablet.click('.approval .btn.ok');
+    await tablet.waitForSelector('.approval', { state: 'detached' });
+    await onScreen('done', 30000);
+    assert.equal(booth4.queue.list().length, 1);
+    assert.equal(booth4.queue.list()[0].copies, 2, 'printed with the copies the attendant chose');
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    // 4. a second guest is not approved
+    await page.click('#startBtn');
+    await onScreen('review', 60000);
+    await page.click('#printBtn');
+    await tablet.waitForSelector('.approval');
+    await tablet.click('.approval .btn.bad');
+    await onScreen('done', 30000);
+    assert.match(await page.textContent('#doneMsg'), /attendant did not print these/);
+    assert.equal(booth4.queue.list().length, 1, 'no second print');
+    await snap('station-kiosk-not-approved', 400);
+    await page.click('#doneBtn');
+    await onScreen('attract');
+
+    // 5. live list with print states, then share a session from the station
+    await tablet.waitForFunction(() => document.querySelectorAll('.session').length === 2);
+    await tablet.waitForFunction(() => [...document.querySelectorAll('.session .pill')].some((p) => /Sent to the printer/.test(p.textContent)) && [...document.querySelectorAll('.session .pill')].some((p) => /Not printed/.test(p.textContent)));
+    await snapPage(tablet, 'station-live', 300);
+
+    await tablet.locator('.session', { hasText: 'Sent to the printer' }).getByRole('button', { name: 'Share…' }).click();
+    await tablet.waitForSelector('#shareOverlay:not([hidden])');
+    await tablet.waitForSelector('#shareQr:not([hidden])');
+    assert.match(await tablet.textContent('#shareStatus'), /Ready/);
+    const shareUrl = await tablet.textContent('#shareUrl');
+    assert.match(shareUrl, new RegExp(`^http://127.0.0.1:${lanPort4}/s/`));
+    const qrShot = await tablet.locator('#shareQr').screenshot();
+    const decoded = await sharp(qrShot).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    assert.equal(jsQR(new Uint8ClampedArray(decoded.data), decoded.info.width, decoded.info.height)?.data, shareUrl, 'the QR on the station decodes to the guest\'s gallery link');
+    await tablet.fill('#emailTo', 'lena@example.com');
+    await tablet.click('#emailSend');
+    await tablet.waitForFunction(() => /Queued for l\*\*\*@example\.com/.test(document.querySelector('#emailMsg').textContent));
+    await waitForMail(smtp4, 1);
+    assert.equal(smtp4.state.messages[0].to.value[0].address, 'lena@example.com');
+    assert.ok(smtp4.state.messages[0].text.includes(shareUrl), 'the email links to the same gallery as the QR');
+    await snapPage(tablet, 'station-share', 300);
+    await tablet.click('#shareClose');
+
+    // 6. the live wall
+    await tablet.click('#wallBtn');
+    await tablet.waitForSelector('#wall:not([hidden])');
+    await tablet.waitForFunction(() => document.querySelector('#wallImg').naturalWidth > 0);
+    assert.equal(await tablet.textContent('#wallCaption'), 'Sarah & James Wedding');
+    await snapPage(tablet, 'station-wall', 300);
+    await tablet.keyboard.press('Escape');
+    await tablet.waitForSelector('#wall', { state: 'hidden' });
+
+    // 7. the station is told when it is signed out
+    await tablet.click('#logoutBtn');
+    await tablet.waitForSelector('#login:not([hidden])');
+    assert.equal((await fetch(`${stationBase}api/me`)).status, 401);
+  } finally {
+    await stationCtx.close();
+    booth4.emailQueue?.stop();
+    booth4.approvals?.stop();
+    booth4.hub?.closeAll();
+    lanServer4.closeAllConnections();
+    lanServer4.close();
+    server4.closeAllConnections();
+    server4.close();
+    await smtp4.close();
+    fs.rmSync(work4, { recursive: true, force: true });
+  }
+
   assert.deepEqual(problems, [], `browser reported problems:\n${problems.join('\n')}\nfailed requests:\n${failedRequests.join('\n')}`);
   console.log('\nE2E PASSED');
 } catch (err) {

@@ -32,9 +32,11 @@ export function slugifyEvent(name, now = new Date()) {
  */
 export class SessionStore {
   #active = new Map();
+  #saving = new Map(); // session id -> the save in progress (or queued)
 
-  constructor({ rootDir }) {
+  constructor({ rootDir, onSave = null }) {
     this.rootDir = rootDir;
+    this.onSave = onSave; // called after every save: how the station learns that a session changed
   }
 
   eventDir(eventSlug) {
@@ -86,11 +88,28 @@ export class SessionStore {
     return session;
   }
 
-  async save(session) {
+  /**
+   * Saves one after another per session, each writing the session as it is when its turn comes. Two saves at once used the
+   * same temporary file, so one of them failed (and a slow older one could land after a newer one).
+   */
+  save(session) {
+    const run = (this.#saving.get(session.id) ?? Promise.resolve()).catch(() => {}).then(() => this.#write(session));
+    this.#saving.set(session.id, run);
+    const clear = () => this.#saving.get(session.id) === run && this.#saving.delete(session.id);
+    run.then(clear, clear);
+    return run;
+  }
+
+  async #write(session) {
     const file = path.join(this.sessionDir(session), 'session.json');
     const tmp = `${file}.${process.pid}.tmp`;
     await fs.writeFile(tmp, JSON.stringify(session, null, 2));
     await fs.rename(tmp, file);
+    try {
+      this.onSave?.(session);
+    } catch {
+      /* a listener must never break saving */
+    }
   }
 
   /** In-memory first (the session in progress), then a scan of the event folders (older sessions). */

@@ -116,6 +116,22 @@ export const DEFAULTS = Object.freeze({
     // How the green is judged. Easiest to set from the operator panel (Green screen card), which also saves them.
     key: { sensitivity: 50, softness: 30, despill: 1, edgeBlur: 0.8 },
   },
+  // A second screen (an attendant's PC or tablet on the same network) that shows sessions live and can approve prints
+  // before they are sent to the printer. Opens at http://<this PC's address>:<lan.port>/station/ and needs the PIN below.
+  station: {
+    enabled: false,
+    pin: '', // at least 6 characters: it protects the booth on your network. Better set via BOOTH_STATION_PIN
+    approval: {
+      // Every print waits for an attendant at the station to say yes (can also be switched on and off in the operator panel).
+      enabled: false,
+      // How long a guest waits for an answer. If nobody answers (or no station is connected) it is settled by onTimeout:
+      // "cancel" = not printed (the photos are still saved and shared), "print" = printed anyway.
+      timeoutSeconds: 120,
+      onTimeout: 'cancel',
+      maxCopies: 4,
+    },
+    recentSessions: 30, // how many recent sessions the station shows
+  },
   email: {
     enabled: false,
     from: '', // e.g. Nexus Booth <booth@example.com> - must be the mailbox you log in with
@@ -224,6 +240,19 @@ export function validateConfig(cfg) {
   need(Number.isInteger(gs.previewWidth) && gs.previewWidth >= 240 && gs.previewWidth <= 1280, 'greenScreen.previewWidth must be an integer from 240 to 1280');
   for (const problem of validateKey(gs.key)) problems.push(`greenScreen.key: ${problem}`);
 
+  const st = cfg.station ?? {};
+  need(typeof st.enabled === 'boolean', 'station.enabled must be true or false');
+  if (st.enabled) {
+    need(typeof st.pin === 'string' && st.pin.length >= 6, 'station.pin must be at least 6 characters (it protects the booth on your network; or set BOOTH_STATION_PIN)');
+  }
+  const ap = st.approval ?? {};
+  need(typeof ap.enabled === 'boolean', 'station.approval.enabled must be true or false');
+  if (ap.enabled) need(st.enabled === true, 'station.approval.enabled needs station.enabled (an attendant has to be able to approve)');
+  need(typeof ap.timeoutSeconds === 'number' && Number.isFinite(ap.timeoutSeconds) && ap.timeoutSeconds >= 1 && ap.timeoutSeconds <= 3600, 'station.approval.timeoutSeconds must be a number from 1 to 3600');
+  need(['cancel', 'print'].includes(ap.onTimeout), 'station.approval.onTimeout must be "cancel" or "print"');
+  need(Number.isInteger(ap.maxCopies) && ap.maxCopies >= 1 && ap.maxCopies <= 10, 'station.approval.maxCopies must be an integer from 1 to 10');
+  need(Number.isInteger(st.recentSessions) && st.recentSessions >= 5 && st.recentSessions <= 200, 'station.recentSessions must be an integer from 5 to 200');
+
   const em = cfg.email ?? {};
   need(typeof em.enabled === 'boolean', 'email.enabled must be true or false');
   if (em.enabled) {
@@ -258,6 +287,12 @@ export function configWarnings(cfg) {
   if (cfg.greenScreen.enabled && cfg.camera.driver === 'digicamcontrol' && !cfg.camera.digicamcontrol.liveView) {
     warnings.push('greenScreen is on but camera.digicamcontrol.liveView is off: guests will not see themselves on the new background before the photo');
   }
+  if (cfg.station.enabled) {
+    warnings.push(`the station is on: anyone on this network who knows the station PIN can open http://<this PC>:${cfg.lan.port}/station/ (plain http: use a private network, not a public Wi-Fi)`);
+    if (cfg.station.pin === cfg.operatorPin) warnings.push('station.pin is the same as operatorPin: use a different PIN, the station is reachable from the network');
+    if (cfg.station.pin && !process.env.BOOTH_STATION_PIN) warnings.push('the station PIN is stored in config.json; consider the BOOTH_STATION_PIN environment variable instead');
+    if (cfg.lan.host === '127.0.0.1' || cfg.lan.host === 'localhost') warnings.push('lan.host is localhost, so no other device can reach the station: use "0.0.0.0"');
+  }
   if (cfg.sharing.enabled && cfg.sharing.mode === 'local') {
     warnings.push(`sharing.mode is "local": guests can only open their link while their phone is on the same network as this PC (listening on port ${cfg.lan.port}; Windows may ask to allow it)`);
   }
@@ -276,6 +311,7 @@ export function redactedConfig(cfg) {
   copy.operatorPin = '***';
   if (copy.sharing?.upload?.secret) copy.sharing.upload.secret = '***';
   if (copy.email?.smtp?.pass) copy.email.smtp.pass = '***';
+  if (copy.station?.pin) copy.station.pin = '***';
   return copy;
 }
 
@@ -295,6 +331,7 @@ export function loadConfig({ file, rootDir = ROOT_DIR } = {}) {
   if (env.BOOTH_OPERATOR_PIN) fromEnv.operatorPin = env.BOOTH_OPERATOR_PIN;
   if (env.BOOTH_UPLOAD_SECRET) fromEnv.sharing = { upload: { secret: env.BOOTH_UPLOAD_SECRET } };
   if (env.BOOTH_SMTP_PASS) fromEnv.email = { smtp: { pass: env.BOOTH_SMTP_PASS } };
+  if (env.BOOTH_STATION_PIN) fromEnv.station = { pin: env.BOOTH_STATION_PIN };
   const merged = validateConfig(deepMerge(deepMerge(DEFAULTS, user), fromEnv));
   const storageDir = path.resolve(rootDir, merged.storage.dir);
   const backgroundsDir = path.resolve(rootDir, merged.greenScreen.dir);

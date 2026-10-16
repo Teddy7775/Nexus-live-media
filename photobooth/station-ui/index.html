@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="dark">
+  <title>Booth station</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308171f'/%3E%3Ccircle cx='32' cy='35' r='13' fill='none' stroke='%234de1ff' stroke-width='5'/%3E%3Crect x='23' y='13' width='18' height='8' rx='3' fill='%234de1ff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="station.css">
+</head>
+<body>
+  <section id="login" class="login" hidden>
+    <form id="loginForm" class="card narrow" autocomplete="off">
+      <h1>Booth station</h1>
+      <p class="muted">Enter the station PIN to see the booth live, approve prints and share photos.</p>
+      <label class="field"><span>Station PIN</span><input id="pin" type="password" autocomplete="off" required></label>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p id="loginError" class="msg bad" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <header class="top">
+      <div class="title">
+        <h1 id="eventName">Booth station</h1>
+        <span id="conn" class="pill off" role="status">Connecting…</span>
+      </div>
+      <div id="health" class="health" aria-label="Booth status"></div>
+      <div class="tools">
+        <button id="wallBtn" class="btn" type="button">Live wall</button>
+        <button id="soundBtn" class="btn" type="button" aria-pressed="false">Sound off</button>
+        <button id="logoutBtn" class="btn" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="approvalsBox" class="approvals" aria-labelledby="h-appr" hidden>
+        <div class="row-head">
+          <h2 id="h-appr">Prints waiting for you</h2>
+          <button id="approveAll" class="btn ok" type="button" hidden>Approve all</button>
+        </div>
+        <div id="approvals" class="cards"></div>
+        <p id="approvalMsg" class="msg" role="status" hidden></p>
+      </section>
+
+      <p id="approvalInfo" class="notice" hidden></p>
+
+      <section aria-labelledby="h-live">
+        <h2 id="h-live">Live</h2>
+        <p id="empty" class="muted" hidden>No sessions yet for this event. They appear here as guests use the booth.</p>
+        <div id="sessions" class="grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Share one session: QR for the guest at the station, or email -->
+  <div id="shareOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="shareTitle" hidden>
+    <div class="card share">
+      <h2 id="shareTitle">Share photos</h2>
+      <div class="share-body">
+        <img id="shareQr" alt="QR code to the guest's photos" hidden>
+        <div class="share-side">
+          <p id="shareStatus" class="msg" role="status"></p>
+          <p id="shareUrl" class="muted small break"></p>
+          <form id="emailForm" autocomplete="off">
+            <label class="field"><span>Email the photos to</span><input id="emailTo" type="email" inputmode="email" autocomplete="off" placeholder="guest@example.com"></label>
+            <label id="optInRow" class="check" hidden><input id="optIn" type="checkbox"><span id="optInLabel"></span></label>
+            <p id="emailSuggest" class="msg" role="status" hidden></p>
+            <button class="btn primary" type="submit" id="emailSend">Send email</button>
+          </form>
+          <p id="emailMsg" class="msg" role="status" hidden></p>
+        </div>
+      </div>
+      <div class="actions"><button id="shareClose" class="btn" type="button">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Live wall: the finished photos as a slideshow for a venue screen -->
+  <div id="wall" class="wall" role="dialog" aria-label="Live wall" hidden>
+    <img id="wallImg" alt="">
+    <p id="wallCaption" class="wall-caption"></p>
+    <p id="wallEmpty" class="wall-empty">Waiting for the first photos…</p>
+    <button id="wallClose" class="btn wall-close" type="button">Close (Esc)</button>
+  </div>
+
+  <script type="module" src="station.js"></script>
+</body>
+</html>

@@ -81,6 +81,17 @@
           <ul id="mails" class="plain small"></ul>
         </section>
 
+        <section class="card" aria-labelledby="h-st" id="stCard">
+          <h2 id="h-st">Attendant station</h2>
+          <p class="status"><span id="stDot" class="dot"></span><span id="stText">…</span></p>
+          <p class="muted" id="stDetail"></p>
+          <p class="small"><code id="stUrl" hidden></code></p>
+          <div id="stControls" hidden>
+            <label class="check"><input id="stApproval" type="checkbox"><span>Every print waits for the station's approval</span></label>
+            <p id="stMsg" class="msg" role="status" hidden></p>
+          </div>
+        </section>
+
         <section class="card wide" aria-labelledby="h-gs" id="gsCard">
           <h2 id="h-gs">Green screen</h2>
           <p class="status"><span id="gsDot" class="dot"></span><span id="gsText">…</span></p>

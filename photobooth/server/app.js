@@ -5,6 +5,8 @@ import { timingSafeEqual } from 'node:crypto';
 import express from 'express';
 import { CameraError } from './camera/errors.js';
 import { ComposeError, composeTemplate, makePreview, renderTestPattern } from './compose.js';
+import { HttpError } from './http-error.js';
+import { ApprovalQueue } from './approval.js';
 import { PrintError, buildPrintPdf } from './print.js';
 import { configWarnings } from './config.js';
 import { qrSvg } from './qr.js';
@@ -13,15 +15,6 @@ import { DEFAULT_KEY, keyToJpeg, mergeKey, suggestKeyFromJpeg } from './greenscr
 import { buildShareBundle, computeShareState, shareUrl } from './share.js';
 import { EmailRejected, buildEmail, classifySmtpError } from './email.js';
 import { isValidEmail, maskEmail, normalizeEmail } from '../public/email-utils.js';
-
-class HttpError extends Error {
-  constructor(status, code, message, detail) {
-    super(message);
-    this.status = status;
-    this.code = code;
-    this.detail = detail;
-  }
-}
 
 // What a guest sees. The technical detail goes to the log and the operator panel.
 const FRIENDLY_CAMERA = {
@@ -38,7 +31,7 @@ const clampCopies = (value, fallback) => {
   return Math.min(10, Math.max(1, n));
 };
 
-export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null, backgrounds = null }) {
+export function createApp({ config, settings, templates, templateProblems = [], templatesDir, camera, liveView, printer, queue, store, logger, version = '0.0.0', publicDir, shareIndex = null, shareBase = '', uploader = null, uploadQueue = null, mailer = null, emailQueue = null, backgrounds = null, hub = null, stationUrl = null }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '10kb' }));
@@ -130,23 +123,42 @@ export function createApp({ config, settings, templates, templateProblems = [], 
   const finalPreviewUrl = (session) => (session.final ? `${store.mediaUrl(session, session.final.preview)}?v=${session.final.version}` : null);
   const templateView = (t) => ({ id: t.id, name: t.name, description: t.description ?? '', shots: t.shots });
 
+  /**
+   * Runs `fn` after any earlier call with the same key has finished. Building a session's picture, gallery or print file
+   * writes the SAME files, and libvips reads images by memory-mapping them: two builds at once (a double tap on Print, the
+   * kiosk and the station both asking) can truncate a file another one is reading, which kills the whole process (SIGBUS).
+   */
+  const locks = new Map();
+  function withLock(key, fn) {
+    const next = (locks.get(key) ?? Promise.resolve()).catch(() => {}).then(fn);
+    locks.set(key, next);
+    next.then(
+      () => locks.get(key) === next && locks.delete(key),
+      () => locks.get(key) === next && locks.delete(key),
+    );
+    return next;
+  }
+
   const sharingOn = config.sharing.enabled;
   const shareLink = (session) => (session.share ? shareUrl(shareBase, session.share.token) : null);
 
   /** Builds the gallery folder for the current picture and (upload mode) queues it for the web host. */
-  async function ensureShareBundle(session, { upload }) {
-    if (!sharingOn || !session.share || !session.final) return;
-    if (session.share.builtVersion !== session.final.version) {
-      const bundle = await buildShareBundle({ session, sessionDir: store.sessionDir(session), brandName: config.sharing.brandName });
-      session.share.builtVersion = session.final.version;
-      session.share.files = bundle.files;
-      await store.save(session);
-    }
-    if (config.sharing.mode === 'upload' && upload && uploadQueue && session.share.uploadedVersion !== session.final.version) {
-      const version = session.final.version;
-      const queued = uploadQueue.list().some((i) => i.sessionId === session.id && i.version === version && i.status !== 'failed');
-      if (!queued) uploadQueue.enqueue({ sessionId: session.id, token: session.share.token, dir: path.join(store.sessionDir(session), 'share'), files: session.share.files, version });
-    }
+  function ensureShareBundle(session, { upload }) {
+    if (!sharingOn || !session.share || !session.final) return Promise.resolve();
+    return withLock(`bundle:${session.id}`, async () => {
+      if (!session.final) return;
+      if (session.share.builtVersion !== session.final.version) {
+        const bundle = await buildShareBundle({ session, sessionDir: store.sessionDir(session), brandName: config.sharing.brandName });
+        session.share.builtVersion = session.final.version;
+        session.share.files = bundle.files;
+        await store.save(session);
+      }
+      if (config.sharing.mode === 'upload' && upload && uploadQueue && session.share.uploadedVersion !== session.final.version) {
+        const version = session.final.version;
+        const queued = uploadQueue.list().some((i) => i.sessionId === session.id && i.version === version && i.status !== 'failed');
+        if (!queued) uploadQueue.enqueue({ sessionId: session.id, token: session.share.token, dir: path.join(store.sessionDir(session), 'share'), files: session.share.files, version });
+      }
+    });
   }
 
   /** What the kiosk needs to know: is the guest's link live yet? */
@@ -155,8 +167,13 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     return computeShareState({ config, session, uploadItem, shareBase });
   }
 
-  async function ensureComposed(session) {
-    if (session.status === 'composed' && session.final) return;
+  function ensureComposed(session) {
+    if (session.status === 'composed' && session.final) return Promise.resolve();
+    return withLock(`compose:${session.id}`, () => compose(session));
+  }
+
+  async function compose(session) {
+    if (session.status === 'composed' && session.final) return; // another request finished it while this one waited
     const template = templateFor(session);
     const shotFiles = [];
     for (const shot of session.shots) shotFiles[shot.index] = store.resolve(session, shot.file);
@@ -185,15 +202,70 @@ export function createApp({ config, settings, templates, templateProblems = [], 
   async function printSession(session, copies, label) {
     await ensureComposed(session);
     const template = templateFor(session);
-    if (!session.pdf) {
+    await withLock(`pdf:${session.id}`, async () => {
+      if (session.pdf) return;
       await buildPrintPdf({ imageFile: store.resolve(session, session.final.file), template, outFile: store.resolve(session, 'print.pdf') });
       session.pdf = 'print.pdf';
-    }
+    });
     const job = queue.enqueue({ sessionId: session.id, pdfFile: store.resolve(session, session.pdf), copies, label });
     session.prints.push({ jobId: job.id, copies, at: new Date().toISOString() });
     await store.save(session);
     return job;
   }
+
+  /** Queues an email of the finished photos (shared by the guest's kiosk and the attendant's station). */
+  async function queueEmail(session, body) {
+    if (!emailQueue) throw new HttpError(409, 'email_disabled', 'Email is turned off');
+    await ensureComposed(session);
+    await ensureShareBundle(session, { upload: true }); // make sure the link the email points to will go live
+    let result;
+    try {
+      result = emailQueue.enqueue({
+        sessionId: session.id,
+        email: body?.email,
+        shareUrl: shareLink(session),
+        eventName: session.eventName,
+        eventSlug: session.eventSlug,
+        previewFile: store.resolve(session, session.final.preview),
+        optIn: config.email.marketingOptIn.enabled && body?.optIn === true,
+      });
+    } catch (err) {
+      if (err instanceof EmailRejected) throw new HttpError(err.status, err.code, err.message);
+      throw err;
+    }
+    return { queued: true, masked: result.masked, duplicate: result.duplicate };
+  }
+
+  // ------------------------------------------------------------ print approval (station)
+  // Created only when the station is on. Whether prints actually WAIT for it is a runtime setting (settings.approvalRequired).
+  const approvals = config.station.enabled
+    ? new ApprovalQueue({
+        timeoutMs: config.station.approval.timeoutSeconds * 1000,
+        onTimeout: config.station.approval.onTimeout,
+        maxCopies: config.station.approval.maxCopies,
+        logger,
+        onApprove: async (item) => {
+          const session = await requireSession(item.sessionId);
+          const job = await printSession(session, item.copies, 'print');
+          return { job, queueAhead: Math.max(0, queue.pending() - 1), estimatedSeconds: config.printer.estimatedSeconds };
+        },
+        onChange: (item) => {
+          hub?.publish('approval', item);
+          hub?.touch(item.sessionId);
+        },
+      })
+    : null;
+
+  /** What the guest's kiosk is told about a print request. Never includes anything an attendant typed beyond the short reason. */
+  const approvalView = (item) => ({
+    id: item.id,
+    status: item.status === 'approving' ? 'pending' : item.status,
+    reason: item.reason,
+    timeoutSeconds: Math.round(item.timeoutMs / 1000),
+    expiresAt: item.expiresAt,
+    ...(item.status === 'approved' ? { job: item.job, queueAhead: item.queueAhead, estimatedSeconds: item.estimatedSeconds ?? config.printer.estimatedSeconds } : {}),
+    ...(item.status === 'error' ? { error: 'The print could not be started.' } : {}),
+  });
 
   // ---------------------------------------------------------------- guest API
 
@@ -215,6 +287,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
       sharing: { enabled: sharingOn, mode: config.sharing.mode, shareSeconds: config.sharing.shareSeconds, wifiHint: config.sharing.wifiHint },
       gif: { enabled: config.gif.enabled, countdownSeconds: config.gif.countdownSeconds, frames: config.gif.frames, intervalMs: config.gif.intervalMs },
       email: { enabled: Boolean(emailQueue), maxPerSession: config.email.maxPerSession, marketingOptIn: config.email.marketingOptIn },
+      station: { approval: Boolean(approvals) && settings.approvalRequired },
       greenScreen: greenOn
         ? {
             enabled: true,
@@ -346,10 +419,30 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     wrap(async (req, res) => {
       if (!settings.printEnabled) throw new HttpError(409, 'printing_disabled', 'Printing is turned off');
       const session = await requireSession(req.params.id);
-      const job = await printSession(session, clampCopies(req.body?.copies, settings.copies), 'print');
-      res.json({ job, queueAhead: Math.max(0, queue.pending() - 1), estimatedSeconds: config.printer.estimatedSeconds });
+      const copies = clampCopies(req.body?.copies, settings.copies);
+      if (approvals && settings.approvalRequired) {
+        // The attendant looks at the finished picture before it is printed, so make sure there is one.
+        await ensureComposed(session);
+        const item = await approvals.request({ sessionId: session.id, copies, label: 'print', stationOnline: Boolean(hub?.online()) });
+        return res.json({ approval: approvalView(item) });
+      }
+      const job = await printSession(session, copies, 'print');
+      return res.json({ job, queueAhead: Math.max(0, queue.pending() - 1), estimatedSeconds: config.printer.estimatedSeconds });
     }),
   );
+
+  app.get('/api/print/approvals/:id', (req, res, next) => {
+    const item = approvals?.get(req.params.id);
+    if (!item) return next(new HttpError(404, 'no_approval', 'Print request not found'));
+    return res.json({ approval: approvalView(item) });
+  });
+
+  /** The guest walked away while waiting: take the request off the attendant's screen. */
+  app.delete('/api/print/approvals/:id', (req, res, next) => {
+    if (!approvals?.get(req.params.id)) return next(new HttpError(404, 'no_approval', 'Print request not found'));
+    approvals.cancel(req.params.id);
+    return res.json({ ok: true });
+  });
 
   app.get('/api/print/jobs/:id', (req, res, next) => {
     const job = queue.get(req.params.id);
@@ -373,25 +466,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     '/api/sessions/:id/email',
     wrap(async (req, res) => {
       if (!emailQueue) throw new HttpError(409, 'email_disabled', 'Email is turned off');
-      const session = await requireSession(req.params.id);
-      await ensureComposed(session);
-      await ensureShareBundle(session, { upload: true }); // make sure the link the email points to will go live
-      let result;
-      try {
-        result = emailQueue.enqueue({
-          sessionId: session.id,
-          email: req.body?.email,
-          shareUrl: shareLink(session),
-          eventName: session.eventName,
-          eventSlug: session.eventSlug,
-          previewFile: store.resolve(session, session.final.preview),
-          optIn: config.email.marketingOptIn.enabled && req.body?.optIn === true,
-        });
-      } catch (err) {
-        if (err instanceof EmailRejected) throw new HttpError(err.status, err.code, err.message);
-        throw err;
-      }
-      res.json({ queued: true, masked: result.masked, duplicate: result.duplicate });
+      res.json(await queueEmail(await requireSession(req.params.id), req.body ?? {}));
     }),
   );
 
@@ -492,6 +567,7 @@ export function createApp({ config, settings, templates, templateProblems = [], 
           uploads: uploadQueue ? uploadQueue.list().filter((i) => i.status !== 'done').slice(0, 12) : [],
         },
         email: { enabled: Boolean(emailQueue), from: emailQueue ? config.email.from : null, host: emailQueue ? config.email.smtp.host : null, queue: emailQueue ? emailQueue.list().slice(0, 12) : [], marketingOptIn: config.email.marketingOptIn.enabled },
+        station: { enabled: config.station.enabled, url: stationUrl, online: Boolean(hub?.online()), approvalRequired: Boolean(approvals) && settings.approvalRequired, timeoutSeconds: config.station.approval.timeoutSeconds, onTimeout: config.station.approval.onTimeout, waiting: approvals ? approvals.pending().length : 0 },
         greenScreen: greenOn ? { enabled: true, key: { ...settings.key }, defaults: { ...DEFAULT_KEY }, backdrop: settings.backdrop, backgrounds: backgrounds.list().map((b) => ({ ...b, thumbUrl: thumbUrl(b.id) })), folder: config.greenScreen.dir } : { enabled: false },
         queue: queue.list().slice(0, 8),
         warnings: configWarnings(config),
@@ -681,5 +757,8 @@ export function createApp({ config, settings, templates, templateProblems = [], 
     return res.status(500).json({ error: 'internal', message: 'Something went wrong. Please ask the attendant for help.' });
   });
 
+  // What the station (a second part of the booth) is allowed to do on a session. It is handed these rather than reaching in.
+  app.actions = { requireSession, ensureComposed, ensureShareBundle, shareState, printSession, queueEmail, isCapturing: () => capturing };
+  app.approvals = approvals;
   return app;
 }

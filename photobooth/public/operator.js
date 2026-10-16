@@ -80,6 +80,7 @@ function renderStatus(s) {
   renderSharing(s.sharing);
   renderMail(s.email);
   renderGreenScreen(s.greenScreen);
+  renderStation(s.station);
 
   templates = s.templates;
   const select = $('#template');
@@ -157,6 +158,41 @@ function renderMail(m) {
       : [h('li', {}, m.enabled ? 'Nothing waiting' : '-')]),
   );
 }
+
+// --------------------------------------------------------------------- station
+
+function renderStation(t) {
+  if (!t.enabled) {
+    dot($('#stDot'), '');
+    $('#stText').textContent = 'Station is off';
+    $('#stDetail').textContent = 'Turn it on in config.json (station.enabled and station.pin) to get a second screen that shows sessions live, approves prints and shares photos.';
+    $('#stUrl').hidden = true;
+    $('#stControls').hidden = true;
+    return;
+  }
+  dot($('#stDot'), t.online ? 'ok' : t.approvalRequired ? 'bad' : 'warn');
+  $('#stText').textContent = t.online ? 'A station is connected' : 'No station connected';
+  $('#stDetail').textContent = t.approvalRequired
+    ? `Prints wait for approval (${t.timeoutSeconds} s, then ${t.onTimeout === 'print' ? 'printed anyway' : 'not printed'}).${t.online ? '' : ' With no station connected, prints are settled at once the same way: connect a station or switch approval off.'}${t.waiting ? ` ${t.waiting} waiting now.` : ''}`
+    : 'Open this address on the attendant\'s PC or tablet (same network) and enter the station PIN:';
+  $('#stUrl').hidden = false;
+  $('#stUrl').textContent = t.url;
+  $('#stControls').hidden = false;
+  if (document.activeElement !== $('#stApproval')) $('#stApproval').checked = t.approvalRequired;
+}
+
+$('#stApproval').addEventListener('change', async (e) => {
+  const box = e.currentTarget;
+  say($('#stMsg'), 'Saving…');
+  try {
+    await api('POST', '/api/operator/settings', { approvalRequired: box.checked });
+    say($('#stMsg'), box.checked ? 'Prints now wait for approval at the station.' : 'Prints go straight to the printer.', 'ok');
+    await refreshStatus();
+  } catch (err) {
+    box.checked = !box.checked;
+    say($('#stMsg'), err.message, 'error');
+  }
+});
 
 // ----------------------------------------------------------------- green screen
 

@@ -11,7 +11,8 @@ import { SessionStore } from './store.js';
 import { RuntimeSettings } from './settings.js';
 import { createApp } from './app.js';
 import { createLanApp } from './lan.js';
-import { ShareIndex, computeShareState, shareBaseUrl } from './share.js';
+import { ShareIndex, computeShareState, lanAddress, shareBaseUrl } from './share.js';
+import { StationHub, createStationRouter } from './station.js';
 import { UploadQueue, WebHostUploader } from './uploader.js';
 import { EmailQueue, Mailer, appendOptIn } from './email.js';
 import { Backgrounds } from './greenscreen.js';
@@ -30,6 +31,7 @@ export async function createBooth(
     uploader: injectedUploader,
     mailer: injectedMailer,
     shareBase: injectedShareBase,
+    now: clock = Date.now, // injectable so tests can move time (station presence, login expiry)
   } = {},
 ) {
   fs.mkdirSync(config.storage.dir, { recursive: true });
@@ -59,8 +61,11 @@ export async function createBooth(
   await camera.init();
   const liveView = new LiveViewController(camera, { logger });
   const printer = injectedPrinter ?? createPrinter(config, { logger });
-  const queue = new PrintQueue(printer, { logger });
-  const store = new SessionStore({ rootDir: config.storage.dir });
+  // The station hears about every change to a session or a print job through these two hooks.
+  const hub = config.station.enabled ? new StationHub({ logger, now: clock }) : null;
+  const queue = new PrintQueue(printer, { logger, onChange: (job) => hub?.touch(job.sessionId) });
+  const store = new SessionStore({ rootDir: config.storage.dir, onSave: (session) => hub?.touch(session.id) });
+  const stationUrl = config.station.enabled ? `http://${lanAddress() ?? 'localhost'}:${config.lan.port}/station/` : null;
 
   // Sharing: a token index, a minimal network listener for galleries, and (upload mode) the durable upload queue.
   const queuesDir = path.join(config.storage.dir, '_queues');
@@ -115,9 +120,13 @@ export async function createBooth(
     }).load();
   }
 
-  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir: path.join(ROOT_DIR, 'public'), shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds });
-  const lanApp = createLanApp({ shareIndex, store, logger });
-  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds };
+  const publicDir = path.join(ROOT_DIR, 'public');
+  const app = createApp({ config, settings, templates, templateProblems, templatesDir, camera, liveView, printer, queue, store, logger, version, publicDir, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, stationUrl });
+  const station = hub
+    ? createStationRouter({ config, hub, approvals: app.approvals, actions: app.actions, store, queue, camera, printer, settings, emailQueue, uploadQueue, publicDir, uiDir: path.join(ROOT_DIR, 'station-ui'), logger, now: clock })
+    : null;
+  const lanApp = createLanApp({ shareIndex, store, logger, station });
+  return { app, lanApp, camera, printer, queue, store, settings, logger, templates, shareIndex, shareBase, uploader, uploadQueue, mailer, emailQueue, backgrounds, hub, approvals: app.approvals, stationUrl };
 }
 
 async function main() {
@@ -142,8 +151,11 @@ async function main() {
   });
   // Galleries for guests' phones: a separate listener that exposes nothing but /s/<token>/ (local mode only).
   let lanServer = null;
-  if (config.sharing.enabled && config.sharing.mode === 'local') {
-    lanServer = booth.lanApp.listen(config.lan.port, config.lan.host, () => logger.info(`guest galleries are served at ${booth.shareBase}/s/<token>/ (listening on ${config.lan.host}:${config.lan.port})`));
+  if ((config.sharing.enabled && config.sharing.mode === 'local') || config.station.enabled) {
+    lanServer = booth.lanApp.listen(config.lan.port, config.lan.host, () => {
+      logger.info(`network listener on ${config.lan.host}:${config.lan.port}${config.sharing.enabled && config.sharing.mode === 'local' ? `: guest galleries at ${booth.shareBase}/s/<token>/` : ''}`);
+      if (config.station.enabled) logger.info(`attendant station: ${booth.stationUrl} (needs the station PIN${config.station.approval.enabled ? '; prints wait for approval' : ''})`);
+    });
     lanServer.on('error', (err) => {
       logger.error(err.code === 'EADDRINUSE' ? `Gallery port ${config.lan.port} is already in use (config: lan.port)` : err.message);
       process.exit(1);
@@ -158,6 +170,8 @@ async function main() {
     logger.info(`${signal} received, shutting down`);
     server.close();
     lanServer?.close();
+    booth.hub?.closeAll();
+    booth.approvals?.stop();
     booth.uploadQueue?.stop();
     booth.emailQueue?.stop();
     await booth.camera.close().catch(() => {});

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ConfigError, DEFAULTS, configWarnings, deepMerge, loadConfig, validateConfig } from '../server/config.js';
+import { ConfigError, DEFAULTS, configWarnings, deepMerge, loadConfig, redactedConfig, validateConfig } from '../server/config.js';
 
 const make = (override) => deepMerge(DEFAULTS, override);
 const problemsOf = (override) => {
@@ -133,6 +133,46 @@ test('green screen: the backgrounds folder is resolved against the app folder, a
     const noLive = make({ greenScreen: { enabled: true }, camera: { driver: 'digicamcontrol', digicamcontrol: { liveView: false } } });
     assert.match(configWarnings(noLive).join('|'), /liveView is off/);
   } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('station settings are validated; the PIN protects the booth on the network, so it must be real', () => {
+  assert.doesNotThrow(() => validateConfig(make({ station: { enabled: true, pin: 'a-good-pin', approval: { enabled: true } } })));
+  assert.doesNotThrow(() => validateConfig(make({ station: { enabled: false } })), 'off needs no PIN');
+  const noPin = problemsOf({ station: { enabled: true, pin: '' } }).join('|');
+  assert.match(noPin, /station\.pin must be at least 6 characters/);
+  assert.match(problemsOf({ station: { enabled: true, pin: '12345' } }).join('|'), /station\.pin/);
+  assert.match(problemsOf({ station: { enabled: false, approval: { enabled: true } } }).join('|'), /station\.approval\.enabled needs station\.enabled/);
+  const bad = problemsOf({ station: { enabled: true, pin: 'a-good-pin', recentSessions: 1, approval: { timeoutSeconds: 0, onTimeout: 'shrug', maxCopies: 11 } } }).join('|');
+  assert.match(bad, /station\.approval\.timeoutSeconds/);
+  assert.match(bad, /station\.approval\.onTimeout must be "cancel" or "print"/);
+  assert.match(bad, /station\.approval\.maxCopies/);
+  assert.match(bad, /station\.recentSessions/);
+});
+
+test('station: warnings about reachability and PIN hygiene, the PIN from the environment, and redaction', () => {
+  const on = make({ station: { enabled: true, pin: 'same-secret' }, operatorPin: 'same-secret' });
+  const warnings = configWarnings(on).join('|');
+  assert.match(warnings, /anyone on this network who knows the station PIN/);
+  assert.match(warnings, /station\.pin is the same as operatorPin/);
+  assert.doesNotMatch(configWarnings(make({})).join('|'), /station/, 'nothing is said when the station is off');
+  assert.match(configWarnings(make({ station: { enabled: true, pin: 'another-pin' }, lan: { host: '127.0.0.1' } })).join('|'), /lan\.host is localhost, so no other device can reach the station/);
+
+  assert.equal(redactedConfig(on).station.pin, '***');
+  assert.equal(on.station.pin, 'same-secret', 'redaction works on a copy');
+
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'cfg-test-'));
+  const before = process.env.BOOTH_STATION_PIN;
+  try {
+    fs.writeFileSync(path.join(root, 'config.json'), JSON.stringify({ station: { enabled: true } }));
+    assert.throws(() => loadConfig({ rootDir: root }), /station\.pin/);
+    process.env.BOOTH_STATION_PIN = 'pin-from-environment';
+    assert.equal(loadConfig({ rootDir: root }).station.pin, 'pin-from-environment');
+    assert.doesNotMatch(configWarnings(loadConfig({ rootDir: root })).join('|'), /station PIN is stored in config\.json/);
+  } finally {
+    if (before === undefined) delete process.env.BOOTH_STATION_PIN;
+    else process.env.BOOTH_STATION_PIN = before;
     fs.rmSync(root, { recursive: true, force: true });
   }
 });

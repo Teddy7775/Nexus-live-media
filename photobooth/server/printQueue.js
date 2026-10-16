@@ -11,10 +11,19 @@ export class PrintQueue {
   #waiting = [];
   #running = false;
 
-  constructor(printer, { logger, keep = 100 } = {}) {
+  constructor(printer, { logger, keep = 100, onChange = null } = {}) {
     this.printer = printer;
     this.log = logger;
     this.keep = keep;
+    this.onChange = onChange; // called with a job whenever its status changes
+  }
+
+  #changed(job) {
+    try {
+      this.onChange?.(this.view(job));
+    } catch {
+      /* a listener must never break printing */
+    }
   }
 
   enqueue({ sessionId, pdfFile, copies = 1, label = 'print' }) {
@@ -34,6 +43,7 @@ export class PrintQueue {
     this.#waiting.push(job);
     this.#trim();
     queueMicrotask(() => this.#drain());
+    this.#changed(job);
     return this.view(job);
   }
 
@@ -64,6 +74,7 @@ export class PrintQueue {
         const job = this.#waiting.shift();
         job.status = 'printing';
         job.startedAt = new Date().toISOString();
+        this.#changed(job);
         try {
           await this.printer.print({ pdfFile: job.pdfFile, copies: job.copies });
           job.status = 'done';
@@ -73,6 +84,7 @@ export class PrintQueue {
           this.log?.error?.(`print job ${job.id} failed: ${job.error}`);
         }
         job.finishedAt = new Date().toISOString();
+        this.#changed(job);
       }
     } finally {
       this.#running = false;

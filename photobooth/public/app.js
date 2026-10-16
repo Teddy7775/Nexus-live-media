@@ -11,6 +11,8 @@ const app = { state: null, flow: null, session: null };
 const email = { open: false, value: '', sent: [], waiters: [], confirmedTypo: false, stopKeyboard: null, sending: false };
 
 class FlowCancelled extends Error {}
+/** The attendant did not approve the print (or nobody answered). The guest's photos are still saved and shared. */
+class PrintNotApproved extends Error {}
 
 // ------------------------------------------------------------------ helpers
 
@@ -335,7 +337,7 @@ async function guarded(signal, step) {
     try {
       return await step();
     } catch (error) {
-      if (error instanceof FlowCancelled) throw error;
+      if (error instanceof FlowCancelled || error instanceof PrintNotApproved) throw error;
       console.error(error);
       if ((await errorScreen(error, signal)) === 'home') throw new FlowCancelled();
     }
@@ -461,6 +463,29 @@ async function review(session, shots, signal) {
   return choice;
 }
 
+/**
+ * With a station, an attendant checks each print first. Waits for the answer; resolves with what the print request would
+ * have returned (job, queueAhead...), or throws PrintNotApproved with a plain-language message.
+ */
+async function awaitApproval(approval, session, signal) {
+  $('#printTitle').textContent = 'One moment…';
+  $('#printMsg').textContent = 'An attendant is checking your photos before they print.';
+  let current = approval;
+  try {
+    while (current.status === 'pending') {
+      await delay(800, signal);
+      current = (await api('GET', `/api/print/approvals/${approval.id}`)).approval;
+    }
+  } catch (error) {
+    if (error instanceof FlowCancelled) api('DELETE', `/api/print/approvals/${approval.id}`).catch(() => {}); // the guest left: take it off the attendant's screen
+    throw error;
+  }
+  $('#printTitle').textContent = 'Printing your photos…';
+  if (current.status === 'approved') return current;
+  if (current.status === 'error') throw new Error('Your photos are saved, but they could not be printed.');
+  throw new PrintNotApproved(current.reason === 'no_station' || current.reason === 'timeout' ? 'Nobody was available to approve a print, so your photos were not printed. They are saved, and you can still get them on your phone.' : 'The attendant did not print these. Your photos are saved, and you can still get them on your phone.');
+}
+
 async function printFlow(session, signal) {
   const { printer } = app.state;
   placeSharePanel('#printShareSlot');
@@ -468,10 +493,12 @@ async function printFlow(session, signal) {
   const bar = $('#printBar');
   bar.style.transition = 'none';
   bar.style.transform = 'scaleX(0)';
+  $('#printTitle').textContent = 'Printing your photos…';
   $('#printMsg').textContent = 'Sending to the printer…';
 
   await guarded(signal, async () => {
-    const queued = await api('POST', `/api/sessions/${session.id}/print`);
+    let queued = await api('POST', `/api/sessions/${session.id}/print`);
+    if (queued.approval) queued = await awaitApproval(queued.approval, session, signal);
     const seconds = (queued.estimatedSeconds || printer.estimatedSeconds) * (1 + queued.queueAhead);
     $('#printMsg').textContent = queued.queueAhead > 0 ? `${plural(queued.queueAhead, 'print')} ahead of yours — about ${seconds} seconds` : `About ${seconds} seconds`;
     bar.style.transition = `transform ${seconds}s linear`;
@@ -489,10 +516,10 @@ async function printFlow(session, signal) {
   });
 }
 
-async function doneScreen(printed, signal) {
+async function doneScreen(printed, signal, notice = null) {
   const { ui, sharing } = app.state;
   $('#doneTitle').textContent = 'Thank you!';
-  $('#doneMsg').textContent = printed ? 'Your photos have been sent to the printer.' : 'Your photos have been saved.';
+  $('#doneMsg').textContent = printed ? 'Your photos have been sent to the printer.' : (notice ?? 'Your photos have been saved.');
   placeSharePanel('#doneShareSlot');
   show('done');
   // With a QR code on screen, give guests time to scan it.
@@ -556,6 +583,7 @@ async function guestFlow(signal) {
   if (app.state.gif?.enabled) await gifPhase(session, signal);
 
   let printed = false;
+  let notice = null;
   let sharing = null;
   for (;;) {
     const result = await review(session, shots, signal);
@@ -566,12 +594,17 @@ async function guestFlow(signal) {
     // Start sharing now so the QR code is ready while the photos print (or on the thank-you screen).
     sharing = startShare(session, signal);
     if (result.action === 'print') {
-      await printFlow(session, signal);
-      printed = true;
+      try {
+        await printFlow(session, signal);
+        printed = true;
+      } catch (error) {
+        if (!(error instanceof PrintNotApproved)) throw error;
+        notice = error.message;
+      }
     }
     break;
   }
-  await doneScreen(printed, signal);
+  await doneScreen(printed, signal, notice);
   void sharing; // runs to completion on its own; it stops when the flow is cancelled
 }
 
