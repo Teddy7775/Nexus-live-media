@@ -1,0 +1,8 @@
+{
+  "port": 3000,
+  "operatorPin": "1234",
+  "event": { "name": "Nexus Photo Booth", "slug": "default" },
+  "activeTemplate": "strip-2x6-x2",
+  "camera": { "driver": "mock" },
+  "printer": { "mode": "dryrun" }
+}

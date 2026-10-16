@@ -1,0 +1,9 @@
+# Machine- and event-specific files: never commit these.
+node_modules/
+config.json
+runtime-settings.json
+events/
+logs/
+*.log
+# Test output
+test-output/

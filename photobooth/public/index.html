@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#080b10">
+  <title>Photo Booth</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308171f'/%3E%3Ccircle cx='32' cy='35' r='13' fill='none' stroke='%234de1ff' stroke-width='5'/%3E%3Crect x='23' y='13' width='18' height='8' rx='3' fill='%234de1ff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-screen="attract">
+  <main id="app">
+
+    <!-- 1. Attract: waiting for a guest -->
+    <section class="screen attract active" data-screen="attract" aria-label="Start">
+      <div class="orb orb-a" aria-hidden="true"></div>
+      <div class="orb orb-b" aria-hidden="true"></div>
+      <header class="event">
+        <h1 id="eventName">Photo Booth</h1>
+        <p id="eventInfo"></p>
+      </header>
+      <button id="startBtn" class="start" type="button">
+        <span class="start-ring" aria-hidden="true"></span>
+        <span class="start-label">Touch<br>to start</span>
+      </button>
+      <!-- Five quick taps here open the operator panel (no keyboard needed on a touch kiosk) -->
+      <div id="hotspot" class="hotspot" aria-hidden="true"></div>
+    </section>
+
+    <!-- 1b. Green screen: choose a background, watching yourself on it -->
+    <section class="screen pick" data-screen="pick" aria-label="Choose your background">
+      <div class="live" id="pickLive"><img id="pickImg" alt=""></div>
+      <div class="pick-bar">
+        <p class="pick-title">Choose your background</p>
+        <div class="pick-thumbs" id="pickThumbs"></div>
+        <button id="pickGo" class="btn" type="button">Use this background</button>
+      </div>
+    </section>
+
+    <!-- 1c. Paying (card QR code, or "pay the attendant") -->
+    <section class="screen pay" data-screen="pay" aria-label="Payment" aria-live="polite">
+      <p class="big" id="payTitle">Scan to pay</p>
+      <p class="pay-amount" id="payAmount"></p>
+      <div class="pay-body">
+        <img id="payQr" alt="QR code: scan with your phone to pay" hidden>
+        <p class="sub" id="payMsg"></p>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="payBar"></i></div>
+      <button id="payCancel" class="btn secondary" type="button">Cancel</button>
+    </section>
+
+    <!-- 2. Countdown with live preview -->
+    <section class="screen countdown" data-screen="countdown" aria-label="Get ready">
+      <div class="live" id="live"><img id="liveImg" alt=""></div>
+      <div class="shade" aria-hidden="true"></div>
+      <div class="chip" id="shotChip"></div>
+      <div class="count" id="count" aria-live="assertive"></div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <!-- 3. The photo just taken -->
+    <section class="screen shot" data-screen="shot" aria-label="Your photo">
+      <img id="shotImg" alt="The photo you just took">
+      <div class="chip" id="shotChip2"></div>
+    </section>
+
+    <!-- 4. Working... -->
+    <section class="screen busy" data-screen="busy" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="big" id="busyMsg">One moment…</p>
+    </section>
+
+    <!-- 5. Review -->
+    <section class="screen review" data-screen="review" aria-label="Your photos">
+      <div class="final-wrap"><img id="finalImg" alt="Your finished photos"></div>
+      <div class="panel">
+        <h2 id="reviewTitle">Looking good!</h2>
+        <p class="sub" id="reviewSub"></p>
+        <button id="printBtn" class="btn" type="button">Print my photos</button>
+        <div class="retakes" id="retakes"></div>
+        <div class="timer" aria-hidden="true"><i id="timerBar"></i></div>
+      </div>
+    </section>
+
+    <!-- 6. Printing -->
+    <section class="screen printing" data-screen="printing" aria-live="polite">
+      <div class="printer-icon" aria-hidden="true"></div>
+      <p class="big" id="printTitle">Printing your photos…</p>
+      <p class="sub" id="printMsg"></p>
+      <div class="progress" aria-hidden="true"><i id="printBar"></i></div>
+      <div id="printShareSlot" class="share-slot">
+        <!-- The same panel moves between this screen and the thank-you screen so the QR code stays up. -->
+        <div id="sharePanel" class="share" hidden>
+          <img id="qrImg" alt="QR code to open your photos on your phone">
+          <div class="share-text">
+            <p class="share-title">Get your photos on your phone</p>
+            <p class="share-status" id="shareStatus" aria-live="polite"></p>
+            <button id="emailBtn" class="btn secondary compact" type="button" hidden>Email me my photos</button>
+            <p class="share-status ok" id="emailSent" aria-live="polite" hidden></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Done -->
+    <section class="screen done" data-screen="done" aria-label="Finished">
+      <div class="check" aria-hidden="true"></div>
+      <p class="big" id="doneTitle">Thank you!</p>
+      <p class="sub" id="doneMsg"></p>
+      <div id="doneShareSlot" class="share-slot"></div>
+      <button id="doneBtn" class="btn secondary" type="button">Finish</button>
+    </section>
+
+    <!-- 8. Something went wrong -->
+    <section class="screen error" data-screen="error" aria-live="assertive">
+      <div class="warn" aria-hidden="true">!</div>
+      <p class="big" id="errorMsg">Something went wrong</p>
+      <p class="sub">If it keeps happening, please ask the attendant for help.</p>
+      <div class="row">
+        <button id="retryBtn" class="btn" type="button">Try again</button>
+        <button id="homeBtn" class="btn secondary" type="button">Start over</button>
+      </div>
+    </section>
+
+    <!-- Email entry: opens over whatever screen the guest is on -->
+    <section id="emailOverlay" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="emailTitle">
+      <div class="email-card">
+        <h2 id="emailTitle">Where should we send your photos?</h2>
+        <div class="email-field" id="emailField"><span id="emailText"></span><span class="caret" aria-hidden="true"></span></div>
+        <p class="email-hint" id="emailHint" role="alert"></p>
+        <button id="emailSuggest" class="suggest" type="button" hidden></button>
+        <div id="keyboard" class="keyboard"></div>
+        <label id="optInRow" class="optin" hidden><input type="checkbox" id="optIn"><span id="optInLabel"></span></label>
+        <p class="email-privacy" id="emailPrivacy"></p>
+        <div class="row">
+          <button id="emailSend" class="btn" type="button" disabled>Send my photos</button>
+          <button id="emailCancel" class="btn secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="flash" aria-hidden="true"></div>
+    <div id="offline" class="offline" role="status" hidden>Booth offline — reconnecting…</div>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Booth operator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308171f'/%3E%3Ccircle cx='32' cy='35' r='13' fill='none' stroke='%234de1ff' stroke-width='5'/%3E%3Crect x='23' y='13' width='18' height='8' rx='3' fill='%234de1ff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="operator.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Booth operator</h1>
+    <a class="link" href="/">&larr; Back to booth</a>
+  </header>
+
+  <main>
+    <section id="gate" class="card narrow">
+      <h2>Enter operator PIN</h2>
+      <form id="pinForm" autocomplete="off">
+        <label class="field">
+          <span>PIN</span>
+          <input id="pin" type="password" inputmode="numeric" autocomplete="off" required>
+        </label>
+        <button class="btn primary" type="submit">Unlock</button>
+        <p id="pinError" class="msg error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <div id="dash" hidden>
+      <section class="card" aria-labelledby="h-warn" id="warnCard" hidden>
+        <h2 id="h-warn">Check these</h2>
+        <ul id="warnings" class="plain"></ul>
+      </section>
+
+      <div class="grid">
+        <section class="card" aria-labelledby="h-cam">
+          <h2 id="h-cam">Camera</h2>
+          <p class="status"><span id="camDot" class="dot"></span><span id="camText">…</span></p>
+          <p class="muted" id="camDriver"></p>
+          <div class="actions"><button id="testCapture" class="btn" type="button">Take test photo</button></div>
+          <p id="captureMsg" class="msg" role="status" hidden></p>
+          <img id="captureImg" class="preview" alt="Test photo" hidden>
+        </section>
+
+        <section class="card" aria-labelledby="h-prn">
+          <h2 id="h-prn">Printer</h2>
+          <p class="status"><span id="prnDot" class="dot"></span><span id="prnText">…</span></p>
+          <p class="muted" id="prnMode"></p>
+          <div class="actions"><button id="testPrint" class="btn" type="button">Print test page</button></div>
+          <p id="printMsg" class="msg" role="status" hidden></p>
+          <details id="printersBox" hidden>
+            <summary>Installed printers and paper sizes</summary>
+            <ul id="printers" class="plain small"></ul>
+          </details>
+          <h3>Recent print jobs</h3>
+          <ul id="jobs" class="plain small"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="h-share" id="shareCard">
+          <h2 id="h-share">Sharing</h2>
+          <p class="status"><span id="shareDot" class="dot"></span><span id="shareText">…</span></p>
+          <p class="muted" id="shareDetail"></p>
+          <div class="actions"><button id="checkUpload" class="btn" type="button" hidden>Check web host</button></div>
+          <p id="uploadMsg" class="msg" role="status" hidden></p>
+          <h3>Gallery uploads</h3>
+          <ul id="uploads" class="plain small"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="h-mail" id="mailCard">
+          <h2 id="h-mail">Email</h2>
+          <p class="status"><span id="mailDot" class="dot"></span><span id="mailText">…</span></p>
+          <p class="muted" id="mailDetail"></p>
+          <div class="actions"><button id="checkMail" class="btn" type="button" hidden>Check mail login</button></div>
+          <form id="testMailForm" hidden>
+            <label class="field"><span>Send a test email to</span><input id="testMailTo" type="email" autocomplete="off" placeholder="you@example.com"></label>
+            <button class="btn" type="submit">Send test email</button>
+          </form>
+          <p id="mailMsg" class="msg" role="status" hidden></p>
+          <h3>Email queue</h3>
+          <ul id="mails" class="plain small"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="h-pay" id="payCard">
+          <h2 id="h-pay">Payments</h2>
+          <p class="status"><span id="payDot" class="dot"></span><span id="payText">…</span></p>
+          <p class="muted" id="payDetail"></p>
+          <form id="payForm" hidden>
+            <label class="field"><span>Who pays?</span>
+              <select id="payMode">
+                <option value="off">The host pays - free for guests</option>
+                <option value="print">Guests pay for each print</option>
+                <option value="session">Guests pay once, before the photos</option>
+              </select>
+            </label>
+            <label class="field"><span>Price per print copy (US dollars)</span><input id="pricePrint" type="number" min="0.5" max="1000" step="0.01" required></label>
+            <label class="field"><span>Price per session (US dollars)</span><input id="priceSession" type="number" min="0.5" max="1000" step="0.01" required></label>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save</button>
+              <button id="payCheck" class="btn" type="button">Check the payment service</button>
+            </div>
+          </form>
+          <p id="payMsg" class="msg" role="status" hidden></p>
+          <p class="muted" id="payTotals"></p>
+          <h3>Needs you</h3>
+          <ul id="payNeeds" class="plain small"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="h-st" id="stCard">
+          <h2 id="h-st">Attendant station</h2>
+          <p class="status"><span id="stDot" class="dot"></span><span id="stText">…</span></p>
+          <p class="muted" id="stDetail"></p>
+          <p class="small"><code id="stUrl" hidden></code></p>
+          <div id="stControls" hidden>
+            <label class="check"><input id="stApproval" type="checkbox"><span>Every print waits for the station's approval</span></label>
+            <p id="stMsg" class="msg" role="status" hidden></p>
+          </div>
+        </section>
+
+        <section class="card wide" aria-labelledby="h-gs" id="gsCard">
+          <h2 id="h-gs">Green screen</h2>
+          <p class="status"><span id="gsDot" class="dot"></span><span id="gsText">…</span></p>
+          <p class="muted" id="gsDetail"></p>
+          <div id="gsBody" hidden>
+            <div class="tuner">
+              <div class="tuner-view">
+                <div class="tuner-frame"><img id="gsImg" alt="Live keyed picture from the camera" hidden><p id="gsPlaceholder" class="muted">The live picture appears here once you press Start live tuner.</p></div>
+                <div class="actions">
+                  <button id="gsToggle" class="btn primary" type="button">Start live tuner</button>
+                  <div class="seg" role="group" aria-label="What to show">
+                    <button type="button" class="btn seg-btn" data-view="composite" aria-pressed="true">Result</button>
+                    <button type="button" class="btn seg-btn" data-view="matte" aria-pressed="false">Matte (white = kept)</button>
+                    <button type="button" class="btn seg-btn" data-view="raw" aria-pressed="false">Camera</button>
+                  </div>
+                </div>
+                <p id="gsLiveMsg" class="msg" role="status" hidden></p>
+              </div>
+              <div class="tuner-controls">
+                <label class="field"><span>Try it on</span><select id="gsBackground"></select></label>
+                <div id="gsSliders"></div>
+                <div class="actions">
+                  <button id="gsCalibrate" class="btn" type="button">Calibrate on the empty backdrop</button>
+                  <button id="gsSave" class="btn primary" type="button">Save these settings</button>
+                  <button id="gsReset" class="btn" type="button">Reset</button>
+                </div>
+                <p id="gsMsg" class="msg" role="status" hidden></p>
+              </div>
+            </div>
+            <h3>Who chooses the background?</h3>
+            <div class="actions">
+              <select id="gsBackdrop" aria-label="Background mode"></select>
+              <button id="gsBackdropSave" class="btn" type="button">Apply</button>
+            </div>
+            <p id="gsBackdropMsg" class="msg" role="status" hidden></p>
+            <h3>Check with a real photo</h3>
+            <div class="actions"><button id="gsTestPhoto" class="btn" type="button">Take a test photo on this background</button></div>
+            <p id="gsPhotoMsg" class="msg" role="status" hidden></p>
+            <img id="gsPhotoImg" class="preview" alt="Test photo on the chosen background" hidden>
+            <p class="muted small" id="gsFolder"></p>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="h-set">
+          <h2 id="h-set">Event settings</h2>
+          <form id="settingsForm">
+            <label class="field"><span>Event name</span><input id="eventName" maxlength="80" required></label>
+            <label class="field"><span>Layout</span><select id="template"></select></label>
+            <p class="muted" id="templateDesc"></p>
+            <label class="field"><span>Copies per guest</span><input id="copies" type="number" min="1" max="10" required></label>
+            <label class="check"><input id="printEnabled" type="checkbox"><span>Print for guests</span></label>
+            <button class="btn primary" type="submit">Save settings</button>
+            <p id="saveMsg" class="msg" role="status" hidden></p>
+          </form>
+          <p class="muted small">A new event name starts a new photo folder: <code id="slug"></code></p>
+        </section>
+      </div>
+
+      <section class="card" aria-labelledby="h-sess">
+        <h2 id="h-sess">Recent sessions</h2>
+        <p id="sessMsg" class="msg" role="status" hidden></p>
+        <div id="sessions" class="thumbs"></div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="operator.js"></script>
+</body>
+</html>
