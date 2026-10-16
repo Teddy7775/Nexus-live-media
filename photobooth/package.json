@@ -1,0 +1,25 @@
+{
+  "name": "nexus-booth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local photobooth app: DSLR capture through digiCamControl, template compositing and DNP printing on Windows.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test \"test/*.test.js\"",
+    "e2e": "node scripts/e2e.mjs",
+    "printers": "node scripts/list-printers.mjs"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "pdf-lib": "^1.17.1",
+    "pdf-to-printer": "^5.8.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.1"
+  }
+}
