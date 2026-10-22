@@ -56,7 +56,7 @@ Volume 4 (Anastasiya’s Echo)
 - Tagline, blurbs, short descriptions and site copy are mine; the tagline is Mama’s sentence from the book.
 
 ## Open items
-- 300 ppi masters for the covers of Volumes 1 and 2 and for the plates of Volume 1, in the registered proportions; Volume 3 and 4 as before; Volume 4’s five continuity problems (its audit, section 3);
+- 300 ppi masters for the covers of Volumes 1 and 2 and for the plates of Volume 1, in the registered proportions; Volume 3 and 4 as before; Volume 4’s open picture problems (its audit, section 3: camera still raised in AE-I13, the wooden bird’s wings in AE-I09 / AE-C04, two rendering styles; the other three of the first five were fixed by regenerated pictures);
   Volume 1’s small points (its audit, section 3).
 - Volume 3: “43” lettering for AN-I03 / AN-I09 once the final art exists.
 - Nobody can guarantee that text passes “all AI detectors” (README, “AI detection and disclosure”). KDP asks for disclosure of

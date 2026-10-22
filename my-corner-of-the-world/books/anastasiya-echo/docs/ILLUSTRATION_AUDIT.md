@@ -6,7 +6,7 @@ and `Anastasiya_Illustration_Index_ID.csv` (copies in `docs/source/`). Register 
 
 **Bottom line.** All 15 interior illustrations and both covers were supplied and are placed at their anchors in
 EN, FR and ES. They are good enough for proofs, the website and the ebooks. They are **not print masters**:
-five full-page plates and both cover images are 896 × 1200 px (≈ 143–146 ppi at print size, a printer wants
+seven full-page plates and both cover images are 896 × 1200 px (≈ 143–146 ppi at print size, a printer wants
 300), and nine have the wrong proportion for their slot. **Four pictures (I04, I11, I13, I14) were regenerated after
 the first review**; most of the continuity problems found then are fixed (section 3), two are not.
 
