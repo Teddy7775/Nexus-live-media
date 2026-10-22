@@ -14,7 +14,8 @@ import pymupdf
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from mcw.core import load_project  # noqa: E402
+from mcw.core import RELEASE, load_project  # noqa: E402
+from mcw.render_cover import PAPER  # noqa: E402
 
 
 def pdf_facts(path: Path):
@@ -58,9 +59,29 @@ def pdf_facts(path: Path):
             "toc": len(d.get_toc()), "size_mb": round(path.stat().st_size / 1e6, 1), "meta_title": d.metadata.get("title", "")}
 
 
+def boxes_ok(path: Path, pr: dict, mode: str) -> bool:
+    """MediaBox = CropBox = BleedBox on every page and a TrimBox that sits where the finished book edge is (recto/verso differ in mode "outside")."""
+    d = pymupdf.open(path)
+    b, tw, th = pr["bleed_in"] * 72, pr["trim_in"][0] * 72, pr["trim_in"][1] * 72
+    for i in sorted({0, 1, len(d) - 2, len(d) - 1}):
+        g = lambda k: d.xref_get_key(d[i].xref, k)[1]
+        if not (g("MediaBox") == g("CropBox") == g("BleedBox")):
+            return False
+        x0 = b if mode == "all" else (0 if i % 2 == 0 else b)
+        tb = g("TrimBox")
+        try:
+            got = [float(v) for v in tb.strip("[]").split()]
+        except ValueError:
+            return False
+        if any(abs(a - w) > 0.01 for a, w in zip(got, [x0, b, x0 + tw, b + th])):
+            return False
+    return True
+
+
 def main():
     P = load_project()
-    out = ["# Preflight report", "", f"Generated {date.today().isoformat()} by `tools/preflight.py` from the files in `release/`.",
+    where = "release/" if RELEASE == ROOT / "release" else "the build directory given by MCW_RELEASE"
+    out = ["# Preflight report", "", f"Generated {date.today().isoformat()} by `tools/preflight.py` from the files in `{where}`.",
            "A printer’s own preflight (KDP previewer, IngramSpark file check) remains the final authority.", ""]
     try:
         from epubcheck import EpubCheck
@@ -72,42 +93,42 @@ def main():
         exp_w = pr["trim_in"][0] + pr["bleed_in"] * (2 if mode == "all" else 1)
         exp_h = pr["trim_in"][1] + 2 * pr["bleed_in"]
         out += [f"## {slug}", "", f"Page size expected for bleed mode `{mode}`: **{exp_w:.3f} × {exp_h:.3f} in**.", "",
-                "### Interiors", "", "| Edition | Pages | Size (in) | Even | Body pt | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |", "|---|---|---|---|---|---|---|---|---|---|"]
+                "### Interiors", "", "| Edition | Pages | Size (in) | Boxes | Even | Body pt | Fonts embedded | Bookmarks | Lowest image ppi | Blank pages | MB |", "|---|---|---|---|---|---|---|---|---|---|---|"]
         for lang in P.langs:
             for ed in ("story", "guide"):
-                f = ROOT / "release" / slug / "print" / f"{lang}-{ed}" / f"{slug}_{lang}_{ed}_interior.pdf"
+                f = RELEASE / slug / "print" / f"{lang}-{ed}" / f"{slug}_{lang}_{ed}_interior.pdf"
                 if not f.exists():
-                    out.append(f"| {lang}-{ed} | missing | | | | | | | | |")
+                    out.append(f"| {lang}-{ed} | missing | | | | | | | | | |")
                     continue
                 x = pdf_facts(f)
                 ok_size = abs(x["w_in"] - exp_w) < 0.01 and abs(x["h_in"] - exp_h) < 0.01
                 ok_pt = x["body_pt"] is not None and abs(x["body_pt"] - pr["body_pt"]) < 0.2
-                out.append(f"| {lang}-{ed} | {x['pages']} | {x['w_in']:.3f} × {x['h_in']:.3f} {'✓' if ok_size else '✗'} | {'✓' if x['pages'] % 2 == 0 else '✗'} | "
+                out.append(f"| {lang}-{ed} | {x['pages']} | {x['w_in']:.3f} × {x['h_in']:.3f} {'✓' if ok_size else '✗'} | {'✓' if boxes_ok(f, pr, mode) else '✗'} | {'✓' if x['pages'] % 2 == 0 else '✗'} | "
                            f"{x['body_pt']} {'✓' if ok_pt else '✗ shrunk?'} | "
                            f"{x['n_fonts']} {'✓' if x['all_embedded'] else '✗'} | {x['toc']} | {x['min_ppi']} | {x['blank']} | {x['size_mb']} |")
         out += ["", "Blank pages are intentional (verso after the half-title, recto/verso balancing before part pages, final page when the count had to be rounded to an even number).", "",
                 "### Cover wraps", "", "| Edition | Wrap (in) | Expected (in) | Spine (in) | Lowest image ppi |", "|---|---|---|---|---|"]
         for lang in P.langs:
             for ed in ("story", "guide"):
-                cdir = ROOT / "release" / slug / "covers" / f"{lang}-{ed}"
+                cdir = RELEASE / slug / "covers" / f"{lang}-{ed}"
                 f = cdir / f"{slug}_{lang}_{ed}_cover_wrap_PRINT.pdf"
                 mp = ROOT / "build" / slug / "print" / f"{lang}-{ed}" / "meta.json"
                 if not f.exists() or not mp.exists():
                     out.append(f"| {lang}-{ed} | missing | | | |")
                     continue
                 pages = json.loads(mp.read_text())["pages"]
-                factor = {"white": 0.002252, "cream": 0.0025, "premium_color": 0.002347}.get(pr.get("paper", "cream"), 0.0025)
+                factor = PAPER.get(pr.get("paper", "cream"), 0.0025)
                 spine = round(pages * factor, 3)
                 d = pymupdf.open(f)
                 r = d[0].rect
-                exp = 2 * pr["bleed_in"] + 2 * pr["trim_in"][0] + round(spine / 0.005) * 0.005
+                exp = 2 * pr["bleed_in"] + 2 * pr["trim_in"][0] + spine
                 x = pdf_facts(f)
                 out.append(f"| {lang}-{ed} | {r.width / 72:.3f} × {r.height / 72:.3f} | ≈ {exp:.3f} × {exp_h:.3f} | {spine:.3f} for {pages} pp | {x['min_ppi']} |")
         out += ["", "The PRINT wrap contains no guides, placeholders or barcode box; the PROOF wrap shows trim, bleed, spine and safe zone. "
-                "Chromium rounds the PDF page size to whole CSS pixels (1/96 in), so the file width can differ from the computed width by up to 0.01 in (0.25 mm); the artwork itself is positioned on the exact computed grid.", "", "### EPUB", "", "| Edition | KB | EPUBCheck |", "|---|---|---|"]
+                "Chromium rounds a printed page to 1/300 in, so after printing every page gets its exact MediaBox, CropBox and BleedBox and a TrimBox (`tools/mcw/pdfbox.py`); the wrap width is trim + bleed + spine, the spine rounded to three decimals as in KDP’s calculator.", "", "### EPUB", "", "| Edition | KB | EPUBCheck |", "|---|---|---|"]
         for lang in P.langs:
             for ed in ("story", "guide"):
-                f = ROOT / "release" / slug / "epub" / f"{slug}_{lang}_{ed}.epub"
+                f = RELEASE / slug / "epub" / f"{slug}_{lang}_{ed}.epub"
                 if not f.exists():
                     out.append(f"| {lang}-{ed} | missing | |")
                     continue
