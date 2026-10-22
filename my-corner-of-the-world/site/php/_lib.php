@@ -74,6 +74,8 @@ function guard_request(string $bucket, int $max, int $window): array {
 
 function send_mail(string $to, string $subject, string $body, string $replyTo = ''): bool {
     $c = cfg();
+    // never report success for a mail that cannot leave: both addresses must be real (config.php not filled in yet = error)
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL) || !filter_var((string)($c['mail_from'] ?? ''), FILTER_VALIDATE_EMAIL)) { return false; }
     $headers = [
         'MIME-Version: 1.0',
         'Content-Type: text/plain; charset=UTF-8',

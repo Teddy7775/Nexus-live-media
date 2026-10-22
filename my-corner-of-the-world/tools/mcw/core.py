@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
@@ -10,9 +11,17 @@ from .mdparse import Guide, Manuscript, parse_guide, parse_manuscript
 
 ROOT = Path(__file__).resolve().parents[2]  # .../my-corner-of-the-world
 BUILD = ROOT / "build"                      # throw-away intermediates (git-ignored)
-RELEASE = ROOT / "release"                  # print PDFs, covers, ePubs (committed)
+RELEASE = Path(os.environ["MCW_RELEASE"]).resolve() if os.environ.get("MCW_RELEASE") else ROOT / "release"
+# print PDFs, covers, ePubs (committed). MCW_RELEASE builds somewhere else, e.g. to keep rebuilt binaries out of git between iterations
 PUBLIC = ROOT / "public_html"               # deployable website (committed)
 LANGS = ("en", "fr", "es")
+
+
+def site_address(series: dict) -> str:
+    """Public address of this collection as printed in the books: the domain plus the project's URL prefix ('' until a domain is set)."""
+    s = series.get("site", {})
+    url = (s.get("url") or "").rstrip("/")
+    return url + (s.get("base_path") or "").rstrip("/") if url else ""
 
 
 def load_json(p: Path):

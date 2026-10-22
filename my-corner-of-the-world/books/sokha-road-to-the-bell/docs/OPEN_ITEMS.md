@@ -21,10 +21,10 @@ of a scene with near-perfect clarity and suggests one last read aloud to loosen 
 
 ## 2. Things only the author can supply (they are placeholders in every proof)
 
-* author or pen name, publisher or imprint, **nine ISBNs** (three languages × story, guide, ebook), domain and contact address;
-* the printer (KDP or IngramSpark: `bleed_mode`, spine factor) and its own cover template;
+* publisher or imprint, ISBNs (a free KDP ISBN per paperback, or your own: one per language and edition, plus ebooks sold elsewhere than Kindle) and the contact address. Supplied on 2026-10-22: author **Teddy Nana**, domain **compasskite.com**;
+* the printer’s final choice (the files are now built for Amazon KDP: `bleed_mode` `outside`, white paper, standard colour; `all` for IngramSpark or Lulu) and its own cover template;
 * **300 ppi masters** for the six plates and two covers (1875 × 2775 px or more; see `ILLUSTRATION_AUDIT.md`). The `--final` build
-  refuses to run below 250 ppi, with the author name empty, or with a picture missing.
+  refuses to run below 250 ppi or with a picture missing (the author name is now set).
 
 ## 3. Decisions I made that you should confirm
 

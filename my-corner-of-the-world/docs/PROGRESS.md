@@ -12,17 +12,32 @@ _Handoff note, updated at each commit so nothing lives only in a chat._
 | Illustrations placed | 15 + 2 covers | 15 + 2 covers | 15 + 2 covers | 15 + 2 covers |
 | Cleared for press | **no**, see `books/sokha-road-to-the-bell/docs/OPEN_ITEMS.md` | **no**, see `books/lamine-drum-and-ball/docs/OPEN_ITEMS.md` | no (proofs) | no (proofs) |
 
-Website: one static site for the whole collection (`public_html/`; `release/my-corner-of-the-world_public_html.zip` plus
-`release/my-corner-of-the-world_downloads_1.zip` and `_2.zip` for the EPUBs, three files because GitHub refuses files over 100 MB), 327 pages, three languages.
-Upload steps for Hostinger are in `README.md`. Reports: `docs/PREFLIGHT.md` (files), `books/*/docs/ILLUSTRATION_AUDIT.md`
+Website: one static site for the domain **compasskite.com** (`public_html/`; `release/compasskite.com_public_html.zip` plus
+`release/compasskite.com_downloads_N.zip` for the EPUBs, split because GitHub refuses files over 100 MB), three languages. The domain root is a small portal that lists
+the hosted projects (`portal/projects.json`); this collection is the project in `/my-corner-of-the-world/`. Upload steps for Hostinger are in `README.md`. Reports: `docs/PREFLIGHT.md` (files), `books/*/docs/ILLUSTRATION_AUDIT.md`
 (`docs/ILLUSTRATION_AUDIT.md` is Volume 3), `books/*/docs/OPEN_ITEMS.md` (Volumes 1 and 2), `books/*/docs/EDIT_LOG.md` (every text change).
 
+## Supplied on 2026-10-22
+Domain **compasskite.com** (shared with other projects: *Tech Explorer* and one more with three volumes, others later), author **Teddy Nana**, printer leaning
+to **Amazon KDP** (not final). The contact e-mail “will be supplied later”.
+
 ## Not final until the author supplies (cannot be invented)
-author / pen name, publisher or imprint, ISBNs (one per language and format), domain + contact email,
-print-master artwork (300 ppi; the covers of Volumes 1 and 2 are 1024 × 1536 px, about 165 ppi; Sokha’s six plates too, Lamine’s interior pictures are fine), printer choice (KDP vs IngramSpark:
-`bleed_mode`, spine factor). Proofs show highlighted placeholders; `--final` refuses to build with them or with pictures below 250 ppi.
+publisher or imprint (and address, for the legal page), ISBNs (KDP can assign a free one per paperback; own ISBNs are one per language and edition, plus ebooks sold elsewhere than Kindle), contact e-mail,
+print-master artwork (300 ppi; the covers are 1024 × 1536 px or less, about 146–182 ppi; the plates of Volumes 1, 3 and 4 are 143–164 ppi, Lamine’s interior pictures are fine), the
+printer’s final choice and the ink type (standard or premium colour). Proofs show highlighted placeholders for the publisher and the ISBN; `--final` refuses to build with the author name empty
+or with pictures below 250 ppi.
 
 ## Decisions to confirm
+KDP and the domain (2026-10-22)
+- **Print files are now in Amazon KDP geometry** (`print.bleed_mode: "outside"`, page 6.125 × 9.25 in, TrimBox/BleedBox set), reversible by one value per `book.json` and a rebuild.
+  The previous files (bleed on all four sides, cream paper) stay in `release/` as last committed and are **not** the KDP files.
+- **White paper, standard colour.** KDP prints colour interiors on white paper only. Standard colour (spine 0.002252 in/page) was chosen over premium colour (0.002347 in/page)
+  because KDP’s cost per page makes premium colour unaffordable for books of 128–220 pages at children’s-book prices (see README, “Print and upload notes”). To switch: `print.paper` → `premium_color`, rebuild the covers.
+- **One domain, several projects.** This collection moved under `/my-corner-of-the-world/` (`site.base_path`), with a portal at the root. Decide the path once: it is part of every published URL.
+  *Tech Explorer* is a hidden entry in `portal/projects.json` (only its name is known). The legal and contact links of the portal point at this project’s pages for now.
+- Rebuilt binaries are **not** committed this round (each regeneration adds about 0.5 GB to a repository that is already about 1.7 GB): `release/` holds the earlier build, and the new files travel as zip archives.
+  `MCW_RELEASE=<dir> python3 build.py all` rebuilds them anywhere. Moving `release/` to Git LFS or GitHub Releases is still recommended.
+
 Series
 - **Volume numbers.** Sokha 1, Lamine 2, Ananya 3, Anastasiya 4, as in the series table of every Discovery Guide (Ananya’s own
   validation note already called it the third book). Earlier builds had Ananya 1 and Anastasiya 2, and the request for Sokha

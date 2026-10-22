@@ -18,10 +18,10 @@ languages** and **each of the two editions** (story only; story + Discovery Guid
 
 | Output | Where it lands | Notes |
 |---|---|---|
-| Paperback interior PDF | `release/<book>/print/<lang>-<edition>/…_interior.pdf` | 6 × 9 in, bleed, embedded fonts, even page count, bookmarks, clickable contents |
+| Paperback interior PDF | `release/<book>/print/<lang>-<edition>/…_interior.pdf` | 6 × 9 in trim, Amazon KDP geometry (bleed on top, bottom and outer edge: page 6.125 × 9.25 in), TrimBox/BleedBox set, embedded fonts, even page count, bookmarks, clickable contents |
 | Cover wrap PDF (print) + PROOF PDF + front PNG | `release/<book>/covers/<lang>-<edition>/` | spine width computed from the real page count; PROOF shows trim/bleed/spine/safe zone |
 | EPUB 3 | `release/<book>/epub/` | reflowable, accessible metadata, embedded fonts, EPUBCheck-valid |
-| Website | `public_html/`, `release/my-corner-of-the-world_public_html.zip` and `release/my-corner-of-the-world_downloads_1.zip`, `_2.zip`, … (the EPUB downloads) | static, 3 languages, upload to Hostinger |
+| Website | `public_html/` (the whole domain root), `release/compasskite.com_public_html.zip` and `release/compasskite.com_downloads_1.zip`, `_2.zip`, … (the EPUB downloads) | static, 3 languages, upload to Hostinger; this collection sits in `/my-corner-of-the-world/`, the portal at the root lists the projects |
 
 The Nexus Live Media site at the repository root (`index.php`) is **not** touched; everything for this
 project lives in this folder.
@@ -38,6 +38,7 @@ python3 build.py epub                   # 6 EPUBs
 python3 build.py site                   # website + deploy zip
 python3 build.py all                    # everything
 # narrow it down:  --book ananya-stolen-flame  --lang fr  --edition guide
+# build somewhere else (e.g. to keep rebuilt binaries out of git between iterations):  MCW_RELEASE=/some/dir python3 build.py all
 ```
 
 Chromium is driven through Playwright. If the browser is not where Playwright expects it, set
@@ -68,7 +69,8 @@ books/_template/             copy this to start a new volume
 tools/mcw/                   build code (parser, typography, print / cover / EPUB / site renderers)
 tools/apply_edits.py         original + edits → edited master      (python3 tools/apply_edits.py [slug])
 tools/audit_style.py         local style-habit report (see "AI detection" below)
-site/                        templates, CSS, JS, i18n strings (EN/FR/ES), PHP form handlers
+site/                        templates, CSS, JS, i18n strings (EN/FR/ES), PHP form handlers (this collection's pages)
+portal/                      the domain's home page: projects.json (registry of hosted projects), its templates and strings
 assets/fonts/                self-hosted OFL fonts + licences (Literata, Nunito Sans, Caveat, Noto Sans Devanagari, Noto Sans Khmer)
 docs/                        ILLUSTRATION_AUDIT.md, PREFLIGHT.md, PROGRESS.md
 release/                     built deliverables
@@ -126,7 +128,11 @@ painted on a tinted paper ground prints on unprinted paper; the web copy keeps t
 
 * Pure static HTML/CSS/JS plus two tiny PHP scripts (newsletter + contact form) — works on any Hostinger
   shared plan. No database, no cookies, no third-party requests, no tracking, no ads.
-* Three languages with translated URLs (`/en/books/…`, `/fr/livres/…`, `/es/libros/…`), `hreflang`,
+* One domain, several projects. The domain root (`compasskite.com/`) is a small portal that lists the projects
+  (`portal/projects.json`); this collection lives in its own folder, `/my-corner-of-the-world/`
+  (`site.base_path` in `series.json`), with its own pages, assets, form scripts and sitemap. A new project gets its own folder and one
+  entry in the registry; the URLs of the others do not change. Never change a published `base_path`.
+* Three languages with translated URLs (`/my-corner-of-the-world/en/books/…`, `/fr/livres/…`, `/es/libros/…`), `hreflang`,
   per-page meta/Open Graph/JSON-LD (`Book`), automatic sitemap, `robots.txt`, `.htaccess` (HTTPS, caching,
   security headers, custom 404).
 * Reader: the whole novel online with illustrations; text size and light / sepia / dark themes; progress
@@ -141,23 +147,34 @@ painted on a tinted paper ground prints on unprinted paper; the web copy keeps t
 
 ### Deploying on Hostinger
 
-1. Fill in `series.json`: `site.url` (e.g. `https://mycorneroftheworld.com`, no trailing slash),
-   `site.contact_email`, `publisher`, and `author.name` once decided. Rebuild: `python3 build.py site`.
-2. In hPanel → **Files → File Manager**, open the document root of the (sub)domain (normally `public_html`) and
-   upload **the contents** of the generated `public_html/` (or upload `my-corner-of-the-world_public_html.zip` and then
-   every `my-corner-of-the-world_downloads_N.zip`, the EPUB downloads, into the same folder and use *Extract* on each; the downloads are
-   split in parts because GitHub refuses files over 100 MB). Make sure `.htaccess` is uploaded (hidden file).
-   The site uses root-relative links, so it must sit at the root of a domain or sub-domain, not in a sub-folder.
-3. Copy `api/config.sample.php` to `api/config.php` and edit `owner_email` and `mail_from` (create that
-   mailbox in hPanel → Emails so mail is delivered). Leave `base_path` empty.
-4. hPanel → **Security → SSL** → install/enable the free SSL and “Force HTTPS”.
-5. Test: submit the contact form and the newsletter form; subscribers are appended to
-   `api/private/subscribers.csv`, which `.htaccess` blocks from the web (download it via File Manager).
-6. Optional: connect the domain’s e-mail, add a favicon PNG set, create a Search Console property and submit
-   `sitemap.xml`.
+The build writes the whole domain root to `public_html/` (git-ignored) and as archives in `release/`
+(`compasskite.com_public_html.zip` plus `compasskite.com_downloads_N.zip`, the EPUB downloads, split because GitHub refuses
+files over 100 MB; every path inside is relative to the domain root).
 
-If the Nexus Live Media site stays on the main domain, create a sub-domain for this site
-(e.g. `corner.yourdomain.com`, hPanel → Domains → Subdomains) and upload there, so the two do not share `.htaccess`.
+1. `series.json` holds `site.url` (`https://compasskite.com`, no trailing slash), `site.base_path` (`/my-corner-of-the-world`) and
+   `author.name`. Still to be filled in by the author: `site.contact_email`, `publisher.name`, `publisher.address`. Rebuild: `python3 build.py site`.
+2. In hPanel → **Files → File Manager**, open the document root of **compasskite.com** (`public_html` of that website) and
+   upload the archive, then every `…_downloads_N.zip`, into it and use *Extract* on each (or upload the contents of `public_html/` by FTP).
+   `index.html` must end up directly in the document root, with the folder `my-corner-of-the-world/` beside it; make sure the hidden
+   `.htaccess` files (one at the root, one in the project folder) are there.
+3. In `my-corner-of-the-world/api/` copy `config.sample.php` to `config.php` and fill in `owner_email` and `mail_from` (create that
+   mailbox in hPanel → Emails so mail is delivered). Leave `base_path` as it is. **Until this is done the contact form shows an
+   error**: it never claims to have sent a message that cannot leave (the newsletter form still stores addresses, without an alert e-mail).
+4. hPanel → **Security → SSL** → install/enable the free SSL and “Force HTTPS”.
+5. Test: `/`, `/en/`, `/fr/`, `/es/`, `/my-corner-of-the-world/fr/`, a chapter, an EPUB download, the contact form and the newsletter
+   form (subscribers are appended to `my-corner-of-the-world/api/private/subscribers.csv`, which `.htaccess` blocks from the web;
+   download it via File Manager).
+6. Optional: connect the domain’s e-mail, add a favicon PNG set, create a Search Console property and submit `sitemap.xml` (an index
+   that lists the portal’s and each project’s sitemap).
+
+If the Nexus Live Media site stays on another domain of the same hosting plan, each domain has its own document root; never extract
+this archive into the root that holds that site (the two would overwrite each other’s `.htaccess`).
+
+### Adding another project to the domain
+
+Copy its built site into a new folder of the document root (`/<path>/`), add an entry to `portal/projects.json` (`status`, `visible`, names
+and descriptions per language; entries with `"visible": false` are not shown) and run `python3 build.py site`. *Tech Explorer* is
+already listed there as a hidden placeholder: nothing is known about it yet beyond its name.
 
 The newsletter form stores an e-mail address and a consent timestamp. It is written for a general
 audience of parents/teachers (the form asks the visitor to confirm they are an adult). Check with the
@@ -166,15 +183,23 @@ empty on purpose.
 
 ## Print and upload notes
 
-* Trim 6 × 9 in, 11.5 pt Literata, 1.5 leading, margins: top 0.78, bottom 0.9, inner 0.85, outer 0.65 in.
-* **Amazon KDP**: set `"bleed_mode": "outside"` (page 6.125 × 9.25 in) and rebuild; KDP wants no bleed on the
-  spine edge. **IngramSpark / most offset printers**: keep `"all"` (6.25 × 9.25 in).
-* Spine = pages × paper factor (cream 0.0025 in/page; white 0.002252; premium colour 0.002347 — KDP figures).
-  The cover builder reads the page count of the matching interior, so always rebuild covers after the interior.
-  Confirm against the printer’s own template before uploading: factors differ by printer and paper.
-* The PRINT cover leaves the barcode box empty (2 × 1.2 in, bottom right of the back cover) — KDP/IngramSpark
-  add the ISBN barcode there. The PROOF cover draws all guides and placeholders.
-* All fonts are embedded. Colours are RGB; let the printer’s preflight convert to CMYK/PDF-X.
+* Trim 6 × 9 in, 11.5 pt Literata, 1.5 leading, margins: top 0.78, bottom 0.9, inner 0.85, outer 0.65 in (KDP asks at least 0.5 in
+  inside for 151–300 pages and 0.625 in for 301–500).
+* **Amazon KDP is the current target** (`print.bleed_mode: "outside"`, page 6.125 × 9.25 in: bleed only on top, bottom and the
+  outer edge; `print.paper: "standard_color"`). **IngramSpark / most offset printers** want `"all"` (6.25 × 9.25 in): change the value
+  and rebuild the interiors and covers. Every page gets its exact MediaBox and CropBox (Chromium would round 6.125 in to 6.1233 in),
+  a BleedBox, and a TrimBox that differs for right- and left-hand pages.
+* **Colour interiors print on white paper only on KDP** (cream exists for black-and-white interiors), so the spine factor is that of
+  white paper: `standard_color` 0.002252 in/page, `premium_color` 0.002347 in/page (`cream` 0.0025 stays in the table for printers that offer it).
+  The cover builder reads the page count of the matching interior, so always rebuild covers after the interior. The spine is rounded to
+  three decimals as in KDP’s calculator. Confirm against KDP’s own cover template before uploading.
+* **Colour costs on KDP are per page, for the whole book** (6 × 9 in, amazon.com, from public guides checked in October 2026, confirm in KDP’s
+  calculator): standard colour about $1.00 + $0.0255 per page, premium colour about $1.00 + $0.065 per page, black-and-white
+  $1.00 + $0.012 per page. For these books (128–220 pages) that is roughly $4.30–$6.60 per copy in standard colour and $9.30–$15.30 in premium
+  colour, before KDP’s 40 % share: premium colour needs a list price well above what children’s chapter books usually sell for.
+* The PRINT cover leaves the barcode box empty (2 × 1.2 in, bottom right of the back cover): KDP puts its ISBN barcode there (it uses a
+  free KDP ISBN or yours). The PROOF cover draws all guides and placeholders.
+* All fonts are embedded. Colours are RGB; KDP converts them for printing, so order a proof copy before approving the book.
 * Page count is always even; recto/verso rules (chapter openers on right-hand pages, blank
   verso where needed) are solved by the layout.
 

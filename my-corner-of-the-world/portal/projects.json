@@ -1,0 +1,29 @@
+{
+  "note": "Registry of the projects hosted on this domain. The portal (domain root) lists the entries with \"visible\": true. Each project lives in its own folder (path) and builds independently; adding a project = one entry here plus its folder, no change to the others. Never rename a path once it is published: it is part of every URL.",
+  "name": "CompassKite",
+  "taglines": {
+    "en": "",
+    "fr": "",
+    "es": ""
+  },
+  "taglines_note": "Optional one-line presentation of the site, shown under the title on the home page when filled in. Left empty on purpose: it is the author's to write.",
+  "projects": [
+    {
+      "id": "my-corner-of-the-world",
+      "path": "/my-corner-of-the-world",
+      "status": "live",
+      "visible": true,
+      "from_series": true,
+      "note": "Name, description, covers and volume count come from series.json and the books of this repository."
+    },
+    {
+      "id": "tech-explorer",
+      "path": "/tech-explorer",
+      "status": "planned",
+      "visible": false,
+      "names": { "en": "Tech Explorer" },
+      "descriptions": { "en": "", "fr": "", "es": "" },
+      "note": "Announced by the author on 2026-10-22; nothing else is known yet. Hidden until the author decides to announce it: set \"visible\": true to show a 'coming soon' card, and change status to \"live\" once its folder is deployed. Missing languages fall back to English."
+    }
+  ]
+}

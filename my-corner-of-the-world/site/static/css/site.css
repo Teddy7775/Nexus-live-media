@@ -205,3 +205,19 @@ textarea{min-height:9rem;resize:vertical}
 .hero .covers.n4 .cover{width:min(26%,10.5rem);margin:0 -.2rem}
 @media (max-width:52rem){.hero .covers{order:-1}.hero .covers .cover{width:min(44%,12rem)}.hero .wrap.hero-n3,.hero .wrap.hero-n4{grid-template-columns:1fr}.hero .covers.n3 .cover{width:min(31%,11rem)}.hero .covers.n4 .cover{width:min(24%,9rem)}}
 .parents-book + .parents-book{border-top:1px solid var(--line);margin-top:2.5rem;padding-top:.5rem}
+
+/* portal: link back to the site that hosts this project (project pages) and the project list (domain root) */
+.portal-bar{background:var(--indigo);font:700 .78rem/1 var(--sans);letter-spacing:.06em}
+.portal-bar a{display:inline-block;padding:.55rem 0;color:#f3d9b4;text-decoration:none}
+.portal-bar a:hover{text-decoration:underline}
+.hero .wrap.one{grid-template-columns:1fr}
+.proj-list{display:grid;gap:1.6rem}
+.proj{display:grid;grid-template-columns:minmax(0,19rem) 1fr;gap:2rem;align-items:center;padding:1.6rem}
+.proj h3{font-size:clamp(1.4rem,3vw,1.9rem)}
+.proj .meta{font:600 .88rem/1.45 var(--sans);color:var(--muted)}
+.proj-covers{display:flex;justify-content:center;align-items:center;padding:.5rem .6rem}
+.proj-covers a{display:block;width:30%;margin:0 -.7rem;filter:drop-shadow(0 10px 14px rgba(53,68,93,.28));transform:rotate(-3deg) translateY(.3rem);transition:transform .25s}
+.proj-covers a:nth-child(even){transform:rotate(2.5deg) translateY(-.4rem)}
+.proj-covers a:hover{transform:rotate(0) translateY(-.2rem);z-index:3}
+.proj-covers img{border-radius:3px 7px 7px 3px}
+@media (max-width:52rem){.proj{grid-template-columns:1fr;gap:1rem}.proj-covers a{width:24%}}

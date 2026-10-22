@@ -61,7 +61,7 @@ repainted.
 * **DB-C04** is a quiet still life (old ball, closed journal, two red laces) against a plain wall. The copy sits on a paper label
   over the wall because black text on the orange wall was not legible; the publisher line and the barcode area are at lower right,
   clear of the still life. No barcode, ISBN or blurb is embedded in the art.
-* The spine is computed from each interior’s real page count (`spine_in = pages × 0.0025`, cream paper) and must be confirmed with
+* The spine is computed from each interior’s real page count (`pages × 0.002252`: standard colour on KDP white paper) and must be confirmed with
   the printer’s own template.
 
 ## 3. Continuity checks

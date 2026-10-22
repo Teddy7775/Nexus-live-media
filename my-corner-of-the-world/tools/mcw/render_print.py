@@ -21,7 +21,8 @@ from . import typo
 from .art import Art
 from .browser import launch
 from .fonts import patched_fonts_dir
-from .core import BUILD, ROOT, Book, load_project
+from .core import BUILD, ROOT, Book, load_project, site_address
+from .pdfbox import set_boxes
 from .mdparse import Block, Manuscript, Section, strip_tags
 
 TEMPLATES = Path(__file__).parent / "templates"
@@ -511,7 +512,7 @@ class PrintBuilder:
         year = pub.get("copyright_year", bk.cfg.get("year", 2026))
         note_title = next((s.title for s in self.ms.sections if s.kind == "note"), "")
         edition = S["guide_ed"] if self.guide_on else S["story_ed"]
-        site = self.series["site"]["url"]
+        site = site_address(self.series)
         ht = (self.mark("halftitle", "r") + f'<section class="front halftitle" id="halftitle"><div class="series">{series}</div>'
               f'<div class="ttl">{title}</div></section>')
         blank = ""
@@ -594,7 +595,7 @@ class PrintBuilder:
         for e in load_project().catalog():
             name = f'{e["book"].title(lang)}: {e["book"].subtitle(lang)}' if e["book"] else e["upcoming"]["titles"][lang]
             items.append(f'<div class="it"><em>{esc(name)}</em></div>')
-        site = self.series["site"]["url"]
+        site = site_address(self.series)
         return (f'<section class="endpage" id="endpage"><h3>{esc(self.series["names"][lang])}</h3>'
                 f'<div class="it" style="font-style:italic">{esc(self.series["descriptions"][lang])}</div>'
                 + "".join(items)
@@ -864,6 +865,11 @@ class PrintBuilder:
             lvl = min(lvl, prev + 1) if prev else 1
             clean.append([lvl, t, pg]); prev = lvl
         doc.set_toc(clean)
+        G = self.geo
+        b, tw, th = G.b * 72, G.tw * 72, G.th * 72
+        # trim box: bleed on every side (mode "all"), or only on top, bottom and the outer edge (mode "outside", e.g. Amazon KDP)
+        set_boxes(doc, G.PW * 72, G.PH * 72,
+                  lambda i: (b, b, b + tw, b + th) if G.mode == "all" else ((0 if i % 2 == 0 else b), b, (0 if i % 2 == 0 else b) + tw, b + th))
         tmp = final.with_suffix(".tmp.pdf")
         doc.save(tmp, garbage=4, deflate=True)
         n = len(doc)

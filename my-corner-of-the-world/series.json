@@ -27,8 +27,13 @@
     "es": "es_MX"
   },
   "site": {
-    "url": "",
-    "url_note": "Set to your final https:// address (no trailing slash) before the production build, e.g. https://mycorneroftheworld.com",
+    "url": "https://compasskite.com",
+    "url_note": "Origin of the whole domain (https://, no trailing slash). This collection is one project of the CompassKite site, so its pages live under base_path; the portal at the domain root lists the projects (portal/projects.json).",
+    "base_path": "/my-corner-of-the-world",
+    "base_path_note": "URL prefix of this project on the domain. Other projects get their own prefix; changing it later breaks every published link, so decide once.",
+    "portal": {
+      "name": "CompassKite"
+    },
     "contact_email": "",
     "analytics": "none"
   },
@@ -39,8 +44,8 @@
     "copyright_year": 2026
   },
   "author": {
-    "name": "",
-    "note": "Leave empty until the approved author or pen name is decided. Print covers and title pages show a clearly marked placeholder in PROOF files and print nothing in PRINT files."
+    "name": "Teddy Nana",
+    "note": "Author name as given by the author on 2026-10-22. It prints on covers, title pages and copyright pages, and goes into the ebook metadata; it must match the author name entered in the printer's/retailer's metadata exactly."
   },
   "books": [
     "sokha-road-to-the-bell",

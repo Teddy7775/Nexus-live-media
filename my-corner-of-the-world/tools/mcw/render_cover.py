@@ -13,10 +13,13 @@ from playwright.sync_api import sync_playwright
 
 from .art import Art
 from .browser import launch
-from .core import BUILD, RELEASE, ROOT, Book
+from .core import BUILD, RELEASE, ROOT, Book, site_address
+from .pdfbox import set_boxes
 
 FONTS = ROOT / "assets" / "fonts"
-PAPER = {"white": 0.002252, "cream": 0.0025, "premium_color": 0.002347}
+# inches of spine per page (KDP figures). KDP prints colour interiors on white paper only: standard colour has the white-paper
+# factor, premium colour a thicker sheet; cream exists for black-and-white interiors only.
+PAPER = {"white": 0.002252, "standard_color": 0.002252, "cream": 0.0025, "premium_color": 0.002347}
 
 STR = {
     "en": {"ages": "Ages 9–13", "guide_pill": "Includes the Discovery Guide", "series": "My Corner of the World",
@@ -36,7 +39,7 @@ def esc(s):
 
 
 def spine_in(pages: int, paper: str) -> float:
-    return round(pages * PAPER[paper], 4)
+    return round(pages * PAPER[paper], 3)
 
 
 class CoverBuilder:
@@ -160,7 +163,7 @@ class CoverBuilder:
         tag = esc(bk.cfg["taglines"][lang])
         paras = "".join(f"<p>{esc(p)}</p>" for p in blurb)
         pub = self.book.series["publisher"]["name"]
-        site = self.book.series["site"]["url"]
+        site = site_address(self.book.series)
         pubtxt = esc(pub) if pub else (f'<span class="todo">{esc(S["ph_pub"])}</span>' if proof else "")
         sitetxt = esc(site.replace("https://", "").replace("http://", "")) if site else ""
         barcode_lbl = '<div class="bc-lbl">BARCODE / ISBN AREA 2.0 × 1.2 in</div>' if proof else ""
@@ -291,6 +294,14 @@ class CoverBuilder:
             pg.wait_for_timeout(300)
             pg.pdf(path=str(path), prefer_css_page_size=True, print_background=True)
             br.close()
+        import pymupdf
+        doc = pymupdf.open(path)
+        b = self.b * 72
+        set_boxes(doc, self.W * 72, self.H * 72, lambda i: (b, b, self.W * 72 - b, self.H * 72 - b))
+        tmp = path.with_suffix(".tmp.pdf")
+        doc.save(tmp, garbage=3, deflate=True)
+        doc.close()
+        tmp.replace(path)
 
     def front_png(self, path: Path, width_px: int = 1200):
         """Trimmed front cover (6 x 9 in) as PNG for the web, EPUB and social cards."""

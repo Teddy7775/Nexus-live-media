@@ -154,10 +154,10 @@
       9
     ],
     "bleed_in": 0.125,
-    "bleed_mode": "all",
-    "bleed_mode_note": "'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). 'outside' = Amazon KDP (page 6.125 x 9.25 in). Always confirm against your printer's template.",
-    "paper": "cream",
-    "paper_ppi_note": "spine thickness per page: white 0.002252 in, cream 0.0025 in, premium-colour 0.002347 in (KDP figures; confirm with your printer)",
+    "bleed_mode": "outside",
+    "bleed_mode_note": "'outside' = Amazon KDP: bleed only on the top, bottom and outer edges (page 6.125 x 9.25 in for a 6 x 9 in trim). 'all' = bleed on every edge (IngramSpark, Lulu, most offset printers; page 6.25 x 9.25 in). Always confirm against your printer's template.",
+    "paper": "standard_color",
+    "paper_note": "Spine thickness per page (KDP figures; confirm in the printer's own calculator): standard_color and white 0.002252 in, premium_color 0.002347 in, cream 0.0025 in. KDP prints colour interiors on white paper only; cream exists for black-and-white interiors.",
     "margins_in": {
       "top": 0.78,
       "bottom": 0.9,

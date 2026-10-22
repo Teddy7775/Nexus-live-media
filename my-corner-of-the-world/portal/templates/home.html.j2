@@ -1,0 +1,26 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<section class="hero"><div class="wrap one">
+  <div>
+    <h1>{{ site_name }}</h1>
+    {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
+  </div>
+</div></section>
+<section class="block" id="projects"><div class="wrap">
+  <h2>{{ t.portal.projects }}</h2>
+  <div class="proj-list mt">
+  {% for p in projects %}
+    <article class="card proj">
+      {% if p.covers %}<div class="proj-covers">{% for c in p.covers %}<a href="{{ c.url }}" aria-label="{{ c.alt }}"><picture><source type="image/webp" srcset="{{ c.webp }}" sizes="(min-width: 52rem) 6rem, 22vw"><img src="{{ c.src }}" width="{{ c.w }}" height="{{ c.h }}" alt="{{ c.alt }}" loading="{{ 'eager' if loop.first and p.first else 'lazy' }}" decoding="async"></picture></a>{% endfor %}</div>{% endif %}
+      <div>
+        <p style="margin:0 0 .5rem"><span class="badge{% if not p.live %} soon{% endif %}">{{ t.portal.live if p.live else t.portal.soon }}</span></p>
+        <h3>{% if p.live %}<a href="{{ p.href }}" style="text-decoration:none;color:inherit">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}</h3>
+        {% if p.desc %}<p>{{ p.desc }}</p>{% endif %}
+        {% if p.meta %}<p class="meta">{{ p.meta }}</p>{% endif %}
+        {% if p.live %}<p style="margin:1rem 0 0"><a class="btn btn-primary" href="{{ p.href }}">{{ t.portal.open }}</a></p>{% endif %}
+      </div>
+    </article>
+  {% endfor %}
+  </div>
+</div></section>
+{% endblock %}

@@ -32,10 +32,14 @@ VERSION = dt.date.today().strftime("%Y%m%d")
 
 class SiteBuilder:
     def __init__(self, P: Project, out: Path = PUBLIC):
-        self.P, self.out = P, out
+        self.P = P
         s = P.series["site"]
         self.site_url = (s.get("url") or "").rstrip("/")
         self.base = (s.get("base_path") or "").rstrip("/")
+        self.root_out = out                                    # what is uploaded to the domain root
+        self.out = out / self.base.strip("/") if self.base else out   # this project's own folder inside it
+        portal = s.get("portal") or {}
+        self.portal_name = portal.get("name", "")
         self.langs = P.langs
         self.tx = {l: P.i18n(l) for l in self.langs}
         self.env = Environment(loader=FileSystemLoader(str(SITE / "templates")),
@@ -161,7 +165,8 @@ class SiteBuilder:
         series = self.P.series
         base_ctx = dict(L=lang, t=t, u=self.u_nav(lang), base=self.base, ver=VERSION, page=page, alts=alts, alts_default=alts_default,
                         locale=series["locales"][lang], series_name=series["names"][lang], nav_current=nav_current,
-                        year=self.year, holder=self.holder)
+                        year=self.year, holder=self.holder,
+                        portal=({"name": self.portal_name, "href": f"/{lang}/"} if self.portal_name else None))
         html = self.env.get_template(template).render(**base_ctx, **ctx)
         self.write(rel_out, html)
         if sitemap and not noindex:
@@ -178,8 +183,12 @@ class SiteBuilder:
         # PHP handlers
         api = self.out / "api"
         api.mkdir(parents=True, exist_ok=True)
-        for f in ("_lib.php", "subscribe.php", "contact.php", "config.sample.php"):
+        for f in ("_lib.php", "subscribe.php", "contact.php"):
             shutil.copyfile(SITE / "php" / f, api / f)
+        sample = (SITE / "php" / "config.sample.php").read_text(encoding="utf-8")
+        marker = "'base_path'     => '',"
+        assert marker in sample, "config.sample.php: base_path line not found"
+        (api / "config.sample.php").write_text(sample.replace(marker, f"'base_path'     => '{self.base}',"), encoding="utf-8")
         shutil.copyfile(SITE / "php" / "htaccess.api", api / ".htaccess")
         (api / "private").mkdir(exist_ok=True)
         shutil.copyfile(SITE / "php" / "htaccess.private", api / "private" / ".htaccess")
@@ -282,6 +291,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
 
     # ---------------------------------------------------------------- build
     def build(self) -> Path:
+        """Writes this project into <docroot>/<base_path>/ (the docroot itself when base_path is empty)."""
         if self.out.exists():
             shutil.rmtree(self.out)
         self.out.mkdir(parents=True)
@@ -292,7 +302,7 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
             self.build_lang(lang)
         self.build_root()
         self.build_support_files()
-        return self.make_zip()
+        return self.out
 
     def build_book_assets(self, book: Book):
         art = Art(book)
@@ -519,18 +529,18 @@ img{{height:520px;border-radius:6px 14px 14px 6px;box-shadow:0 20px 50px #0008}}
             urls.append(f"<url><loc>{esc(loc)}</loc><lastmod>{today}</lastmod>{alt}</url>")
         self.write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
                    'xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(urls) + "</urlset>")
-        self.write("robots.txt", f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {site}{self.base}/sitemap.xml\n")
+        if not self.base:       # inside a larger site, robots.txt, the root .htaccess and the deploy note belong to the portal
+            self.write("robots.txt", f"User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: {site}/sitemap.xml\n")
+            self.write("README-DEPLOY.txt", deploy_note(self.root_out, self.site_url))
         self.write(".htaccess", self.htaccess())
-        self.write("README-DEPLOY.txt",
-                   "Upload the CONTENTS of this folder to public_html on Hostinger.\n"
-                   "(If you work from the zip files in release/: extract my-corner-of-the-world_public_html.zip and then every\n"
-                   " my-corner-of-the-world_downloads_N.zip into the same folder; those hold the EPUB downloads.)\n"
-                   "Then copy api/config.sample.php to api/config.php and fill it in (owner email, mail_from).\n"
-                   "Full instructions: my-corner-of-the-world/README.md\n")
 
     def htaccess(self) -> str:
-        b = self.base
-        return f"""# My Corner of the World: Hostinger / LiteSpeed / Apache
+        return make_htaccess(self.base, "My Corner of the World")
+
+
+def make_htaccess(b: str, label: str) -> str:
+    """Apache/LiteSpeed rules for one folder of the site (the domain root or a project folder). `b` is its URL prefix."""
+    return f"""# {label}: Hostinger / LiteSpeed / Apache
 DirectoryIndex index.html index.php
 Options -Indexes
 ErrorDocument 404 {b}/404.html
@@ -580,45 +590,70 @@ AddType font/woff2 .woff2
 </FilesMatch>
 """
 
-    def make_zip(self) -> Path:
-        """The site archive plus the EPUB downloads in as many archives as needed, each under GitHub's 100 MB file limit
-        (unzip them all into the same folder)."""
-        out = RELEASE / f"{self.P.series['id']}_public_html.zip"
-        out.parent.mkdir(parents=True, exist_ok=True)
-        for old in RELEASE.glob(f"{self.P.series['id']}_downloads*.zip"):
-            old.unlink()
-        files = [p for p in sorted(self.out.rglob("*")) if p.is_file() and p.name != "config.php" and "subscribers.csv" not in p.name]
-        parts: list[list[tuple[Path, str]]] = [[]]
-        size = 0
-        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-            for p in files:
-                rel = p.relative_to(self.out).as_posix()
-                if not rel.startswith("downloads/"):
-                    z.write(p, rel)
-                    continue
-                n = p.stat().st_size
-                if size + n > 88 * 1024 * 1024 and parts[-1]:
-                    parts.append([])
-                    size = 0
-                parts[-1].append((p, rel))
-                size += n
-        self.downloads_zips = []
-        for i, part in enumerate(parts, 1):
-            dl = RELEASE / f"{self.P.series['id']}_downloads_{i}.zip"
-            with zipfile.ZipFile(dl, "w", zipfile.ZIP_STORED) as zd:
-                for p, rel in part:
-                    zd.write(p, rel)
-            self.downloads_zips.append(dl)
-        return out
+
+def deploy_note(root: Path, site_url: str) -> str:
+    host = site_url.replace("https://", "").replace("http://", "") or "your domain"
+    cfgs = sorted(p.parent.parent.relative_to(root).as_posix() for p in root.rglob("api/config.sample.php"))
+    todo = "".join(f"  - {c + '/' if c != '.' else ''}api/config.sample.php  ->  {c + '/' if c != '.' else ''}api/config.php\n" for c in cfgs)
+    return (f"Upload the CONTENTS of this folder to the document root of {host} (public_html on Hostinger).\n"
+            f"(If you work from the zip files in release/: extract {host}_public_html.zip and then every {host}_downloads_N.zip\n"
+            " into the same folder; those hold the EPUB downloads.)\n"
+            "Then, for each project with forms, copy its config.sample.php to config.php and fill it in (owner_email, mail_from):\n"
+            + todo +
+            "Until then the contact form shows an error rather than pretending to send (the newsletter form still stores addresses).\n"
+            "Full instructions: my-corner-of-the-world/README.md\n")
+
+
+def make_site_zips(P: Project, root: Path) -> tuple[Path, list[Path]]:
+    """The whole domain root as one archive (portal, projects, assets, form scripts) plus the EPUB downloads in as many
+    archives as needed, each under GitHub's 100 MB file limit. Extract them all into the same folder: paths are relative to the domain root."""
+    host = re.sub(r"^https?://", "", (P.series["site"].get("url") or "").rstrip("/")) or P.series["id"]
+    out = RELEASE / f"{host}_public_html.zip"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    for old in [*RELEASE.glob("*_public_html.zip"), *RELEASE.glob("*_downloads_*.zip"), *RELEASE.glob("*_downloads.zip")]:
+        old.unlink()
+    files = [p for p in sorted(root.rglob("*")) if p.is_file() and p.name != "config.php" and "subscribers.csv" not in p.name]
+    parts: list[list[tuple[Path, str]]] = [[]]
+    size = 0
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        for p in files:
+            rel = p.relative_to(root).as_posix()
+            if "/downloads/" not in "/" + rel:
+                z.write(p, rel)
+                continue
+            n = p.stat().st_size
+            if size + n > 88 * 1024 * 1024 and parts[-1]:
+                parts.append([])
+                size = 0
+            parts[-1].append((p, rel))
+            size += n
+    dls = []
+    for i, part in enumerate(parts, 1):
+        if not part:
+            continue
+        dl = RELEASE / f"{host}_downloads_{i}.zip"
+        with zipfile.ZipFile(dl, "w", zipfile.ZIP_STORED) as zd:
+            for p, rel in part:
+                zd.write(p, rel)
+        dls.append(dl)
+    return out, dls
 
 
 def build_site(P: Project):
+    """The domain root = the portal (project list) + this collection under its base_path. Rebuilt from scratch every time."""
+    if PUBLIC.exists():
+        shutil.rmtree(PUBLIC)
     sb = SiteBuilder(P)
-    z = sb.build()
-    n = sum(1 for _ in sb.out.rglob("*.html"))
-    print(f"[site] {n} HTML pages, {len(sb.pages)} in sitemap -> {sb.out}")
+    sb.build()
+    from .render_portal import PortalBuilder
+    pb = PortalBuilder(P, sb)
+    pb.build()
+    (PUBLIC / "README-DEPLOY.txt").write_text(deploy_note(PUBLIC, sb.site_url), encoding="utf-8")
+    z, dls = make_site_zips(P, PUBLIC)
+    n = sum(1 for _ in PUBLIC.rglob("*.html"))
+    print(f"[site] {n} HTML pages ({len(sb.pages)} + {len(pb.pages)} in the sitemaps) -> {PUBLIC}")
     print(f"[site] deploy zip: {z} ({z.stat().st_size // 1024} KB)")
-    for dz in sb.downloads_zips:
+    for dz in dls:
         print(f"[site] downloads zip (EPUBs, extract into the same folder): {dz} ({dz.stat().st_size // 1024} KB)")
-    for w in sb.warnings:
+    for w in [*sb.warnings, *pb.warnings]:
         print("   !", w)
