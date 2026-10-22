@@ -1,0 +1,20 @@
+[
+ {
+  "id": "GLE-01",
+  "kind": "accuracy",
+  "find": "carrying a pair of shiny white cleats and calls their ball garbage",
+  "replace": "carrying a pair of shiny white cleats and tells them they play with garbage",
+  "why": "The novel (chapter 6) has Cheikh say “You play with garbage”; the French and Spanish guides already say so. “calls their ball garbage” was a paraphrase that does not match the text.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GLE-02",
+  "kind": "accuracy",
+  "find": "Cheikh’s apology for calling the ball garbage",
+  "replace": "Cheikh’s apology for calling their stuff garbage",
+  "why": "Chapter 17: “I shouldn’t have called your stuff garbage.” The French and Spanish guides say “their things”.",
+  "regex": false,
+  "count": 1
+ }
+]

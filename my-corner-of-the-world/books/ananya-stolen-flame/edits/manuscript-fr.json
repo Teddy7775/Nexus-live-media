@@ -1,0 +1,236 @@
+[
+ {
+  "id": "FR-01",
+  "kind": "fix",
+  "find": "Je ne le connaissais pas honteux.",
+  "replace": "Je ne l’avais jamais vu honteux.",
+  "why": "Aligns with EN-01 (“I had never seen him ashamed”).",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-02",
+  "kind": "consistency",
+  "find": "Le soir, j’ai décroché l’affiche du mur de ma chambre où j’avais recopié le duel.",
+  "replace": "Le soir, j’ai épinglé sur le mur de ma chambre la copie de l’affiche du duel que j’avais dessinée.",
+  "why": "The French said she took the poster down; EN (and the story) has her pin up the copy she drew. Corrected.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-03",
+  "kind": "consistency",
+  "find": "Rohan est rentré avec huit points de suture et trois mensonges.",
+  "replace": "Rohan est rentré avec huit points de suture et quatre mensonges.",
+  "why": "The chapter counts four lies (“Mensonge numéro quatre”); EN already says four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-04",
+  "kind": "fix",
+  "find": "Son silence a changé de forme. Ce n’était plus le silence fermé qu’il avait gardé devant nos parents. C’était celui d’une porte entrouverte.",
+  "replace": "Son silence a changé de forme. Le silence fermé qu’il avait gardé devant nos parents avait disparu. Il restait celui d’une porte entrouverte.",
+  "why": "Mirrors EN-04.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-05",
+  "kind": "voice",
+  "find": "Ce n’était pas encore courageux. C’était seulement rapide, chaud et silencieux, comme lorsqu’on pose le pied sur une dalle brûlante et qu’on court avant de réfléchir.",
+  "replace": "Ce n’était pas encore du courage, seulement quelque chose de rapide, de chaud et de silencieux, comme quand on pose le pied sur une dalle brûlante et qu’on court avant de réfléchir.",
+  "why": "Mirrors EN-06.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-06",
+  "kind": "voice",
+  "find": "Voilà ce que j’aurais dû comprendre : Rohan ne me proposait pas sa place.",
+  "replace": "Je le vois maintenant : Rohan ne me proposait pas sa place.",
+  "why": "Mirrors EN-07.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-07",
+  "kind": "voice",
+  "find": "\n\nJe ne savais pas encore que cette phrase nous serait utile.",
+  "replace": "",
+  "why": "Mirrors EN-08.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-08",
+  "kind": "voice",
+  "find": "Ce serait faux. La douleur prouvait seulement",
+  "replace": "Elle prouvait seulement",
+  "why": "Mirrors EN-09.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-09",
+  "kind": "voice",
+  "find": "C’est précisément pour cela que mon mensonge comptait. Je ne cachais pas seulement un projet. J’utilisais sa discrétion comme si elle m’était due.",
+  "replace": "C’est pour cela que mon mensonge comptait : je ne cachais pas seulement un projet, j’utilisais sa discrétion comme si elle m’était due.",
+  "why": "Mirrors EN-10.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-10",
+  "kind": "voice",
+  "find": "J’ai compris qu’il cherchait une conclusion qui lui permettrait de respirer",
+  "replace": "Il cherchait une conclusion qui lui permettrait de respirer",
+  "why": "Mirrors EN-11.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-11",
+  "kind": "cliche",
+  "find": "Les conséquences continuaient de s’éloigner de moi comme des cercles dans l’eau. Plié, le carré volé tenait dans ma paume. Il touchait pourtant des personnes dont je ne connaissais même pas le nom.",
+  "replace": "Les conséquences continuaient de s’étendre. Plié, le carré volé tenait dans ma paume, et il avait pourtant touché des personnes dont je ne connaissais même pas le nom.",
+  "why": "Mirrors EN-12.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-12",
+  "kind": "rhythm",
+  "find": "J’avais piloté sous mon nom. J’avais choisi une manœuvre. Elle avait fonctionné devant les gens",
+  "replace": "J’avais piloté sous mon nom et choisi ma manœuvre, et elle avait fonctionné devant les gens",
+  "why": "Mirrors EN-13.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-13",
+  "kind": "cliche",
+  "find": "Tout s’est passé trop vite et assez lentement pour que je voie chaque détail.",
+  "replace": "Tout est allé trop vite, et pourtant j’ai vu chaque détail.",
+  "why": "Mirrors EN-14.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-14",
+  "kind": "rhythm",
+  "find": "Elle n’était pas le kesariya volé. Elle ne devait rien prouver. C’était un morceau autorisé",
+  "replace": "Elle n’était pas le kesariya volé et ne devait rien prouver. C’était un morceau autorisé",
+  "why": "Mirrors EN-15.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-15",
+  "kind": "cliche",
+  "find": "Mon cœur s’est arrêté.",
+  "replace": "Je n’ai pas bougé.",
+  "why": "Mirrors EN-16.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-16",
+  "kind": "cliche",
+  "find": "J’ai senti mon ventre se contracter.",
+  "replace": "Le carré posé sur son lit m’a soudain paru beaucoup plus important.",
+  "why": "Mirrors EN-17.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "FR-M1",
+  "kind": "markup",
+  "find": "\\*\\*SCORE D’ANANYA\\*\\*\\n\\nMaintien[^\\n]*\\n\\nErreurs[^\\n]*\\n\\nChutes[^\\n]*\\n\\nÉcoute des consignes[^\\n]*\\n",
+  "replace": "**SCORE D’ANANYA**\n\n- Maintien : 6 minutes\n- Erreurs : 11\n- Chutes : 1\n- Écoute des consignes : à améliorer\n",
+  "why": "Score card was four loose paragraphs; EN/ES use a list.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M2",
+  "kind": "markup",
+  "find": "\\*\\*LANCERS RATÉS DE ROHAN : 2\\*\\*",
+  "replace": "- LANCERS RATÉS DE ROHAN : 2",
+  "why": "Same list convention as EN/ES.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M3",
+  "kind": "markup",
+  "find": "•[^\\n]*Papa avait écrit[^\\n]*\\n•[^\\n]*Le tissu devait[^\\n]*\\n•[^\\n]*Je choisirais Agni[^\\n]*\\n",
+  "replace": "- Papa avait écrit « ne pas couper ».\n- Le tissu devait être présenté à une cliente.\n- Je choisirais Agni si elle me demandait de choisir tout de suite.\n",
+  "why": "Hand-typed “•” bullets become a real list.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M4",
+  "kind": "markup",
+  "find": "\\*\\*Bulletin du vent\\*\\*\\n\\nDirection[^\\n]*\\n\\nForce[^\\n]*\\n\\nÉtat de mes mains[^\\n]*\\n\\nÉtat de ma tête[^\\n]*\\n",
+  "replace": "**Bulletin du vent**\n\n- Direction : ouest.\n- Force : assez pour porter Agni et assez pour emporter une mauvaise décision très loin.\n- État de mes mains : protégées.\n- État de ma tête : beaucoup moins.\n",
+  "why": "Wind report: four paragraphs become a list (as in EN).",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M5",
+  "kind": "markup",
+  "find": "•[^\\n]*sept triangles[^\\n]*\\n•[^\\n]*deux sachets[^\\n]*\\n•[^\\n]*une plume grise[^\\n]*\\n•[^\\n]*quatre morceaux[^\\n]*\\n•[^\\n]*un fil inconnu[^\\n]*\\n•[^\\n]*la feuille de score[^\\n]*\\n•[^\\n]*une place vide[^\\n]*\\n",
+  "replace": "- sept triangles de papier\n- deux sachets vides de gajak\n- une plume grise, remise aux secouristes\n- quatre morceaux de coton simple, enroulés sur du carton\n- un fil inconnu signalé près d’une antenne\n- la feuille de score de Rohan\n- une place vide contre le mur où Agni séchait d’habitude\n",
+  "why": "Roof inventory: “•” paragraph becomes a list.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M6",
+  "kind": "markup",
+  "find": "\\*\\*Elle est moins spectaculaire\\.\\*\\*",
+  "replace": "*Elle est moins spectaculaire.*",
+  "why": "Text messages are italic in EN/ES.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M7",
+  "kind": "markup",
+  "find": "\\*\\*Je la préfère\\.\\*\\*",
+  "replace": "*Je la préfère.*",
+  "why": "Text messages are italic in EN/ES.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M8",
+  "kind": "markup",
+  "find": "\\*\\*(Vous pouvez tout lire si vous gardez pour vous ce qui n’appartient pas à la classe\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Teacher’s written notes are italic in EN/ES.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M9",
+  "kind": "markup",
+  "find": "\\*\\*(D’accord\\. Les histoires des autres restent les leurs\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Same.",
+  "regex": true,
+  "count": 1
+ },
+ {
+  "id": "FR-M10",
+  "kind": "markup",
+  "find": "\\*\\*(Tu as choisi le mot exact\\.)\\*\\*",
+  "replace": "*\\1*",
+  "why": "Same.",
+  "regex": true,
+  "count": 1
+ }
+]

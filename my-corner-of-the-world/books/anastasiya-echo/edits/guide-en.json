@@ -1,0 +1,11 @@
+[
+ {
+  "id": "GAE-01",
+  "kind": "clarity",
+  "find": "Papa’s fate and Mykhailo’s fate are not resolved.",
+  "replace": "Papa’s fate and the fate of Daryna’s brother, Mykhailo, are not resolved.",
+  "why": "Mykhailo is not introduced in the guide’s Who’s Who; a teacher reading this line would not know who he is (Daryna’s missing brother, chapter 18).",
+  "regex": false,
+  "count": 1
+ }
+]

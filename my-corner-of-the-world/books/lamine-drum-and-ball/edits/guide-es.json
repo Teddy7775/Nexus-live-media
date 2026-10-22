@@ -1,0 +1,11 @@
+[
+ {
+  "id": "GLS-01",
+  "kind": "capitalisation",
+  "find": "El Ramadán termina con una gran fiesta",
+  "replace": "El ramadán termina con una gran fiesta",
+  "why": "Spanish writes ramadán in lower case in running text (the guide does so everywhere else); only the glossary headword is capitalised.",
+  "regex": false,
+  "count": 1
+ }
+]

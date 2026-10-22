@@ -1,0 +1,114 @@
+THE DRUM AND THE BALL
+ART DIRECTION
+
+EDITORIAL BRIEF
+
+Scope and source
+Production selection for The Drum and the Ball / Lamine’s Journal, using The_Drum_and_the_Ball_EN(1).md supplied by the author: 17 chapters, an epilogue, February 5-March 17, 2024. This dossier contains exactly 15 interior illustration slots plus front and back cover art. Character studies and excluded source images are outside that count.
+
+The promise of the book
+A boy who dreams of playing professionally learns to listen, keep his word and share the play. The father learns to listen too. Sell the relationship, humor and emotional movement as well as football. Neither the story nor the cover promises that Lamine will become a star.
+
+Reader and visual rhythm
+Editorial working target: readers around 9-13; this is a design recommendation, not author metadata. Four images open Part One, two cover Part Two, four cover Part Three, four cover Part Four and one closes the epilogue. Chapters 5, 6, 9 and 14 deliberately breathe without a dedicated image.
+
+Status of the art
+Two supplied images are retained, three are edited, and twelve images are newly generated, including the back cover. The water-point source serves as a character reference for a new second-trip scene. Originals are never replaced. Generated art is a selected review set; print preflight still depends on trim, bleed, paper and printer profile.
+
+VISUAL LANGUAGE
+
+Production master
+The supplied couverture.png and finished narrative scenes define the finish: expressive ink outlines, painted planes, tactile earth, cloth and skin, believable child proportions. Do not copy the white background of the character studies into narrative plates. Keep facial identities and skin tones stable even as costumes or light change.
+
+Palette with a purpose
+Ochre earth #B96532; dark indigo #34466B; ivory cloth #F0DCB7; lace burgundy #8C313C; foliage #5D6C4B; morning water #91ABB5. These are proposed working swatches, not measurements of a calibrated original. Burgundy remains a small friendship motif, not a mystical glow.
+
+Light follows the manuscript
+Early water trip: cool morning. Ceremony: soft morning shade. Market: morning activity. River: daylight after breakfast, never sunset. March 9 match: hot mid-afternoon, not an orange dusk spectacle. Home scenes may use warm interior light and indigo evening shadows. The cover is symbolic and may use sunset.
+
+Environment and dignity
+Use the contemporary world present in the manuscript: school building, phone, business ledger, plastic chairs, motorbikes where relevant and organized family work. No anonymous timeless village, disaster framing or luxury arrival spectacle. Geography and architecture in this set are story illustrations, not documentary location evidence.
+
+CHARACTER CONTINUITY
+
+Lamine NDiop
+Twelve; slim, dark brown skin, short black textured hair, oval expressive face. Everyday master: cream collared short-sleeved shirt, blue shorts. The manuscript does not prescribe all garment colors; this palette comes from the supplied art. Formal match: plain ivory football jersey, blue shorts, worn CLOSED shoes with dark red laces. Both legs are intact in this manuscript; do not import the amputation/crutch constraint from another project.
+
+Moussa
+Editorially assigned to the unnamed yellow-shirt character sheet, consistent with the foreground yellow-shirt boy in the supplied confrontation. Retain the light warm-tan complexion, black short hair, strong eyebrows, yellow T-shirt and charcoal shorts. This naming is an editorial inference, not an explicit label in the attachment. Keep him visibly a child. Use ordinary closed shoes for the formal match.
+
+Cheikh and Malang
+Cheikh: the blue-tracksuit reference, slightly more athletic than Lamine, same age range; white cleats acquire red dust. The blue match kit has no invented surname, academy logo or club claim. Malang: the adult cap/sunglasses/dark-shirt reference; a working father returning for family events, not a celebrity patron.
+
+Baba / Boubacar
+Lean, bald, dark brown skin, angular face. Indigo boubou is the normal visual master; chapter 3 explicitly requires a SAND-COLORED boubou. Open hands and uncertainty matter as much as authority. During the match he has NO DRUM: he taps his forearm silently. Keep drum chronology separate from costume chronology.
+
+SUPPORTING CAST AND OBJECTS
+
+Awa, Mom and Yaye Khady
+Awa is seven: small hair buns/twists, coral dress, lively directness, never a miniature adult. Mom borrows the family reference face and green/yellow headwrap; use practical work clothes at the stall. Yaye Khady borrows the elderly woman in the courtyard finale, brown patterned cloth and lined face; do not borrow the child-faced anatomy of the meal image.
+
+New visual assignments
+Fatou: about twelve, dark brown skin, two low braids, muted teal blouse, dark brown skirt, notebook and pen; show intelligence through action, not caricature. Idrissa: about twelve, dark brown skin, very short hair, olive-green top and charcoal shorts. Diatta: middle-aged, muted gray polo and navy trousers. These are proposed design decisions where the source supplies no portrait.
+
+Three balls, three functions
+OLD BALL: handmade black plastic, tape and gray cloth, visibly irregular; splits in chapter 1, survives repairs, becomes Awa’s in the epilogue. CHEIKH’S TRAINING BALL: lightly worn round white/blue ball, offered in chapter 7 and handed over only in chapter 17. MATCH BALL: separate neutral off-white/dark-gray-panel ball lent by Diatta on March 9; it is not the wagered ball.
+
+Shoelaces, journal and drum
+Exactly two dark red textile shoelaces offered loose in chapter 4, later threaded into Lamine’s worn shoes and wrapped because they are long. Never substitute red sandal straps. Private journal: black cover, worn corners; distinguish from the ceremony family-name book. Drum: the wooden rope-tensioned goblet silhouette of the cover is the production master; other supplied drum studies are inconsistent and not used as masters.
+
+SCENE MECHANICS THAT MUST REMAIN TRUE
+
+Before the match
+DB-I01: black plastic peels to gray cloth; red laces have not yet been given. DB-I02: second journey, Lamine carries the yellow basin and Awa the small jug. DB-I03: oversized boubou for Lamine, sand boubou for Baba, discreet finger rhythm on the book cover. DB-I04: reconciliation is partial. DB-I05: Fatou reads the rules; no opposing match team yet.
+
+Trust and shared effort
+DB-I06 centers Mom’s competence and Lamine’s help. DB-I07 is morning and the kingfisher catches a fish; Baba does not demonstrate skipping stones. DB-I08: Lamine controls his closed journal, adults are not physically threatening. DB-I09: adults handle dangerous debris, children keep clear. DB-I10 evokes the pre-match conversation, not a magical rhythm lesson.
+
+The game and its aftermath
+DB-I11: Lamine passes to Moussa, who will score the 1-1 equalizer; do not show Lamine scoring. DB-I12: Idrissa scores 2-1 after Lamine’s square pass. Borrowed small goals have nets; no stone towers. DB-I13: ball handover is the next morning, not on the field at the whistle. DB-I14: Lamine chooses his page, Baba listens without touching the journal. DB-I15: use the OLD ball.
+
+Sound remains literary
+The book’s poc / doum pattern connects listening, patience and movement. Convey this through spacing, glance and gesture. Do not add glowing notes, ancestral apparitions or an actual drum at the match. Sound lettering may be typeset by the designer only if a deliberate book-wide policy is later adopted.
+
+PLACEMENT AND PAGE DESIGN
+
+Locate by anchor, not guessed page number
+The register gives chapter, exact English insertion sentence and source line. Place each illustration immediately after its anchor paragraph, or on the next suitable page without preceding the narrated event. Line numbers refer to the supplied Markdown version and will change with edits; the quotation is the durable locator.
+
+Working book format
+A 6 x 9 inch portrait trim is a practical design proposal, not a confirmed specification. Most horizontal images work as generous inset plates across a text page, with the image kept whole. Use portrait DB-I10 as a full-page inset. Do not force every aspect ratio into a full-page bleed or crop hands, the red laces, the notebook or the ball.
+
+Pacing and gutters
+Treat the images as rests or revelations after the prose. Avoid a two-page spread that puts faces or the deciding ball in the gutter. Keep the river image spacious. Do not put a goal illustration before the sentence that reveals who scores. ID labels belong in the production dossier and filenames, not in the reading edition.
+
+Review versus final print
+Native pixel sizes and maximum physical dimensions at 300 ppi appear in the CSV. A 1536-pixel-wide image spans about 5.12 inches at 300 ppi; changing a DPI tag does not create detail. The retained front cover is 1024 x 1536, so a 6 x 9 inch cover uses about 171 ppi before bleed; obtain a higher-resolution production master or approve a smaller trim before press.
+
+COVER DIRECTION
+
+Front cover DB-C01
+Retain the supplied symbolic father-and-son composition. Typeset The Drum and the Ball in the open upper sky. Set Lamine’s Journal as a smaller subtitle if retained by the publisher, and MY CORNER OF THE WORLD as series information if intended. The author name was not supplied: do not invent one. Test a light ivory serif title with high contrast on the indigo sky.
+
+Back cover DB-C04
+A quiet wall and small still life continue the cover palette. Keep the upper area for editorial copy and lower-right zone for publisher/barcode information. No generated barcode, ISBN or blurb is embedded. A separate back-cover illustration is supplied; this is not a press-ready wrap.
+
+Spine and printer template
+Do not guess spine width. Set it after pagination, stock and printer specification are fixed. Add bleed only to the printer’s specification, commonly around 3 mm but never assumed final here. Keep title, author line and barcode inside the template’s safe areas; the artwork files contain no crop marks.
+
+Marketing emphasis
+Lead with friendship, a father-son relationship and the choice to pass. Avoid a promise of professional success, an academy contract, a trophy or a village rescued by a wealthy visitor. The cover should invite curiosity without revealing the final score.
+
+PRODUCTION HANDOFF
+
+File and ID policy
+DB-I01 through DB-I15 are the 15 interiors; DB-C01 is the front cover; DB-C04 is the back cover. SRC-01 through SRC-19 identify supplied attachments in the audit only. REF labels identify portrait resources outside the image count. Keep these IDs stable when revising art; use version suffixes for replacements.
+
+Prompts and reference sheets
+The English scene-prompt file contains every selected ID. Prompts begin with Characters, Setting and Objects. Existing retained art has an explicitly marked reference prompt, not a claim of regeneration. Character-sheet prompts are delivered in a separate file and sheet; they are instructions for future continuity sheets and are not extra interior images.
+
+Validation
+Check source action, character identity, age, skin tone, ball type, shoe/lace state, drum presence, lighting, anatomy and crop before assigning a revised file to an ID. New images in this set were made with the built-in image-generation tool. They remain raster artwork; print dimensions must be checked from actual pixels.
+
+Small editorial finding
+The final story note repeats the paragraph beginning “Lamine’s journal runs from February 5 to March 17, 2024.” with a minor wording change. This dossier flags the duplicate for the book editor; the supplied manuscript is not silently rewritten. No external fact-check of the story note was performed for this illustration task.

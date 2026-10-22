@@ -1,0 +1,19 @@
+{
+ "AE-I14": {
+  "erase": [
+   {
+    "box": [
+     470,
+     1110,
+     130,
+     170
+    ],
+    "polarity": "dark",
+    "delta": 30,
+    "grow": 3,
+    "radius": 5,
+    "why": "the regenerated picture carries the asset id 'AE-I14' on the notebook cover; asset ids never appear inside the illustration"
+   }
+  ]
+ }
+}

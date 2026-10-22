@@ -1,0 +1,29 @@
+[
+ {
+  "id": "GES-01",
+  "kind": "consistency",
+  "find": "ocho puntos en la mano y tres mentiras.",
+  "replace": "ocho puntos en la mano y cuatro mentiras.",
+  "why": "Guide said three; the story enumerates four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GES-02",
+  "kind": "consistency",
+  "find": "ocho puntos y tres mentiras”.",
+  "replace": "ocho puntos y cuatro mentiras”.",
+  "why": "Quotes the novel’s first line.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GES-03",
+  "kind": "consistency",
+  "find": "descuelga la copia del cartel que había dibujado para la pared de su cuarto y escribe",
+  "replace": "prende en la pared de su cuarto la copia del cartel que había dibujado y escribe",
+  "why": "Matches the corrected novel sentence (ES-02).",
+  "regex": false,
+  "count": 1
+ }
+]

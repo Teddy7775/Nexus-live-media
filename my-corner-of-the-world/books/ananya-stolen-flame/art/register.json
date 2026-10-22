@@ -1,0 +1,405 @@
+{
+ "version": 1,
+ "book": "ananya-stolen-flame",
+ "note": "Slot kinds and ratios come from the supplied register/dossier. 'stem' is the filename stem; the build looks for art/final/<stem>.* first, then art/source/<stem>.*",
+ "slots": {
+  "AN-I01": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I01_deux_pas_derriere_v01",
+   "chapter": "ch-01",
+   "story_date": "2024-12-28",
+   "scene": {
+    "en": "Two Steps Behind",
+    "fr": "Deux pas derrière",
+    "es": "Dos pasos detrás"
+   },
+   "alt": {
+    "en": "Ananya holds the large spool behind Rohan as he flies a black kite on their rooftop.",
+    "fr": "Ananya tient la grande bobine derrière Rohan, qui pilote un cerf-volant noir sur leur toit.",
+    "es": "Ananya sostiene el carrete grande detrás de Rohan, que hace volar una cometa negra en su azotea."
+   },
+   "continuity": "Patang noir de Rohan ; ancienne charkhi ; aucune blessure",
+   "image_check": "No Agni and no bandages. The spool belongs to Rohan. Do not position Ananya at the edge of the roof.",
+   "anchor": {
+    "en": "I knew my place. Two steps behind him",
+    "fr": "Je connaissais ma place. Deux pas derrière lui",
+    "es": "Yo sabía cuál era mi lugar. Dos pasos detrás de él"
+   }
+  },
+  "AN-I02": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I02_secret_rohan_v01",
+   "chapter": "ch-02",
+   "story_date": "2024-12-31",
+   "scene": {
+    "en": "The Secret in the Bedroom",
+    "fr": "Le secret dans la chambre",
+    "es": "El secreto en el cuarto"
+   },
+   "alt": {
+    "en": "Rohan, his right hand bandaged, shares his secret with Ananya in his bedroom.",
+    "fr": "Rohan, la main droite bandée, confie son secret à Ananya dans sa chambre.",
+    "es": "Rohan, con la mano derecha vendada, le confía su secreto a Ananya en su cuarto."
+   },
+   "continuity": "Main droite bandée ; charkhi vide",
+   "image_check": "The bandage must remain on the right hand; never mirror it. All eight stitches remain hidden under the gauze.",
+   "anchor": {
+    "en": "“I won’t say anything,” I whispered.",
+    "fr": "Je ne dirai rien, ai-je soufflé.",
+    "es": "No voy a decir nada —susurré."
+   }
+  },
+  "AN-I03": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I03_kesariya_43_v01",
+   "chapter": "ch-04",
+   "story_date": "2025-01-02",
+   "scene": {
+    "en": "Square Number 43",
+    "fr": "Le carré numéro 43",
+    "es": "El cuadro número 43"
+   },
+   "alt": {
+    "en": "Ananya hides the saffron fabric square under her sweater as Papa returns to the workshop.",
+    "fr": "Ananya cache sous son pull le carré de tissu safran tandis que Papa revient dans l’atelier.",
+    "es": "Ananya esconde bajo el suéter el cuadro de tela color azafrán mientras Papá vuelve al taller."
+   },
+   "continuity": "Kesariya 43 entier ; Agni n’existe pas encore",
+   "image_check": "The square is still intact. Add “43” during layout and, if legible, “Redo 43. Do not cut.” Do not turn the dye into magic.",
+   "anchor": {
+    "en": "I slid the square under my sweater.",
+    "fr": "J’ai glissé le carré sous mon pull.",
+    "es": "Me metí el cuadro debajo del suéter."
+   }
+  },
+  "AN-I04": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I04_six_minutes_v01",
+   "chapter": "ch-06",
+   "story_date": "2025-01-04",
+   "scene": {
+    "en": "Six Minutes in the Wind",
+    "fr": "Six minutes dans le vent",
+    "es": "Seis minutos en el viento"
+   },
+   "alt": {
+    "en": "Ananya manages to keep a white patang with a red circle in the air as Rohan watches.",
+    "fr": "Ananya réussit à maintenir un patang blanc à cercle rouge en l’air sous le regard de Rohan.",
+    "es": "Ananya logra mantener en el aire una patang blanca con un círculo rojo mientras Rohan la observa."
+   },
+   "continuity": "Patang blanc à cercle rouge ; Rohan bandé",
+   "image_check": "Do not introduce the crate built in Chapter Fifteen. Never wrap the line around a finger. Do not add an adult to this secret practice scene.",
+   "anchor": {
+    "en": "For six minutes, the patang stayed up above the terrace.",
+    "fr": "Pendant six minutes, la patang est restée au-dessus de la terrasse.",
+    "es": "Durante seis minutos, la patang se quedó arriba de la terraza."
+   }
+  },
+  "AN-I05": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I05_farida_papier_v01",
+   "chapter": "ch-08",
+   "story_date": "2025-01-06",
+   "scene": {
+    "en": "What Farida Knows About Paper",
+    "fr": "Ce que Farida sait du papier",
+    "es": "Lo que Farida sabe del papel"
+   },
+   "alt": {
+    "en": "Farida compares the heavy cloth Agni with the light framework of a paper patang in front of Ananya and Meena.",
+    "fr": "Farida compare le lourd Agni de tissu à l’armature légère d’un patang de papier devant Ananya et Meena.",
+    "es": "Farida compara la pesada Agni de tela con el armazón ligero de una patang de papel frente a Ananya y Meena."
+   },
+   "continuity": "Premier Agni entièrement en tissu ; démonstrateur de papier distinct",
+   "image_check": "Rohan is absent from the market. The flame has not yet been cut out. Add any shop sign separately: “FARIDA PATANG HOUSE”.",
+   "anchor": {
+    "en": "If you love this color, keep a small piece of it.",
+    "fr": "Un combattant doit être léger et pouvoir se tordre.",
+    "es": "Una cometa de pelea tiene que ser ligera"
+   }
+  },
+  "AN-I06": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I06_lecon_des_pieds_v01",
+   "chapter": "ch-09",
+   "story_date": "2025-01-07",
+   "scene": {
+    "en": "The Lesson in Footwork",
+    "fr": "La leçon des pieds",
+    "es": "La lección de los pies"
+   },
+   "alt": {
+    "en": "Ma shows Ananya how to place her feet and soften her knees on the terrace.",
+    "fr": "Ma montre à Ananya comment placer ses pieds et assouplir ses genoux sur la terrasse.",
+    "es": "Mamá le enseña a Ananya a colocar los pies y a flexionar las rodillas en la terraza."
+   },
+   "continuity": "Agni ivoire avec tissu 43, posé ; exercice sans vol",
+   "image_check": "Ma has changed out of her sandals into closed shoes. Ananya is not flying a kite during this passage. Agni still carries the stolen cloth.",
+   "anchor": {
+    "en": "Ma fixed my feet.",
+    "fr": "Maman corrigeait mes pieds.",
+    "es": "Mamá me corregía los pies."
+   }
+  },
+  "AN-I07": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I07_secours_cour_v01",
+   "chapter": "ch-10",
+   "story_date": "2025-01-08",
+   "scene": {
+    "en": "Waiting for the Rescuers",
+    "fr": "Attendre les secouristes",
+    "es": "Esperando a los rescatistas"
+   },
+   "alt": {
+    "en": "Volunteers cover the injured black kite while the children wait under the archway with Ma.",
+    "fr": "Des bénévoles couvrent le milan blessé pendant que les enfants attendent sous l’arcade avec Ma.",
+    "es": "Unos voluntarios cubren al milano herido mientras los niños esperan bajo el arco con Mamá."
+   },
+   "continuity": "Premier milan ; fil bleu dans le jasmin ; Agni absent",
+   "image_check": "The children touch neither the bird nor the filament. Do not show a bird already healed or released. This is the first incident, separate from the one during the duel.",
+   "anchor": {
+    "en": "The woman laid the blanket over the bird",
+    "fr": "La femme a posé la couverture sur le milan",
+    "es": "La mujer le puso la cobija encima al milano"
+   }
+  },
+  "AN-I08": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I08_ses_mains_v01",
+   "chapter": "ch-11",
+   "story_date": "2025-01-09",
+   "scene": {
+    "en": "Her Hands Are Her Own",
+    "fr": "Ses mains lui appartiennent",
+    "es": "Sus manos le pertenecen"
+   },
+   "alt": {
+    "en": "Ananya faces Rohan, who has grabbed the line behind her fingers with his left hand.",
+    "fr": "Ananya fait face à Rohan, qui a saisi de la main gauche le fil derrière ses doigts.",
+    "es": "Ananya se enfrenta a Rohan, que le ha agarrado el hilo con la mano izquierda, detrás de sus dedos."
+   },
+   "continuity": "Agni ivoire avec tissu 43 ; main droite de Rohan bandée",
+   "image_check": "This instant precedes the controlled handover to Meena. Do not make Ananya suddenly drop the line. Do not depict a fight.",
+   "anchor": {
+    "en": "He came over and grabbed the line with his left hand",
+    "fr": "Il s’est approché et a attrapé la ligne de sa main gauche",
+    "es": "Se acercó y agarró el hilo con la mano izquierda"
+   }
+  },
+  "AN-I09": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I09_preuve_43_v01",
+   "chapter": "ch-12",
+   "story_date": "2025-01-10",
+   "scene": {
+    "en": "The Evidence on the Table",
+    "fr": "La preuve sur la table",
+    "es": "La prueba sobre la mesa"
+   },
+   "alt": {
+    "en": "Papa examines the cloth flame on Agni while Ananya and Rohan stand silently in front of him.",
+    "fr": "Papa examine la flamme de tissu sur Agni tandis qu’Ananya et Rohan restent silencieux devant lui.",
+    "es": "Papá examina la llama de tela en Agni mientras Ananya y Rohan permanecen en silencio frente a él."
+   },
+   "continuity": "Agni ivoire, flamme 43 collée ; révélation après départ de la cliente",
+   "image_check": "The number 43 is essential and must be added cleanly after generation. Do not depict the new pale fabric at this stage.",
+   "anchor": {
+    "en": "The kesariya flame had the number 43 in its bottom corner.",
+    "fr": "La flamme kesariya portait le numéro 43",
+    "es": "La llama kesariya tenía el número 43"
+   }
+  },
+  "AN-I10": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I10_travail_reparation_v01",
+   "chapter": "ch-13",
+   "story_date": "2025-01-11",
+   "scene": {
+    "en": "Making Amends Through Work",
+    "fr": "Réparer par le travail",
+    "es": "Reparar con trabajo"
+   },
+   "alt": {
+    "en": "Ananya patiently numbers the samples while Papa works at another table.",
+    "fr": "Ananya numérote patiemment les échantillons pendant que Papa travaille à une autre table.",
+    "es": "Ananya numera con paciencia las muestras mientras Papá trabaja en otra mesa."
+   },
+   "continuity": "Échantillons neufs ; Agni confisqué avec tissu 43 encore collé",
+   "image_check": "Morning, before the flame is removed and scrap no. 17 is given. Ananya handles no chemicals or hot dye bath.",
+   "anchor": {
+    "en": "For two hours, I labeled samples.",
+    "fr": "Pendant deux heures, j’ai étiqueté des échantillons.",
+    "es": "Durante dos horas, etiqueté muestras."
+   }
+  },
+  "AN-I11": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I11_vikram_sans_public_v01",
+   "chapter": "ch-14",
+   "story_date": "2025-01-12",
+   "scene": {
+    "en": "Vikram Without His Audience",
+    "fr": "Vikram sans son public",
+    "es": "Vikram sin su público"
+   },
+   "alt": {
+    "en": "After a call from his father, Vikram tears the paper of the patang he was repairing as Ananya watches.",
+    "fr": "Après un appel de son père, Vikram abîme le papier du patang qu’il réparait sous le regard d’Ananya.",
+    "es": "Tras una llamada de su padre, Vikram rompe el papel de la patang que estaba arreglando mientras Ananya lo observa."
+   },
+   "continuity": "Patang bleu et blanc en réparation ; pas de scène de duel",
+   "image_check": "The gray sweatshirt with glue marks is required. Do not make Vikram a caricatured antagonist or suggest that he and Ananya have already reconciled.",
+   "anchor": {
+    "en": "He hung up and pressed down too hard on the stick.",
+    "fr": "Il a raccroché et appuyé trop fort sur la baguette.",
+    "es": "Colgó y apretó demasiado fuerte la varilla."
+   }
+  },
+  "AN-I12": {
+   "kind": "full",
+   "ratio": "2:3",
+   "stem": "AN-I12_flamme_autorisee_v01",
+   "chapter": "ch-15",
+   "story_date": "2025-01-13",
+   "scene": {
+    "en": "A Flame With Permission",
+    "fr": "Une flamme autorisée",
+    "es": "Una llama con permiso"
+   },
+   "alt": {
+    "en": "Ananya glues the new pale flame onto Agni as Rohan and Meena help rebuild the project.",
+    "fr": "Ananya colle la nouvelle flamme pâle sur Agni pendant que Rohan et Meena l’aident à reconstruire le projet.",
+    "es": "Ananya pega la nueva llama pálida en Agni mientras Rohan y Meena la ayudan a reconstruir el proyecto."
+   },
+   "continuity": "Agni réparé ; chute 17 pâle ; attelle droite légère",
+   "image_check": "Authorized scrap no. 17, with no number on the flame itself. Fabric 43 has been returned to Papa. Rohan’s right hand is braced, not healed.",
+   "anchor": {
+    "en": "We glued on the new flame.",
+    "fr": "Nous avons collé la nouvelle flamme.",
+    "es": "Pegamos la llama nueva."
+   }
+  },
+  "AN-I13": {
+   "kind": "spread",
+   "ratio": "4:3",
+   "stem": "AN-I13_ciel_pour_ma_v01",
+   "chapter": "ch-16",
+   "story_date": "2025-01-14",
+   "scene": {
+    "en": "The Sky for Ma Too",
+    "fr": "Le ciel pour Ma aussi",
+    "es": "El cielo también para Mamá"
+   },
+   "alt": {
+    "en": "Ma flies a green patang, Papa brings her tea and the children watch among the festive rooftops.",
+    "fr": "Ma fait voler un patang vert, Papa lui apporte du thé et les enfants les regardent parmi les toits en fête.",
+    "es": "Mamá hace volar una patang verde, Papá le lleva té y los niños los miran entre las azoteas en fiesta."
+   },
+   "continuity": "Patang vert en vol ; matin après dix heures ; Agni hors champ",
+   "image_check": "Ma’s patang is green. Do not depict Agni’s loss or a duel at this point. Keep a neutral area at the fold.",
+   "anchor": {
+    "en": "Papa brought her tea instead of calling her down.",
+    "fr": "Papa lui a apporté son thé au lieu de l’appeler.",
+    "es": "Papá le llevó su té en lugar de llamarla."
+   }
+  },
+  "AN-I14": {
+   "kind": "spread",
+   "ratio": "4:3",
+   "stem": "AN-I14_derniere_boucle_v01",
+   "chapter": "ch-17",
+   "story_date": "2025-01-14",
+   "scene": {
+    "en": "The Last Loop",
+    "fr": "La dernière boucle",
+    "es": "La última vuelta"
+   },
+   "alt": {
+    "en": "Ananya lets Agni go; the empty spool rests in its crate while a black kite bird remains caught on a neighboring roof.",
+    "fr": "Ananya laisse partir Agni ; la bobine vide repose dans sa caisse tandis qu’un milan reste pris sur un toit voisin.",
+    "es": "Ananya deja ir a Agni; el carrete vacío descansa en su cajón mientras un milano sigue atrapado en una azotea vecina."
+   },
+   "continuity": "Agni final libéré ; second milan encore pris ; 15 h 17",
+   "image_check": "Do not draw the bird already free. No scissors in Ananya’s hands. Agni carries scrap 17, not fabric 43. The cotton must truly leave the spool.",
+   "anchor": {
+    "en": "The last loop slipped off the wood.",
+    "fr": "La dernière boucle a glissé hors du bois.",
+    "es": "La última vuelta se salió de la madera."
+   }
+  },
+  "AN-I15": {
+   "kind": "half",
+   "ratio": "3:2",
+   "stem": "AN-I15_couleur_ensemble_v01",
+   "chapter": "epilogue",
+   "story_date": "2025-01-29",
+   "scene": {
+    "en": "Looking at Color Together",
+    "fr": "Regarder la couleur ensemble",
+    "es": "Mirar el color juntos"
+   },
+   "alt": {
+    "en": "Ananya and Papa look together at a sample near the doorway; her new light wooden spool waits on the table.",
+    "fr": "Ananya et Papa observent ensemble un échantillon au seuil ; sa nouvelle bobine claire attend sur la table.",
+    "es": "Ananya y Papá miran juntos una muestra junto a la puerta; su nuevo carrete claro espera sobre la mesa."
+   },
+   "continuity": "Nouvelle charkhi claire avec étiquette A. S. ; Agni reste perdu",
+   "image_check": "A. S. belongs on a tied-on paper tag, never engraved. Agni is not recovered. Rohan’s protection at this later stage is a proposed visual continuity choice; his recovery remains limited.",
+   "anchor": {
+    "en": "We looked at it together.",
+    "fr": "Nous l’avons regardée ensemble.",
+    "es": "La miramos juntos."
+   }
+  },
+  "AN-C01": {
+   "kind": "cover",
+   "ratio": "2:3",
+   "stem": "AN-C01_premiere_couverture_v01",
+   "chapter": null,
+   "story_date": null,
+   "scene": {
+    "en": "Front cover",
+    "fr": "Première de couverture",
+    "es": "Portada"
+   },
+   "alt": {
+    "en": "Ananya follows an ivory patang with a saffron flame above Jaipur’s rooftops with her eyes.",
+    "fr": "Ananya suit du regard un patang ivoire à flamme safran au-dessus des toits de Jaipur.",
+    "es": "Ananya sigue con la mirada una patang color marfil con una llama azafrán sobre las azoteas de Jaipur."
+   },
+   "continuity": "Agni ivoire avec flamme 43 ; synthèse symbolique sans révéler la fin",
+   "image_check": "A symbolic composition, not an additional scene from the diary. Use the first flame to evoke the title, without confusing it with the flame at the climax."
+  },
+  "AN-C04": {
+   "kind": "cover",
+   "ratio": "2:3",
+   "stem": "AN-C04_quatrieme_couverture_v01",
+   "chapter": null,
+   "story_date": null,
+   "scene": {
+    "en": "Back cover",
+    "fr": "Quatrième de couverture",
+    "es": "Contraportada"
+   },
+   "alt": {
+    "en": "A notebook and workshop materials rest at the bottom of a light background reserved for the book’s description.",
+    "fr": "Un carnet et des matériaux d’atelier reposent au bas d’un fond clair réservé au résumé du livre.",
+    "es": "Un cuaderno y materiales de taller descansan en la parte inferior de un fondo claro reservado para la sinopsis del libro."
+   },
+   "continuity": "Nature morte symbolique ; aucun retour d’Agni",
+   "image_check": "Do not generate a blurb, ISBN or barcode. Preserve a genuinely readable area for the editorial layout."
+  }
+ }
+}

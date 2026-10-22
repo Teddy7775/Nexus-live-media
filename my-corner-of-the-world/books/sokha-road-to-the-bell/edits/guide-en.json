@@ -1,0 +1,119 @@
+[
+ {
+  "id": "GSE-01",
+  "kind": "grammar",
+  "find": "A assessment day, moving day, rain, and",
+  "replace": "An assessment day, moving day, rain, and",
+  "why": "Article agreement: “an” before a vowel sound (section 1, “How the Book Is Built” table, Part Four row).",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S01",
+  "kind": "clarity",
+  "find": "- [CMAA / CMVIS](https://www.cmaa.gov.kh/en/documentary/monthly-report-for-december-2025-on-explosive-ordnance-accidents)",
+  "replace": "- [CMAA / CMVIS: December 2025 report on explosive ordnance accidents](https://www.cmaa.gov.kh/en/documentary/monthly-report-for-december-2025-on-explosive-ordnance-accidents)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S02",
+  "kind": "clarity",
+  "find": "- [Cambodia](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Art7Reports/2025-Cambodia-Art7Report-for2024.pdf)",
+  "replace": "- [Cambodia: Article 7 report for 2024 (Anti-Personnel Mine Ban Convention)](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Art7Reports/2025-Cambodia-Art7Report-for2024.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S03",
+  "kind": "clarity",
+  "find": "- [UNMAS](https://www.unmas.org/sites/default/files/handbook_english.pdf)",
+  "replace": "- [UNMAS: Landmines, ERW and IED Safety Handbook](https://www.unmas.org/sites/default/files/handbook_english.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S04",
+  "kind": "clarity",
+  "find": "- [IMAS 07.11](https://www.mineactionstandards.org/standards/07-11/)",
+  "replace": "- [IMAS 07.11: Land release](https://www.mineactionstandards.org/standards/07-11/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S05",
+  "kind": "clarity",
+  "find": "- [ICRC](https://www.icrc.org/en/document/cambodia-icrc-celebrates-30-years-physical-rehabilitation-programme)",
+  "replace": "- [ICRC: thirty years of physical rehabilitation in Cambodia (2022)](https://www.icrc.org/en/document/cambodia-icrc-celebrates-30-years-physical-rehabilitation-programme)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S06",
+  "kind": "clarity",
+  "find": "- [ICRC](https://www.icrc.org/sites/default/files/2025-04/ICRC_Thailand_Facts_and_Figures_2024.pdf)",
+  "replace": "- [ICRC: regional facts and figures, 2024](https://www.icrc.org/sites/default/files/2025-04/ICRC_Thailand_Facts_and_Figures_2024.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S07",
+  "kind": "clarity",
+  "find": "- [NIS](https://www.nis.gov.kh/nis/Census2019/Final%20General%20Population%20Census%202019-English.pdf)",
+  "replace": "- [National Institute of Statistics: General Population Census 2019](https://www.nis.gov.kh/nis/Census2019/Final%20General%20Population%20Census%202019-English.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S08",
+  "kind": "clarity",
+  "find": "- [Cambodge](https://mef.gov.kh/calendar-holiday-2025/)",
+  "replace": "- [Ministry of Economy and Finance of Cambodia: 2025 holiday calendar](https://mef.gov.kh/calendar-holiday-2025/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S09",
+  "kind": "clarity",
+  "find": "- [APOPO](https://apopo.org/latest/in-loving-memory-of-magawa/)",
+  "replace": "- [APOPO: in loving memory of Magawa](https://apopo.org/latest/in-loving-memory-of-magawa/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S10",
+  "kind": "clarity",
+  "find": "- [CMAA](https://www.cmaa.gov.kh/en/news/ekuttm-desrttthmnrtii-lii-dhuj-smboodh-ruupsmnnaak-viir-knntur-hit-miin-magawa)",
+  "replace": "- [CMAA: unveiling of Magawa’s statue](https://www.cmaa.gov.kh/en/news/ekuttm-desrttthmnrtii-lii-dhuj-smboodh-ruupsmnnaak-viir-knntur-hit-miin-magawa)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S11",
+  "kind": "clarity",
+  "find": "- [ONU](https://cambodia.un.org/en/308549-humanitarian-response-forum-hrf-situation-report-15-cambodia-thailand-border-situation-16th)",
+  "replace": "- [UN Cambodia: Cambodia–Thailand border situation, January 16, 2026](https://cambodia.un.org/en/308549-humanitarian-response-forum-hrf-situation-report-15-cambodia-thailand-border-situation-16th)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSE-S12",
+  "kind": "clarity",
+  "find": "- [Convention](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Meetings/2025/22MSP-Cambodia-Art5-ExtReq-Decision.pdf)",
+  "replace": "- [Anti-Personnel Mine Ban Convention: decision on Cambodia’s Article 5 extension request](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Meetings/2025/22MSP-Cambodia-Art5-ExtReq-Decision.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ }
+]

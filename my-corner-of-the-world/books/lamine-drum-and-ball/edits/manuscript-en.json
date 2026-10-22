@@ -1,0 +1,20 @@
+[
+ {
+  "id": "MLE-01",
+  "kind": "punctuation",
+  "find": "for women and men French is the main language",
+  "replace": "for women and men. French is the main language",
+  "why": "Missing full stop between two sentences in the glossary entry “Madame, Monsieur”.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "MLE-02",
+  "kind": "duplicate",
+  "find": "\n\nLamine’s journal runs from February 5 to March 17, 2024. That year, Ramadan fasting began in Senegal on March 11 or 12, depending on the community.",
+  "replace": "",
+  "why": "The last paragraph of “A Note on the Story” repeats the one before it with two words changed (flagged by the art-direction dossier itself, and absent from the Spanish file). The first version is kept, as in Spanish.",
+  "regex": false,
+  "count": 1
+ }
+]

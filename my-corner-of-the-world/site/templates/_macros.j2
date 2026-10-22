@@ -1,0 +1,22 @@
+{% macro picture(img, alt, sizes, cls='', eager=False) -%}
+<picture>{% if img.webp %}<source type="image/webp" srcset="{{ img.webp }}" sizes="{{ sizes }}">{% endif %}<img {% if cls %}class="{{ cls }}" {% endif %}src="{{ img.src }}" width="{{ img.w }}" height="{{ img.h }}" alt="{{ alt }}" {% if not eager %}loading="lazy" decoding="async"{% else %}fetchpriority="high"{% endif %}></picture>
+{%- endmacro %}
+{% macro newsletter(t, u, base, ts) -%}
+<form action="{{ base }}/api/subscribe.php" method="post" data-ajax data-ok="{{ t.newsletter.thanks }}" data-err="{{ t.newsletter.error }}">
+  <input type="hidden" name="lang" value="{{ L }}"><input type="hidden" name="ts" value="">
+  <div class="hp" aria-hidden="true"><label>Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+  <div class="f"><label for="nl-email">{{ t.newsletter.email }}</label><input id="nl-email" type="email" name="email" required autocomplete="email"></div>
+  <label class="check"><input type="checkbox" name="consent" value="1" required><span>{{ t.newsletter.consent }}</span></label>
+  <p class="mt"><button class="btn btn-primary" type="submit">{{ t.newsletter.submit }}</button></p>
+</form>
+{%- endmacro %}
+{% macro volume_card(v, t) -%}
+<article class="card vol {% if v.live %}is-live{% endif %}" style="--vc:{{ v.accent }}">
+  <p style="margin:0">{% if v.live %}<span class="badge">{{ t.home.vol.format(n=v.volume) }}</span>{% else %}<span class="badge soon">{{ t.home.coming }}</span>{% endif %}</p>
+  <h3>{% if v.live %}<a href="{{ v.url }}" style="text-decoration:none;color:inherit">{{ v.title }}</a>{% else %}{{ v.title }}{% endif %}</h3>
+  <p class="meta">{{ v.narrator }} · {{ v.where }}</p>
+  <p class="q">“{{ v.question }}”</p>
+  {% if v.age_note %}<p class="meta" style="margin:0">{{ v.age_note }}</p>{% endif %}
+  {% if v.live %}<p style="margin:.2rem 0 0"><a class="btn btn-quiet" href="{{ v.url }}">{{ t.book.read }}</a></p>{% endif %}
+</article>
+{%- endmacro %}

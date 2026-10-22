@@ -1,0 +1,15 @@
+THE DRUM AND THE BALL - DOSSIER ILLUSTRATIONS
+
+assets/: les 15 illustrations intérieures DB-I01 à DB-I15 et les couvertures DB-C01 / DB-C04, sans annotations dans les images.
+documents/Illustrations_Annotees.pdf: chaque image avec son ID, son insertion exacte et les choix éditoriaux; audit des 19 sources.
+documents/Art_Direction_EN.pdf: direction artistique en anglais. Version texte modifiable également fournie.
+documents/Illustration_Register.xlsx: registre, prompts de scènes, prompts de fiches personnages séparés, audit des sources.
+documents/Prompts_Only_EN.txt: uniquement les prompts des 17 visuels retenus, en anglais.
+documents/Character_Sheet_Prompts_Only_EN.txt: 10 prompts de fiches personnages, séparés et hors quota.
+references/: originaux et brouillons utilisés pour les références; ne pas les confondre avec les images finales de assets/.
+production_manifest.json: métadonnées et prompts avec IDs stables.
+
+DB-I09 contient la seconde version demandée: brouette stable et trou nettoyé rempli à la pelle.
+DB-I12 et DB-I13 ont été corrigées pour la continuité des vêtements, chaussures et ballon.
+
+Deux images sont conservées, trois sont corrigées depuis les images fournies, douze sont nouvelles. Les images originales restent intactes. La numérotation des lignes correspond au Markdown fourni, pas à une pagination de livre. La maquette finale, la typographie de couverture et le dos attendent le format, le nom d’auteur, la pagination et le gabarit d’impression. Les dimensions au registre sont les dimensions natives, sans faux agrandissement de résolution.

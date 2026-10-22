@@ -1,0 +1,110 @@
+[
+ {
+  "id": "GSS-S01",
+  "kind": "clarity",
+  "find": "- [CMAA / CMVIS](https://www.cmaa.gov.kh/en/documentary/monthly-report-for-december-2025-on-explosive-ordnance-accidents)",
+  "replace": "- [CMAA / CMVIS: informe de diciembre de 2025 sobre accidentes con artefactos explosivos](https://www.cmaa.gov.kh/en/documentary/monthly-report-for-december-2025-on-explosive-ordnance-accidents)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S02",
+  "kind": "clarity",
+  "find": "- [Cambodia](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Art7Reports/2025-Cambodia-Art7Report-for2024.pdf)",
+  "replace": "- [Camboya: informe del artículo 7 para 2024 (Convención sobre la prohibición de las minas antipersonal)](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Art7Reports/2025-Cambodia-Art7Report-for2024.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S03",
+  "kind": "clarity",
+  "find": "- [UNMAS](https://www.unmas.org/sites/default/files/handbook_english.pdf)",
+  "replace": "- [UNMAS: Landmines, ERW and IED Safety Handbook](https://www.unmas.org/sites/default/files/handbook_english.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S04",
+  "kind": "clarity",
+  "find": "- [IMAS 07.11](https://www.mineactionstandards.org/standards/07-11/)",
+  "replace": "- [IMAS 07.11: Land release (liberación de tierras)](https://www.mineactionstandards.org/standards/07-11/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S05",
+  "kind": "clarity",
+  "find": "- [ICRC](https://www.icrc.org/en/document/cambodia-icrc-celebrates-30-years-physical-rehabilitation-programme)",
+  "replace": "- [CICR: treinta años de rehabilitación física en Camboya (2022)](https://www.icrc.org/en/document/cambodia-icrc-celebrates-30-years-physical-rehabilitation-programme)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S06",
+  "kind": "clarity",
+  "find": "- [ICRC](https://www.icrc.org/sites/default/files/2025-04/ICRC_Thailand_Facts_and_Figures_2024.pdf)",
+  "replace": "- [CICR: balance regional 2024](https://www.icrc.org/sites/default/files/2025-04/ICRC_Thailand_Facts_and_Figures_2024.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S07",
+  "kind": "clarity",
+  "find": "- [NIS](https://www.nis.gov.kh/nis/Census2019/Final%20General%20Population%20Census%202019-English.pdf)",
+  "replace": "- [Instituto Nacional de Estadística: Censo General de Población 2019](https://www.nis.gov.kh/nis/Census2019/Final%20General%20Population%20Census%202019-English.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S08",
+  "kind": "clarity",
+  "find": "- [Cambodge](https://mef.gov.kh/calendar-holiday-2025/)",
+  "replace": "- [Ministerio de Economía y Finanzas de Camboya: calendario de feriados de 2025](https://mef.gov.kh/calendar-holiday-2025/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S09",
+  "kind": "clarity",
+  "find": "- [APOPO](https://apopo.org/latest/in-loving-memory-of-magawa/)",
+  "replace": "- [APOPO: homenaje a Magawa](https://apopo.org/latest/in-loving-memory-of-magawa/)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S10",
+  "kind": "clarity",
+  "find": "- [CMAA](https://www.cmaa.gov.kh/en/news/ekuttm-desrttthmnrtii-lii-dhuj-smboodh-ruupsmnnaak-viir-knntur-hit-miin-magawa)",
+  "replace": "- [CMAA: inauguración de la estatua de Magawa](https://www.cmaa.gov.kh/en/news/ekuttm-desrttthmnrtii-lii-dhuj-smboodh-ruupsmnnaak-viir-knntur-hit-miin-magawa)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S11",
+  "kind": "clarity",
+  "find": "- [ONU](https://cambodia.un.org/en/308549-humanitarian-response-forum-hrf-situation-report-15-cambodia-thailand-border-situation-16th)",
+  "replace": "- [ONU Camboya: situación en la frontera al 16 de enero de 2026](https://cambodia.un.org/en/308549-humanitarian-response-forum-hrf-situation-report-15-cambodia-thailand-border-situation-16th)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GSS-S12",
+  "kind": "clarity",
+  "find": "- [Convention](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Meetings/2025/22MSP-Cambodia-Art5-ExtReq-Decision.pdf)",
+  "replace": "- [Convención sobre la prohibición de las minas antipersonal: decisión sobre la solicitud de prórroga de Camboya (artículo 5)](https://www.apminebanconvention.org/fileadmin/_APMBC-DOCUMENTS/Meetings/2025/22MSP-Cambodia-Art5-ExtReq-Decision.pdf)",
+  "why": "Documentary sources: the one-word link label is replaced by the description the validation note gives for the same address, so a reader of the printed book can tell the references apart. The address is unchanged.",
+  "regex": false,
+  "count": 1
+ }
+]

@@ -1,0 +1,242 @@
+/* Print interior stylesheet (generated per book/language/edition by render_print.py) */
+@font-face{font-family:"Literata";font-weight:400;font-style:normal;src:url("{{ fonts }}/literata-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Literata";font-weight:400;font-style:italic;src:url("{{ fonts }}/literata-latin-400-italic.woff2") format("woff2");}
+@font-face{font-family:"Literata";font-weight:500;font-style:normal;src:url("{{ fonts }}/literata-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"Literata";font-weight:600;font-style:normal;src:url("{{ fonts }}/literata-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"Literata";font-weight:600;font-style:italic;src:url("{{ fonts }}/literata-latin-600-italic.woff2") format("woff2");}
+@font-face{font-family:"Literata";font-weight:700;font-style:normal;src:url("{{ fonts }}/literata-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"Nunito Sans";font-weight:400;src:url("{{ fonts }}/nunito-sans-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Nunito Sans";font-weight:600;src:url("{{ fonts }}/nunito-sans-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"Nunito Sans";font-weight:700;src:url("{{ fonts }}/nunito-sans-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"Nunito Sans";font-weight:800;src:url("{{ fonts }}/nunito-sans-latin-800-normal.woff2") format("woff2");}
+@font-face{font-family:"Caveat";font-weight:400;src:url("{{ fonts }}/caveat-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Caveat";font-weight:600;src:url("{{ fonts }}/caveat-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"Caveat";font-weight:700;src:url("{{ fonts }}/caveat-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Devanagari";font-weight:400;src:url("{{ fonts }}/noto-sans-devanagari-devanagari-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Devanagari";font-weight:600;src:url("{{ fonts }}/noto-sans-devanagari-devanagari-600-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Khmer";font-weight:400;src:url("{{ fonts }}/noto-sans-khmer-khmer-400-normal.woff2") format("woff2");}
+@font-face{font-family:"Noto Sans Khmer";font-weight:600;src:url("{{ fonts }}/noto-sans-khmer-khmer-600-normal.woff2") format("woff2");}
+
+:root{
+  --paper:{{ pal.paper }}; --plaster:{{ pal.plaster }}; --petrol:{{ pal.petrol }}; --indigo:{{ pal.indigo }};
+  --kes:{{ pal.kesariya }}; --ember:{{ pal.ember }}; --pale:{{ pal.pale }}; --stain:{{ pal.stain }};
+  --pen:{{ pal.pen or pal.petrol }}; --pink:{{ pal.pink or pal.kesariya }};
+  --ink:#241f1c;
+  --body:{{ body_pt }}pt; --lead:{{ leading }};
+}
+
+/* ---------- page geometry --------------------------------------------------- */
+@page { size: {{ PW }}in {{ PH }}in; margin: {{ m_top }}in {{ m_out_r }}in {{ m_bot }}in {{ m_in_r }}in; }
+@page :right { margin: {{ m_top }}in {{ m_out_r }}in {{ m_bot }}in {{ m_in_r }}in; }
+@page :left  { margin: {{ m_top }}in {{ m_in_l }}in {{ m_bot }}in {{ m_out_l }}in; }
+/* ^ for :left the *outer* edge is the left edge; the names above are mirrored on purpose */
+
+@page plate { margin: 0; }
+@page spread { margin: 0; }
+
+/* ---------- base ----------------------------------------------------------- */
+*{ box-sizing: border-box; }
+html{ font-family: "Literata", Georgia, serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body{ margin:0; font-size: var(--body); line-height: var(--lead); font-variant-numeric: oldstyle-nums; font-kerning: normal; text-rendering: geometricPrecision; hyphens: manual; }
+p{ margin:0; text-indent:1.35em; text-align:justify; orphans:2; widows:2; overflow-wrap: break-word; }
+h1,h2,h3,h4{ font-weight:600; margin:0; }
+.deva{ font-family:"Noto Sans Devanagari","Literata",sans-serif; font-size:.92em; }
+.khmer{ font-family:"Noto Sans Khmer","Literata",sans-serif; font-size:.9em; line-height:1; }
+em{ font-style:italic; }
+
+/* ---------- front matter ---------------------------------------------------- */
+.front{ break-before: page; height: {{ text_h }}in; position:relative; }
+.front.verso{ break-before: page; }
+.halftitle{ text-align:center; padding-top:2.6in; }
+.halftitle .series{ font:700 8.5pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); margin-bottom:1.1em; }
+.halftitle .ttl{ font:600 25pt/1.12 "Literata"; color:var(--indigo); }
+.titlepage{ text-align:center; padding-top:1.6in; }
+.titlepage .series{ font:700 8.5pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); }
+.titlepage .orn{ margin:1.4em auto; width:1.1in; height:.34in; }
+.titlepage .ttl{ font:600 31pt/1.08 "Literata"; color:var(--indigo); margin:.15in 0 .12in; }
+.titlepage .sub{ font:italic 400 15pt/1.3 "Literata"; color:var(--petrol); margin-bottom:1.9in; }
+.titlepage .by{ font:600 11pt "Nunito Sans"; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); }
+.titlepage .pub{ position:absolute; bottom:.2in; left:0; right:0; font:600 8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--stain); }
+.copyright{ font:400 8pt/1.5 "Nunito Sans"; color:#4b423b; position:absolute; bottom:.3in; left:0; right:0; }
+.copyright p{ text-indent:0; text-align:left; margin:0 0 .5em; hyphens:manual; }
+.todo{ background:#ffe9a8; color:#7a3b00; padding:0 .25em; border-radius:2pt; }
+.toc{ break-before:page; }
+.toc a{ color:inherit; text-decoration:none; }
+.toc a.part{ display:block; }
+.toc h2{ font:700 9pt "Nunito Sans"; letter-spacing:.26em; text-transform:uppercase; color:var(--kes); text-align:center; margin:.3in 0 .26in; }
+.toc .part{ font:700 7.8pt "Nunito Sans"; letter-spacing:.18em; text-transform:uppercase; color:var(--petrol); margin:.85em 0 .2em; }
+.toc .row{ display:flex; align-items:baseline; gap:.45em; font-size:9.8pt; line-height:1.38; }
+.toc .row .n{ width:1.55em; color:var(--kes); font:700 9pt "Nunito Sans"; flex:none; text-align:right; }
+.toc .row .t{ flex:none; }
+.toc .row .dots{ flex:1; border-bottom:1.1pt dotted #b9a995; transform:translateY(-.25em); }
+.toc .row .pg{ flex:none; width:2em; text-align:right; font:600 9pt "Nunito Sans"; color:var(--stain); }
+.toc .row.plain .n{ visibility:hidden; }
+.toc.dense h2{ margin:.15in 0 .16in; }
+.toc.dense .part{ margin:.7em 0 .12em; }
+.toc.dense .row{ font-size:9.3pt; line-height:1.28; }
+
+/* ---------- parts & chapter openers -------------------------------------- */
+.partpage{ break-before: page; height:{{ text_h }}in; position:relative; text-align:center; padding-top:2.35in; }
+.partpage .lab{ font:700 9pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
+.partpage .big{ font:600 28pt/1.12 "Literata"; color:var(--indigo); margin:.28in .2in .1in; }
+.partpage .orn{ width:1.4in; height:.42in; margin:.34in auto 0; }
+.partpage .rng{ margin-top:.35in; font:italic 400 10.5pt "Literata"; color:var(--stain); }
+
+.chapter{ break-before: page; }
+.spacer{ break-before: page; height: 1px; }
+.chapter.nobreak{ break-before:auto; }
+.chapter > .seg{ }
+.opener{ text-align:center; padding-top:{{ opener_top }}in; margin-bottom:.46in; }
+.opener .lab{ font:800 8.8pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
+.opener .num{ font:600 40pt/1 "Literata"; color:var(--plaster); margin:.12in 0 .02in; }
+.opener .ttl{ font:600 22pt/1.14 "Literata"; color:var(--indigo); margin:.08in .1in .0; }
+{% if hand %}.opener .date{ font:600 15.5pt/1.2 "Caveat"; color:var(--petrol); margin-top:.16in; }
+{% else %}.opener .date{ font:italic 400 11.4pt/1.25 "Literata"; letter-spacing:.015em; color:var(--petrol); margin-top:.15in; }{% endif %}
+.opener .orn{ width:1.2in; height:.3in; margin:.2in auto 0; }
+.opener.plain .ttl{ margin-top:.16in; }
+.opener + p, .opener + .seg > p:first-child{ text-indent:0; }
+.opener + p::first-letter{ font:600 3.05em/.82 "Literata"; float:left; padding:.06em .09em 0 0; color:var(--kes); }
+.glossary .opener + p::first-letter{ all:unset; }
+.glossary .opener + p{ text-indent:0; }
+.noind{ text-indent:0; }
+.after-plate{ text-indent:0; }
+
+/* ---------- notebook furniture ------------------------------------------- */
+.notice{ text-align:center; margin:.9em .4em; padding:.55em .8em; border-top:1pt solid var(--pale); border-bottom:1pt solid var(--pale); font:700 9.2pt/1.35 "Nunito Sans"; letter-spacing:.1em; text-transform:uppercase; color:var(--indigo); break-inside:avoid; }
+.notice strong{ font-weight:inherit; }
+.poster{ text-align:center; margin:1em .5em; padding:.8em .9em .7em; border:1.2pt solid var(--indigo); outline:.6pt solid var(--indigo); outline-offset:2.4pt; break-inside:avoid; }
+.poster div{ font:800 10.4pt/1.4 "Nunito Sans"; letter-spacing:.12em; text-transform:uppercase; color:var(--indigo); }
+.poster div + div{ margin-top:.25em; font-weight:600; font-size:9.4pt; color:var(--ember); }
+.card{ margin:.95em .2em; padding:.6em .9em .7em; background:#f8f1e4; border-left:2.2pt solid var(--kes); break-inside:avoid; }
+.card .ct{ font:700 8.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--kes); margin-bottom:.3em; }
+.card ul,.card ol{ margin:.1em 0 0; padding-left:1.3em; {% if hand %}font:400 15.5pt/1.18 "Caveat"{% else %}font:italic 400 10.4pt/1.35 "Literata"{% endif %}; color:#3b2f2a; }
+.card li{ margin:.04em 0; padding-left:.1em; }
+ol.rules{ margin:.6em .6em; padding:0; list-style:none; counter-reset:r var(--start,0); }
+ol.rules li{ counter-increment:r; position:relative; padding:.12em 0 .12em 2.2em; font:400 13pt/1.2 "Caveat"; text-indent:0; break-inside:avoid; }
+ol.rules li::before{ content:counter(r); position:absolute; left:.2em; top:.2em; width:1.35em; height:1.35em; border-radius:50%; background:var(--kes); color:#fff; font:700 8.4pt/1.35em "Nunito Sans"; text-align:center; }
+{% if hand %}.note{ text-indent:0; margin:.7em 1.1em; padding:.1em 0 .1em .9em; border-left:1.6pt solid var(--pale); font:400 15pt/1.2 "Caveat"; color:var(--petrol); text-align:left; break-inside:avoid; }
+.dateline{ text-indent:0; margin:1.3em 0 .7em; text-align:center; font:600 15.5pt/1.2 "Caveat"; color:var(--petrol); break-after:avoid; }
+{% else %}.note{ text-indent:0; margin:.7em 1.1em; padding:.05em 0 .05em .9em; border-left:1.6pt solid var(--pale); font:italic 400 10.6pt/1.4 "Literata"; color:var(--petrol); text-align:left; break-inside:avoid; }
+.dateline{ text-indent:0; margin:1.3em 0 .7em; text-align:center; font:italic 400 11.4pt/1.25 "Literata"; color:var(--petrol); break-after:avoid; }{% endif %}
+.tail{ margin:1.5em .2em 0; padding:.55em .95em .6em; border:1pt dashed var(--plaster); background:#fbf5ea; break-inside:avoid; }
+.tail p{ text-indent:0; text-align:left; font:400 14.5pt/1.2 "Caveat"; color:#3b2f2a; margin:.12em 0; hyphens:manual; }
+.tail p strong{ font:800 7.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--kes); margin-right:.35em; }
+.tail .sw{ display:inline-block; width:.8em; height:.8em; border-radius:50%; border:.7pt solid #0003; vertical-align:-.08em; margin-right:.4em; }
+.tail .card{ margin:.2em 0 .1em; background:transparent; border:none; padding:0; }
+.tail .card .ct{ color:var(--kes); }
+
+{% if design.sound_lines %}
+/* ---------- the sound that opens each chapter ----------------------------- */
+.opener .sound{ margin:.2in .9in 0; text-align:center; }
+.opener .sound .k{ display:block; font:800 7.6pt "Nunito Sans"; letter-spacing:.24em; text-transform:uppercase; color:var(--kes); margin-bottom:.35em; }
+.opener .sound .t{ display:block; font:italic 400 10.8pt/1.4 "Literata"; color:var(--indigo); }
+.opener{ margin-bottom:.4in; }
+.partpage .per{ margin-top:.28in; font:italic 400 11.4pt "Literata"; color:var(--petrol); }
+{% endif %}
+{% if design.nb_cards %}
+/* ---------- notebook pages: ruled paper with a red margin line ------------ */
+.card.nb{ --nbl:14.6pt; position:relative; margin:1.05em .15em; padding:0 .75em .25em 1.5em; border-left:0; border-radius:1.5pt;
+  background-color:#fbf7ee; box-shadow:inset 0 0 0 .5pt var(--pale);
+  background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--nbl) - .55pt), rgba(79,98,115,.2) calc(var(--nbl) - .55pt), rgba(79,98,115,.2) var(--nbl)); }
+.card.nb::before{ content:""; position:absolute; left:.8em; top:0; bottom:0; width:.8pt; background:var(--kes); opacity:.65; }
+.card.nb .ct{ font:800 7.6pt/14.6pt "Nunito Sans"; letter-spacing:.17em; text-transform:uppercase; color:var(--kes); margin:0; padding-top:.1em; }
+.card.nb ul,.card.nb ol{ list-style:none; margin:0; padding:0; font:italic 400 10.2pt/14.6pt "Literata"; color:#34302b; }
+.card.nb li{ margin:0; padding:0; text-indent:0; text-align:left; hyphens:manual; orphans:2; widows:2; }
+.card.nb li strong{ font-style:normal; font-weight:600; color:var(--indigo); }
+.card.nb.long{ break-inside:auto; }
+.card.nb .ct{ break-after:avoid; }
+.card.nb li:first-child{ break-after:avoid; }
+.card.nb li:last-child{ break-before:avoid; }
+{% endif %}
+.guide-title .care{ margin:.2in .3in 0; padding:.6em 1em; border-left:2.4pt solid var(--kes); background:#f6efe3; font:400 8.9pt/1.45 "Literata"; color:#3b342e; text-align:left; }
+.guide-title.has-care{ padding-top:1.25in; }
+.guide-title.has-care .warn{ margin-top:.35in; }
+
+/* ---------- illustrations ------------------------------------------------- */
+figure.inline{ margin:1.15em 0; break-inside:avoid; text-align:center; }
+figure.inline img{ display:block; width:100%; height:auto; border-radius:2.5pt; }
+figure.inline.wide{ margin:1.3em 0; }
+figure.missing .ph{ border:1.2pt dashed var(--plaster); background:#fbf5ea; text-align:center; color:var(--stain); font:600 9pt/1.5 "Nunito Sans"; padding:1.1em .6em; border-radius:3pt; }
+.plate{ page: plate; position:relative; width:{{ PW }}in; height:{{ PH }}in; overflow:hidden; break-before: page; break-after: page; margin:0; }
+.plate img{ position:absolute; display:block; }
+.plate.missing{ background:#fbf5ea; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--stain); font:600 10pt/1.6 "Nunito Sans"; }
+.spread-l{ page: spread; }
+.spread-r{ page: spread; }
+.seg{ }
+
+/* ---------- glossary / notes ---------------------------------------------- */
+.glossary p{ text-indent:0; text-align:left; margin:0 0 .5em; font-size:10.4pt; line-height:1.42; hyphens:manual; }
+.glossary p strong{ font:700 9.6pt "Nunito Sans"; color:var(--indigo); }
+.note-page p{ text-indent:0; margin:0 0 .75em; font-size:{{ note_pt }}pt; line-height:1.42; }
+.endpage{ break-before: page; text-align:center; padding-top:2.2in; }
+.endpage h3{ font:700 9pt "Nunito Sans"; letter-spacing:.28em; text-transform:uppercase; color:var(--kes); margin-bottom:.4in; }
+.endpage .it{ margin:.2in 0; font-size:10.8pt; line-height:1.4; }
+.endpage .it em{ color:var(--indigo); font-style:italic; }
+.endpage .it small{ display:block; font:600 8pt "Nunito Sans"; color:var(--stain); letter-spacing:.06em; margin-top:.1em; }
+
+/* ---------- guide edition -------------------------------------------------- */
+.guide-title{ break-before:page; height:{{ text_h }}in; text-align:center; padding-top:2.1in; }
+.guide-title .lab{ font:700 8.6pt "Nunito Sans"; letter-spacing:.3em; text-transform:uppercase; color:var(--kes); }
+.guide-title .big{ font:600 27pt/1.1 "Literata"; color:var(--indigo); margin:.22in 0 .12in; }
+.guide-title .sub{ font:italic 400 11.5pt/1.45 "Literata"; color:var(--petrol); margin:0 .4in; }
+.guide-title .warn{ margin:.55in .3in 0; padding:.7em 1em; border:1pt solid var(--pale); background:#fbf5ea; font:600 9.4pt/1.45 "Nunito Sans"; color:var(--ember); text-align:left; }
+.guide{ font-size:10pt; line-height:1.42; }
+.guide p{ text-indent:0; text-align:left; margin:0 0 .55em; hyphens:manual; }
+.guide h2{ break-before:{{ 'auto' if design.guide_flow else 'page' }}; margin-top:{{ '.42in' if design.guide_flow else '.1in' }}; break-after:avoid; font:600 17pt/1.2 "Literata"; color:var(--indigo); margin-bottom:.16in; padding-bottom:.1in; border-bottom:1.4pt solid var(--pale); }
+.guide h2 .gn{ color:var(--kes); margin-right:.35em; font-family:"Nunito Sans"; font-weight:800; }
+.guide h3{ break-after:avoid; font:700 8.8pt "Nunito Sans"; letter-spacing:.14em; text-transform:uppercase; color:var(--petrol); margin:1.1em 0 .4em; }
+.guide ul,.guide ol{ margin:.2em 0 .7em; padding-left:1.3em; }
+.guide li{ margin:.22em 0; text-align:left; hyphens:manual; }
+.guide table{ width:100%; border-collapse:collapse; margin:.45em 0 .9em; font-size:8.8pt; line-height:1.35; break-inside:auto; }
+.guide th,.guide td{ text-align:left; vertical-align:top; padding:.32em .5em; border-bottom:.6pt solid #e2d4bc; }
+.guide th{ font:700 7.8pt "Nunito Sans"; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--petrol); border:none; }
+.guide tr{ break-inside:avoid; }
+.guide table.kv td:first-child{ width:23%; font-weight:600; color:var(--indigo); }
+.guide .intro{ font:italic 400 10pt/1.45 "Literata"; color:var(--petrol); margin-bottom:.7em; }
+.guide .lead-q{ font-weight:600; color:var(--indigo); margin-top:.9em; }
+.guide h2.first{ break-before:auto; margin-top:.28in; }
+.guide a{ color:var(--petrol); text-decoration:none; overflow-wrap:anywhere; }
+.guide .src li{ font-size:8.6pt; line-height:1.35; }
+.guide .gloss td:nth-child(2){ font-size:10pt; white-space:nowrap; }
+.guide table.gloss{ table-layout:fixed; }
+.guide table.gloss th:nth-child(1){ width:25%; } .guide table.gloss th:nth-child(2){ width:28%; } .guide table.gloss th:nth-child(3){ width:47%; }
+.guide table.gloss td:nth-child(2){ white-space:normal; font-size:9.2pt; }
+.guide table.gloss4 th:nth-child(1){ width:21%; } .guide table.gloss4 th:nth-child(2){ width:20%; } .guide table.gloss4 th:nth-child(3){ width:37%; } .guide table.gloss4 th:nth-child(4){ width:22%; }
+.guide table.gloss4 td:nth-child(2){ font-size:9.4pt; line-height:1.5; }
+
+{% if design.notice_hand %}
+/* ---------- lines written in the notebook (bold on their own line in the manuscript) -------- */
+.notice.hand{ border:0; padding:.1em .5em; margin:.95em 1.1em; font:600 17.5pt/1.16 "Caveat"; letter-spacing:0; text-transform:none; color:var(--pen); }
+.notice.hand::before{ content:""; display:block; width:.55in; border-top:1.1pt solid var(--pink); margin:0 auto .28em; opacity:.9; }
+{% endif %}
+{% if design.guide_cards_break %}
+.guide .card{ break-inside:auto; }
+.guide .card .ct{ break-after:avoid; }
+.guide .card li{ break-inside:avoid; }
+{% endif %}
+/* ---------- web addresses printed after link text in the guide ---------------------------- */
+.guide .url{ font:400 7.6pt/1.3 "Nunito Sans"; color:var(--stain); overflow-wrap:anywhere; word-break:break-all; }
+.guide p .url::before,.guide li .url::before{ content:" ("; } .guide p .url::after,.guide li .url::after{ content:")"; }
+.guide ul.src{ list-style:none; padding-left:0; }
+.guide ul.src li{ margin:.34em 0; padding-left:.9em; position:relative; font-size:9pt; line-height:1.3; }
+.guide ul.src li::before{ content:""; position:absolute; left:0; top:.55em; width:.32em; height:.32em; border-radius:50%; background:var(--pale); }
+.guide ul.src a{ color:var(--indigo); font-weight:600; }
+.guide ul.src .url{ display:block; margin-top:.05em; }
+.guide ul.src .url::before,.guide ul.src .url::after{ content:none; }
+
+/* ---------- headings never break mid-word and balance their lines -------------------------- */
+.opener .ttl,.partpage .big,.guide-title .big,.titlepage .ttl,.halftitle .ttl{ text-wrap:balance; hyphens:none; }
+{% if design.copyfit %}
+/* ---------- copy-fitting: tracking nudges for chapters that would end on a runt page ---------- */
+.chapter.tt1 p,.chapter.tt1 li{ letter-spacing:-.004em; } .chapter.tt2 p,.chapter.tt2 li{ letter-spacing:-.008em; } .chapter.tt3 p,.chapter.tt3 li{ letter-spacing:-.012em; }
+.chapter.lo1 p,.chapter.lo1 li{ letter-spacing:.005em; } .chapter.lo2 p,.chapter.lo2 li{ letter-spacing:.010em; }
+.chapter.vt{ line-height:1.475; } .chapter.vl{ line-height:1.535; }
+.chapter.glossary.vt p,.chapter.note-page.vt p{ line-height:1.40; } .chapter.glossary.vl p,.chapter.note-page.vl p{ line-height:1.47; }
+.guide.vt{ line-height:1.385; } .guide.vl{ line-height:1.47; }
+.guide.tt1 p,.guide.tt1 li{ letter-spacing:-.004em; } .guide.tt2 p,.guide.tt2 li{ letter-spacing:-.008em; } .guide.tt3 p,.guide.tt3 li{ letter-spacing:-.012em; }
+.guide.lo1 p,.guide.lo1 li{ letter-spacing:.005em; } .guide.lo2 p,.guide.lo2 li{ letter-spacing:.010em; }
+{% endif %}
+{% if design.text_pretty %}
+p{ text-wrap:pretty; }
+{% endif %}
+

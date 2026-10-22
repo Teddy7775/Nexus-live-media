@@ -1,0 +1,13 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<section class="block"><div class="narrow">
+  <h1>{{ t.legal.title }}</h1>
+  <h2 style="font-size:1.3rem">{{ t.legal.publisher }}</h2>
+  <p>{% if publisher %}{{ publisher }}{% else %}<span class="todo-banner">{{ t.legal.todo }}</span>{% endif %}</p>
+  <p>{{ t.legal.address }}: {% if address %}{{ address }}{% else %}<span class="todo-banner">{{ t.legal.todo }}</span>{% endif %}</p>
+  <p>{{ t.legal.email }}: {% if email %}<a href="mailto:{{ email }}">{{ email }}</a>{% else %}<span class="todo-banner">{{ t.legal.todo }}</span>{% endif %}</p>
+  <p>{{ t.legal.hosting }}: {{ t.legal.hosted }}</p>
+  <p>{{ t.legal.rights }}</p>
+  <h2 style="font-size:1.3rem" class="mt">{{ t.legal.privacy_h }}</h2><p>{{ t.legal.privacy }}</p>
+</div></section>
+{% endblock %}

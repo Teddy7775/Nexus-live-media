@@ -1,0 +1,11 @@
+[
+ {
+  "id": "GAF-01",
+  "kind": "clarity",
+  "find": "Le sort de Papa et celui de Mykhailo ne sont pas résolus.",
+  "replace": "Le sort de Papa et celui de Mykhailo, le frère de Daryna, ne sont pas résolus.",
+  "why": "Mykhailo is not introduced in the guide’s Who’s Who; a teacher reading this line would not know who he is (Daryna’s missing brother, chapter 18).",
+  "regex": false,
+  "count": 1
+ }
+]

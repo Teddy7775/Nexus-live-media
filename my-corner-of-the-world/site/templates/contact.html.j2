@@ -1,0 +1,17 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<section class="block"><div class="narrow">
+  <h1>{{ t.contact.title }}</h1><p class="lead">{{ t.contact.lead }}</p>
+  {% if sent %}<p class="msg ok" role="status">{{ t.contact.thanks }}</p>{% endif %}
+  <form action="{{ base }}/api/contact.php" method="post" data-ajax data-ok="{{ t.contact.thanks }}" data-err="{{ t.contact.error }}" class="mt">
+    <input type="hidden" name="lang" value="{{ L }}"><input type="hidden" name="ts" value="">
+    <div class="hp" aria-hidden="true"><label>Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+    <div class="f"><label for="c-name">{{ t.contact.name }}</label><input id="c-name" type="text" name="name" required autocomplete="name"></div>
+    <div class="f"><label for="c-email">{{ t.contact.email }}</label><input id="c-email" type="email" name="email" required autocomplete="email"></div>
+    <div class="f"><label for="c-msg">{{ t.contact.message }}</label><textarea id="c-msg" name="message" required></textarea></div>
+    <label class="check"><input type="checkbox" name="consent" value="1" required><span>{{ t.contact.consent }}</span></label>
+    <p class="mt"><button class="btn btn-primary" type="submit">{{ t.contact.send }}</button></p>
+  </form>
+  {% if email %}<p class="mt">{{ t.contact.direct }} <a href="mailto:{{ email }}">{{ email }}</a></p>{% endif %}
+</div></section>
+{% endblock %}

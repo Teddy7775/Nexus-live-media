@@ -1,0 +1,170 @@
+{
+ "seg": {
+  "books": "libros",
+  "read": "leer",
+  "guide": "guia-de-descubrimiento",
+  "parents": "familias-y-docentes",
+  "about": "acerca-de",
+  "contact": "contacto",
+  "legal": "aviso-legal"
+ },
+ "nav": {
+  "home": "Inicio",
+  "books": "Los libros",
+  "parents": "Familias y docentes",
+  "about": "Acerca de",
+  "contact": "Contacto",
+  "legal": "Aviso legal",
+  "menu": "Menú",
+  "language": "Idioma",
+  "skip": "Saltar al contenido"
+ },
+ "home": {
+  "kicker": "Novelas en forma de cuaderno para lectores curiosos, desde los 9 años",
+  "title": "Cuatro jóvenes narradores. Cuatro rincones del mundo.",
+  "lead": "Novelas en forma de cuaderno sobre los lugares de donde venimos y las decisiones que nos hacen quienes somos. Cada libro se puede leer por separado.",
+  "cta_read": "Leer en línea",
+  "cta_books": "Explorar los libros",
+  "how_title": "Lee a tu manera",
+  "how": [
+   {
+    "t": "Leer en línea",
+    "p": "La novela completa, gratis en tu navegador, con ilustraciones, un modo de lectura para cualquier luz, sin cuentas ni anuncios."
+   },
+   {
+    "t": "Impreso y ebook",
+    "p": "Ediciones en papel y EPUB en español, inglés y francés, con o sin la guía de descubrimiento."
+   },
+   {
+    "t": "Para el aula y la familia",
+    "p": "Una guía con contexto, preguntas para conversar y actividades para cada grupo de capítulos."
+   }
+  ],
+  "volumes": "La colección",
+  "coming": "Próximamente",
+  "vol": "Volumen {n}",
+  "narrator": "Narrador",
+  "where": "Dónde y cuándo",
+  "question": "La pregunta central"
+ },
+ "newsletter": {
+  "title": "Noticias de los próximos volúmenes",
+  "text": "Para madres, padres, docentes y bibliotecarios. Un mensaje breve cuando salga un nuevo volumen, nada más.",
+  "email": "Correo electrónico",
+  "consent": "Soy una persona adulta (madre, padre, docente o bibliotecario) y acepto recibir noticias de los próximos volúmenes. Puedo darme de baja en cualquier momento.",
+  "submit": "Mantenme al tanto",
+  "thanks": "Gracias, ya estás en la lista.",
+  "error": "Algo salió mal. Revisa tu correo electrónico e inténtalo de nuevo."
+ },
+ "book": {
+  "read": "Leer en línea",
+  "start": "Empezar a leer",
+  "continue": "Seguir leyendo",
+  "download": "Descargar",
+  "downloads": "Ediciones y descargas",
+  "ed_story": "Edición de la novela",
+  "ed_guide": "Novela + guía de descubrimiento",
+  "ed_story_p": "La novela sola.",
+  "ed_guide_p": "La novela seguida de la guía de descubrimiento (la guía cuenta toda la historia: léela después de la novela).",
+  "epub": "EPUB para lectores electrónicos y teléfonos",
+  "paperback": "Edición impresa",
+  "paperback_soon": "Edición impresa próximamente",
+  "guide": "Guía de descubrimiento",
+  "guide_p": "Contexto, glosario, notas de seguridad, preguntas para conversar y actividades para lectores, familias y aulas.",
+  "gallery": "Un vistazo por dentro",
+  "gallery_note": "Algunas ilustraciones que no revelan la historia. Otras aparecen mientras lees.",
+  "characters": "Quién es quién",
+  "details": "De un vistazo",
+  "ages": "Edad",
+  "setting": "Lugar",
+  "time": "Época",
+  "form": "Forma",
+  "language": "Idioma",
+  "spoiler": "La guía habla de toda la historia, incluido el final.",
+  "series_label": "Mi rincón del mundo",
+  "note_label": "Una ficción con raíces en lugares reales. Consulta «Nota sobre la historia» al final del libro.",
+  "read_guide": "Leer la guía en línea",
+  "age_value": "9–13 años"
+ },
+ "reader": {
+  "contents": "Índice",
+  "prev": "Anterior",
+  "next": "Siguiente",
+  "back": "Volver al libro",
+  "smaller": "Texto más pequeño",
+  "larger": "Texto más grande",
+  "light": "Claro",
+  "sepia": "Papel",
+  "dark": "Oscuro",
+  "settings": "Ajustes de lectura",
+  "progress": "Progreso de lectura",
+  "end": "Has llegado al final de la historia.",
+  "next_chapter": "Capítulo siguiente",
+  "chapter": "Capítulo",
+  "open_guide": "Abrir la guía de descubrimiento",
+  "sample_end": "Fin de la vista previa gratuita.",
+  "sample_cta": "Consigue el libro completo en edición impresa o ebook."
+ },
+ "guide": {
+  "on_page": "En esta página",
+  "title": "Guía de descubrimiento",
+  "spoiler": "Aviso: esta guía habla de toda la historia, incluido el final. Léela después de la novela."
+ },
+ "parents": {
+  "title": "Para familias y docentes",
+  "lead": "Qué esperar de cada libro, cómo leerlo con lectores jóvenes y cómo trata este sitio su privacidad.",
+  "from_guide": "De la guía de descubrimiento",
+  "privacy_title": "Privacidad, en palabras sencillas",
+  "privacy": "Este sitio no usa cookies, publicidad ni herramientas de análisis. Tu posición de lectura y tus preferencias de pantalla se guardan solo en tu navegador y nunca se nos envían. A los niños nunca se les pide información personal; los formularios de este sitio son para madres, padres, docentes y bibliotecarios."
+ },
+ "about": {
+  "title": "Acerca de la colección",
+  "p1": "Mi rincón del mundo sigue a cuatro jóvenes narradores ficticios en cuatro países de tres continentes. Cada libro se puede leer por separado, y entre ellos se hablan de maneras sorprendentes.",
+  "p2": "Cada volumen está escrito como un cuaderno: fechas, listas, cosas dichas y cosas calladas. Las historias son inventadas; los lugares, oficios, fiestas y peligros que describen son reales, y cada libro termina con una nota que separa unos de otros.",
+  "p3": "Cada libro indica su edad recomendada: unos están escritos para lectores de 9 a 13 años, otros para lectores a partir de los 13. Los más pequeños pueden disfrutarlos con un adulto, y los lectores mayores también son bienvenidos.",
+  "trio_title": "Una idea, cuatro preguntas",
+  "author_title": "La autoría"
+ },
+ "contact": {
+  "title": "Contacto",
+  "lead": "Para madres, padres, docentes, bibliotecarios y libreros. Esta página no es para niños.",
+  "name": "Tu nombre",
+  "email": "Correo electrónico",
+  "message": "Mensaje",
+  "send": "Enviar mensaje",
+  "thanks": "Gracias, tu mensaje ha sido enviado.",
+  "error": "No se pudo enviar el mensaje. Revisa los campos e inténtalo de nuevo.",
+  "consent": "Soy una persona adulta y acepto que mis datos se usen para responder a este mensaje.",
+  "direct": "O escribe directamente a"
+ },
+ "legal": {
+  "title": "Aviso legal y privacidad",
+  "publisher": "Editorial",
+  "address": "Dirección",
+  "email": "Contacto",
+  "hosting": "Alojamiento",
+  "rights": "Los textos y las ilustraciones están protegidos por derechos de autor. Todos los derechos reservados.",
+  "todo": "Por completar antes del lanzamiento",
+  "privacy_h": "Datos personales",
+  "privacy": "El sitio no instala cookies ni carga nada de servicios de terceros. Si usas un formulario, recibimos solo lo que escribes (nombre, correo, mensaje) y lo usamos únicamente para responder o, en el caso del boletín, para enviarte noticias de los próximos volúmenes. Puedes pedirnos que borremos tus datos en cualquier momento.",
+  "hosted": "Este sitio está alojado en Hostinger."
+ },
+ "foot": {
+  "tagline": "Hecho con cuidado para jóvenes lectores curiosos.",
+  "copyright": "© {year} {holder}",
+  "rights": "Todos los derechos reservados."
+ },
+ "e404": {
+  "title": "Página no encontrada",
+  "text": "Esta página salió volando. Prueba con el inicio o con los libros."
+ },
+ "root": {
+  "choose": "Elige tu idioma"
+ },
+ "secslug": {
+  "prologue": "prologo",
+  "epilogue": "epilogo",
+  "glossary": "glosario",
+  "note": "nota"
+ }
+}

@@ -1,0 +1,7 @@
+{% extends "base.html.j2" %}{% import "_macros.j2" as m %}
+{% block main %}
+<section class="block"><div class="wrap">
+  <p class="kicker">{{ series_name }}</p><h1>{{ t.home.volumes }}</h1><p class="lead">{{ series_desc }}</p>
+  <div class="grid g4 mt">{% for v in volumes %}{{ m.volume_card(v, t) }}{% endfor %}</div>
+</div></section>
+{% endblock %}

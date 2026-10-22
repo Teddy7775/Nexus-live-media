@@ -1,0 +1,29 @@
+[
+ {
+  "id": "GEN-01",
+  "kind": "consistency",
+  "find": "eight stitches in his hand and three lies.",
+  "replace": "eight stitches in his hand and four lies.",
+  "why": "Guide said three; the story enumerates four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GEN-02",
+  "kind": "consistency",
+  "find": "“Rohan came home with eight stitches and three lies.”",
+  "replace": "“Rohan came home with eight stitches and four lies.”",
+  "why": "Quotes the novel’s first line, which says four.",
+  "regex": false,
+  "count": 1
+ },
+ {
+  "id": "GEN-03",
+  "kind": "consistency",
+  "find": "takes down the copy of the poster she drew for her bedroom wall and writes her own name",
+  "replace": "pins the copy of the poster she drew on her bedroom wall and writes her own name",
+  "why": "Matches the corrected novel sentence (EN-02).",
+  "regex": false,
+  "count": 1
+ }
+]

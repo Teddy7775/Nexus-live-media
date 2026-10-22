@@ -1,0 +1,9 @@
+{% extends "base.html.j2" %}{% import "_macros.j2" as m %}
+{% block main %}
+<section class="block"><div class="narrow">
+  <p class="kicker">{{ series_name }}</p><h1>{{ t.about.title }}</h1>
+  <p class="lead">{{ t.about.p1 }}</p><p>{{ t.about.p2 }}</p><p>{{ t.about.p3 }}</p>
+</div></section>
+<section class="block alt"><div class="wrap"><h2>{{ t.about.trio_title }}</h2><div class="grid g4 mt">{% for v in volumes %}{{ m.volume_card(v, t) }}{% endfor %}</div></div></section>
+{% if author %}<section class="block"><div class="narrow"><h2>{{ t.about.author_title }}</h2><p>{{ author }}</p></div></section>{% endif %}
+{% endblock %}

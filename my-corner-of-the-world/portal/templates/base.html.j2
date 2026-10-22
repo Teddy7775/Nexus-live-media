@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="{{ L }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page.title }}</title>
+<meta name="description" content="{{ page.description }}">
+{% if page.canonical %}<link rel="canonical" href="{{ page.canonical }}">{% endif %}
+{% for a in alts %}<link rel="alternate" hreflang="{{ a.lang }}" href="{{ a.href }}">
+{% endfor %}{% if alts_default %}<link rel="alternate" hreflang="x-default" href="{{ alts_default }}">{% endif %}
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.description }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="{{ locale }}">
+{% if page.canonical %}<meta property="og:url" content="{{ page.canonical }}">{% endif %}
+<meta name="theme-color" content="#35445D">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/nunito-sans-latin-700-normal.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/site.css?v={{ ver }}">
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem('mcw:theme');if(t)d.setAttribute('data-theme',t)}catch(e){}})()</script>
+{% if page.jsonld %}<script type="application/ld+json">{{ page.jsonld|safe }}</script>{% endif %}
+</head>
+<body>
+<a class="skip" href="#main">{{ t.nav.skip }}</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="{{ u.home }}">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 15 16 30 4 15Z" fill="#F2E7D2" stroke="#35445D" stroke-width="1.6"/><path d="M16 2v28M4 15h24" stroke="#35445D" stroke-width="1"/></svg>
+      <span>{{ site_name }}</span>
+    </a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="nav" type="button">{{ t.nav.menu }}</button>
+    <nav class="nav" id="nav" aria-label="{{ site_name }}">
+      {% for p in nav_projects %}<a href="{{ p.href }}">{{ p.name }}</a>
+      {% endfor %}<div class="lang" role="group" aria-label="{{ t.nav.language }}">
+        {% for a in alts %}<a href="{{ a.href_rel }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}" {% if a.lang==L %}aria-current="true"{% endif %} title="{{ a.name }}">{{ a.lang|upper }}</a>{% endfor %}
+      </div>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="cols">
+      <div><h2>{{ site_name }}</h2>{% if tagline %}<p>{{ tagline }}</p>{% endif %}</div>
+      <div><h2>{{ t.portal.projects }}</h2><ul>{% for p in nav_projects %}<li><a href="{{ p.href }}">{{ p.name }}</a></li>{% endfor %}</ul></div>
+      <div><h2>{{ t.nav.contact }}</h2><ul><li><a href="{{ u.contact }}">{{ t.nav.contact }}</a></li><li><a href="{{ u.legal }}">{{ t.nav.legal }}</a></li></ul></div>
+    </div>
+    <p class="fine">{{ t.foot.copyright.format(year=year, holder=holder) }} · {{ t.foot.rights }}</p>
+  </div>
+</footer>
+<script src="/assets/js/site.js?v={{ ver }}" defer></script>
+</body>
+</html>

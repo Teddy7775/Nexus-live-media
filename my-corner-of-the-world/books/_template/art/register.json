@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "book": "REPLACE-with-url-safe-slug",
+  "note": "One entry per illustration. 'kind' is full | half | spread | cover. 'anchor' is a sentence (per language) that appears verbatim in the chapter: the picture is placed right after the paragraph containing it. 'python3 build.py check' fails if an anchor stops matching.",
+  "slots": {
+    "V2-I01": {
+      "kind": "full",
+      "ratio": "2:3",
+      "stem": "V2-I01_short_name",
+      "chapter": "ch-01",
+      "scene": {
+        "en": "",
+        "fr": "",
+        "es": ""
+      },
+      "alt": {
+        "en": "",
+        "fr": "",
+        "es": ""
+      },
+      "anchor": {
+        "en": "",
+        "fr": "",
+        "es": ""
+      },
+      "continuity": "",
+      "image_check": ""
+    }
+  }
+}
