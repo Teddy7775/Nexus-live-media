@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Nexus Live Media — Invoice Inquiry — LED Wall — Nov 14, 2026</title>
+<style>
+  @page { size: Letter; margin: 0; }
+
+  :root{
+    /* Brand tokens carried over from the Nexus Live Media site */
+    --bg:#070A16;
+    --bg2:#0B1020;
+    --on-dark:#EAF0FF;
+    --on-dark-muted:#A9B5DD;
+    --violet:#7C3AED;
+    --cyan:#22D3EE;
+    --amber:#F59E0B;
+
+    /* Light "paper" tokens (print-safe contrast on white) */
+    --ink:#0B1020;
+    --muted:#55607F;
+    --line:#E3E7F3;
+    --tint:#F6F7FC;
+    --violet-ink:#6D28D9;
+    --violet-tint:#F3EFFE;
+    --cyan-ink:#0E7490;
+    --cyan-tint:#ECFAFD;
+    --amber-ink:#92400E;
+    --amber-tint:#FFF6E0;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+  body{
+    margin:0;
+    background:#E9ECF5;
+    color:var(--ink);
+    font-family:"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size:12px;
+    line-height:1.45;
+  }
+  a{color:inherit}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- on-screen helper (never prints) ---------- */
+  .screen-note{
+    max-width:8.5in; margin:14px auto 0; padding:10px 14px;
+    background:var(--amber-tint); color:var(--amber-ink);
+    border:1px solid #F3D9A0; border-radius:10px;
+    font-size:12px; line-height:1.5;
+  }
+  .screen-note b{color:#7A3410}
+
+  /* ---------- page ---------- */
+  .page{
+    width:8.5in; height:11in;
+    margin:14px auto 28px;
+    background:#fff;
+    box-shadow:0 10px 40px rgba(11,16,32,.18);
+    overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .rule{height:4px; flex:none; background:linear-gradient(90deg,var(--violet),var(--cyan),var(--amber))}
+
+  /* ---------- header band ---------- */
+  .band{
+    flex:none;
+    color:var(--on-dark);
+    padding:24px 48px 56px;
+    background:
+      radial-gradient(520px 300px at 8% -30%, rgba(124,58,237,.55), transparent 62%),
+      radial-gradient(420px 260px at 96% -10%, rgba(34,211,238,.32), transparent 60%),
+      radial-gradient(360px 220px at 70% 130%, rgba(245,158,11,.20), transparent 60%),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+  }
+  .band-top{display:flex; justify-content:space-between; align-items:flex-start; gap:24px}
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{
+    width:42px; height:42px; border-radius:14px; flex:none;
+    background:
+      radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.65), transparent 60%),
+      linear-gradient(135deg, var(--violet), var(--cyan));
+    box-shadow:0 10px 26px rgba(124,58,237,.35), 0 8px 18px rgba(34,211,238,.22);
+  }
+  .brand-name{font-size:17px; font-weight:800; letter-spacing:.2px; line-height:1.15}
+  .brand-tag{font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--on-dark-muted); margin-top:3px}
+
+  .meta{display:grid; grid-template-columns:auto auto; gap:3px 14px; font-size:11px; text-align:right; margin:0}
+  .meta dt{color:var(--on-dark-muted); font-weight:600}
+  .meta dd{margin:0; font-weight:700; font-variant-numeric:tabular-nums}
+
+  .title-row{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-top:20px}
+  .eyebrow{font-size:10px; font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan)}
+  h1{margin:6px 0 0; font-size:34px; line-height:1.05; font-weight:800; letter-spacing:-.02em}
+  .subtitle{margin-top:8px; font-size:14px; color:var(--on-dark-muted); font-weight:500}
+  .subtitle b{color:var(--on-dark); font-weight:700}
+  .chip{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px; border-radius:999px;
+    border:1px solid rgba(245,158,11,.55);
+    background:rgba(245,158,11,.14);
+    color:#FCD79A; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .chip::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--amber)}
+
+  /* ---------- event facts strip (overlaps band) ---------- */
+  .facts{
+    flex:none;
+    margin:-34px 48px 0;
+    display:grid; grid-template-columns:1.35fr 1.2fr .8fr 1.05fr;
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 14px 34px rgba(11,16,32,.14);
+    position:relative;
+  }
+  .fact{padding:12px 16px; border-left:1px solid var(--line)}
+  .fact:first-child{border-left:0}
+  .label{font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+  .fact .v{font-size:14px; font-weight:800; margin-top:3px; letter-spacing:-.01em}
+  .fact .s{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .fact.hl .v{color:var(--violet-ink)}
+
+  /* ---------- sections ---------- */
+  main{padding:16px 48px 0; flex:1; min-height:0}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+  h2{margin:0 0 7px; font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--violet-ink)}
+
+  .kv{display:grid; grid-template-columns:62px 1fr; gap:5px 10px; align-items:end}
+  .kv .k{font-size:10.5px; color:var(--muted); font-weight:600; padding-bottom:1px}
+
+  /* fillable fields */
+  .field{
+    display:block; min-height:17px; padding:0 2px 1px;
+    border-bottom:1px solid #C9CFE4;
+    font-weight:600; outline:none;
+  }
+  .field:empty::before{content:attr(data-ph); color:#9AA3C0; font-weight:500; font-style:italic}
+  @media screen{
+    .field{background:var(--amber-tint); border-bottom:1px dashed #D9A93B; border-radius:3px 3px 0 0; cursor:text}
+    .field:focus{background:#FFEFC2}
+  }
+
+  /* ---------- pricing ---------- */
+  .pricing{margin-top:16px}
+  .incl{
+    list-style:none; margin:0 0 12px; padding:9px 14px;
+    display:grid; grid-template-columns:repeat(4,auto); justify-content:space-between; gap:10px;
+    background:var(--tint); border:1px solid var(--line); border-radius:12px;
+    font-size:10.5px; font-weight:600; color:#2B3454;
+  }
+  .incl li{display:flex; align-items:center; gap:6px; white-space:nowrap}
+  .incl svg{flex:none; color:var(--violet-ink)}
+  .incl-label{font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+
+  .opts{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .opt{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff}
+  .opt header{display:flex; justify-content:space-between; align-items:center; padding:11px 14px}
+  .opt.a header{background:var(--violet-tint); color:var(--violet-ink)}
+  .opt.b header{background:var(--cyan-tint); color:var(--cyan-ink)}
+  .o-label{font-size:9px; font-weight:800; letter-spacing:.16em; text-transform:uppercase}
+  .o-size{font-size:22px; font-weight:800; letter-spacing:-.02em; line-height:1.1; margin-top:1px}
+  .pick{padding:3px 9px; border-radius:999px; border:1px solid currentColor; font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase}
+
+  .lines{width:100%; border-collapse:collapse}
+  .lines td{padding:7px 14px; border-top:1px solid var(--line); vertical-align:top; font-size:11.5px; font-weight:600}
+  .lines td:first-child{width:100%}
+  .lines td:last-child{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums}
+  .lines small{display:block; font-size:10px; font-weight:500; color:var(--muted)}
+  .lines .tot td{font-size:12px; font-weight:800; padding-top:9px; padding-bottom:9px; border-top:1.5px solid var(--ink)}
+  .lines .tot td:last-child{font-size:20px; letter-spacing:-.02em; line-height:1.1}
+  .opt.a .tot td:last-child{color:var(--violet-ink)}
+  .opt.b .tot td:last-child{color:var(--cyan-ink)}
+  .lines .due td{background:var(--amber-tint); color:var(--amber-ink); font-weight:700}
+  .lines .due small{color:var(--amber-ink); opacity:.85}
+
+  /* ---------- terms + next steps ---------- */
+  .lower{margin-top:20px}
+  ul.terms{margin:0; padding:0; list-style:none; font-size:10.5px; color:#2B3454}
+  ul.terms li{position:relative; padding-left:14px; margin-bottom:5px}
+  ul.terms li::before{content:""; position:absolute; left:0; top:.55em; width:6px; height:6px; border-radius:2px; background:linear-gradient(135deg,var(--violet),var(--cyan))}
+  ul.terms b{color:var(--ink)}
+
+  ol.steps{margin:0; padding:0; list-style:none; counter-reset:s; font-size:11px}
+  ol.steps li{counter-increment:s; display:flex; gap:9px; align-items:flex-start; margin-bottom:6px; color:#2B3454}
+  ol.steps li::before{
+    content:counter(s); flex:none; width:18px; height:18px; border-radius:6px;
+    background:var(--violet-tint); color:var(--violet-ink); font-weight:800; font-size:10px;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .cta{
+    display:inline-block; margin-top:4px; padding:9px 16px; border-radius:999px;
+    background:linear-gradient(135deg,var(--violet),#5B21B6); color:#fff; text-decoration:none;
+    font-weight:800; font-size:11px; letter-spacing:.04em;
+  }
+  .cta-sub{font-size:10px; color:var(--muted); margin-top:5px}
+
+  /* ---------- footer ---------- */
+  footer{
+    flex:none;
+    margin-top:12px; padding:11px 48px 15px;
+    border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; gap:20px; align-items:flex-start;
+    font-size:9.5px; color:var(--muted); line-height:1.5;
+  }
+  footer b{color:var(--ink)}
+  footer .r{text-align:right}
+
+  @media print{
+    body{background:#fff}
+    .screen-note{display:none}
+    .page{margin:0; box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-note" role="note">
+  <b>Editable draft.</b> Click any highlighted field to fill it in, then print / save as PDF (highlights don’t print).
+  <b>Confirm before sending:</b> (1) the rate card doesn’t say how many crew hours a flat LED rate covers — this is a 7-hour run plus 3–4 hours of setup, so decide whether extended hours are priced separately;
+  (2) the balance date is the rate card’s “14 days prior” rule, which lands just days after this issue date; (3) taxes and payment method aren’t on the rate card, so none are stated.
+</div>
+
+<div class="page">
+
+  <div class="rule"></div>
+
+  <header class="band">
+    <div class="band-top">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name">Nexus Live Media</div>
+          <div class="brand-tag">Live • Hybrid • Broadcast</div>
+        </div>
+      </div>
+      <dl class="meta">
+        <dt>Inquiry No.</dt><dd>NLM-INQ-2026-1114-LED</dd>
+        <dt>Issued</dt><dd>October 27, 2026</dd>
+      </dl>
+    </div>
+
+    <div class="title-row">
+      <div>
+        <div class="eyebrow">Pro-forma · for approval</div>
+        <h1>Invoice Inquiry</h1>
+        <div class="subtitle"><b>Modular HD LED Wall Rental</b> · P2.6 / P2.9 high-refresh display</div>
+      </div>
+      <span class="chip">Awaiting approval</span>
+    </div>
+  </header>
+
+  <section class="facts" aria-label="Event at a glance">
+    <div class="fact hl">
+      <div class="label">Event date</div>
+      <div class="v">Sat, Nov 14, 2026</div>
+      <div class="s">Saturday evening</div>
+    </div>
+    <div class="fact">
+      <div class="label">Event window</div>
+      <div class="v">6:00 PM – 1:00 AM</div>
+      <div class="s">Closes Sun, Nov 15</div>
+    </div>
+    <div class="fact">
+      <div class="label">Run time</div>
+      <div class="v">7 hours</div>
+      <div class="s">Overnight event</div>
+    </div>
+    <div class="fact">
+      <div class="label">Setup begins</div>
+      <div class="v">2:00 – 3:00 PM</div>
+      <div class="s">3–4 hrs before call</div>
+    </div>
+  </section>
+
+  <main>
+    <div class="cols">
+      <section aria-labelledby="h-client">
+        <h2 id="h-client">Prepared for</h2>
+        <div class="kv">
+          <div class="k">Guest</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Client / guest name"></span>
+          <div class="k">Company</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Company or host (optional)"></span>
+          <div class="k">Email</div><span class="field" contenteditable="true" spellcheck="false" data-ph="name@email.com"></span>
+          <div class="k">Phone</div><span class="field" contenteditable="true" spellcheck="false" data-ph="(000) 000-0000"></span>
+        </div>
+      </section>
+      <section aria-labelledby="h-venue">
+        <h2 id="h-venue">Event venue</h2>
+        <div class="kv">
+          <div class="k">Venue</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Venue name"></span>
+          <div class="k">Address</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Street, city, state, ZIP"></span>
+          <div class="k">On-site</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Day-of contact &amp; phone"></span>
+          <div class="k">Occasion</div><span class="field" contenteditable="true" spellcheck="false" data-ph="Type of event"></span>
+        </div>
+      </section>
+    </div>
+
+    <section class="pricing" aria-labelledby="h-items">
+      <h2 id="h-items">LED wall options · select one</h2>
+
+      <ul class="incl" aria-label="Included with either option">
+        <li><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>P2.6 / P2.9 high-refresh panels</li>
+        <li><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Novastar 4K video processor</li>
+        <li><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ground-stack truss</li>
+        <li><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>On-site LED video technician</li>
+      </ul>
+
+      <div class="opts">
+        <article class="opt a" aria-label="Option A, 10 by 6 foot wall">
+          <header>
+            <div><div class="o-label">Option A</div><div class="o-size">10 × 6 ft</div></div>
+            <span class="pick">Compact</span>
+          </header>
+          <table class="lines">
+            <tbody>
+              <tr><td>Modular HD LED wall rental</td><td>$2,500.00</td></tr>
+              <tr><td>Mandatory logistics fee<small>Transport, rigging &amp; calibration</small></td><td>$500.00</td></tr>
+              <tr class="tot"><td>Event total</td><td>$3,000.00</td></tr>
+              <tr><td>30% retainer<small>Due on acceptance · reserves Nov 14</small></td><td>$900.00</td></tr>
+              <tr class="due"><td>Remaining balance<small>Due Sat, Oct 31, 2026 · 14 days prior</small></td><td>$2,100.00</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="opt b" aria-label="Option B, 13 by 8 foot wall">
+          <header>
+            <div><div class="o-label">Option B</div><div class="o-size">13 × 8 ft</div></div>
+            <span class="pick">Large format</span>
+          </header>
+          <table class="lines">
+            <tbody>
+              <tr><td>Modular HD LED wall rental</td><td>$3,800.00</td></tr>
+              <tr><td>Mandatory logistics fee<small>Transport, rigging &amp; calibration</small></td><td>$500.00</td></tr>
+              <tr class="tot"><td>Event total</td><td>$4,300.00</td></tr>
+              <tr><td>30% retainer<small>Due on acceptance · reserves Nov 14</small></td><td>$1,290.00</td></tr>
+              <tr class="due"><td>Remaining balance<small>Due Sat, Oct 31, 2026 · 14 days prior</small></td><td>$3,010.00</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <div class="cols lower">
+      <section aria-labelledby="h-terms">
+        <h2 id="h-terms">Terms &amp; logistics</h2>
+        <ul class="terms">
+          <li><b>$500 logistics fee</b> — mandatory on every LED wall package; already included in the totals above.</li>
+          <li><b>30% retainer reserves the date;</b> balance is due 14 days prior to the event.</li>
+          <li><b>Punctual setup</b> starts 3–4 hours before call time (2:00 – 3:00 PM for a 6:00 PM call).</li>
+          <li><b>Fully insured</b> — $2,000,000 Commercial General Liability; COI issued upon request.</li>
+        </ul>
+      </section>
+      <section aria-labelledby="h-next">
+        <h2 id="h-next">To lock in November 14</h2>
+        <ol class="steps">
+          <li>Choose Option A (10×6 ft) or Option B (13×8 ft).</li>
+          <li>Send the venue name and address for load-in planning.</li>
+          <li>Pay the 30% retainer to reserve the date.</li>
+        </ol>
+        <a class="cta" href="mailto:executive@nexuslivemedia.com?subject=Book%20Nexus%20Media%20Crew%20%E2%80%94%20LED%20Wall%20%E2%80%94%20Nov%2014%2C%202026">Book Nexus Media Crew →</a>
+        <div class="cta-sub">or reply to executive@nexuslivemedia.com</div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>
+      <b>Nexus Live Media</b> · Operated by US AFRIK MEDIA LLC<br />
+      Coverage: Washington, D.C. Metro Area &amp; travel nationwide
+    </div>
+    <div class="r">
+      www.nexuslivemedia.com<br />
+      executive@nexuslivemedia.com
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
