@@ -11,7 +11,10 @@ page_start([
 ]);
 ?>
 <section class="page-hero">
-  <div class="hero-media"><?= picture('events/corporate', 'Keynote speaker on an LED-backed stage at a corporate summit produced by Nexus Live Media', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media">
+    <?= picture('about/ident', 'Nexus Live Media brand animation: light streaks forming the word NEXUS', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?>
+    <video data-src="/assets/video/ident.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+  </div>
   <div class="container">
     <?= breadcrumbs($crumbs) ?>
     <div class="hero-content reveal in">
@@ -44,6 +47,7 @@ page_start([
         </ul>
         <a class="btn btn-primary btn-block mt" href="/contact">Work with us</a>
       </div>
+      <div class="media-rounded mt"><?= picture('brand/poster', 'Nexus Live Media brand board: Your Event. Elevated. LED walls, live streaming, photo booth, AV production', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 40vw']) ?></div>
     </aside>
   </div>
 </section>
@@ -72,6 +76,21 @@ page_start([
 <?php foreach (array_slice(services(), 0, 4, true) as $slug => $s): ?>
       <?= service_card($slug, $s) ?>
 <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="section-head reveal">
+      <div><span class="eyebrow">On site</span><h2>A few moments from our events</h2></div>
+      <a class="btn" href="/events">Event types <?= icon('arrow') ?></a>
+    </div>
+    <div class="gallery">
+      <figure class="reveal"><?= picture('gallery/keynote', 'Keynote speaker on stage with LED screen at a corporate summit', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Corporate summit</figcaption></figure>
+      <figure class="reveal"><?= picture('services/media-coverage', 'Gala dinner with LED stage and guests at round tables', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Gala coverage</figcaption></figure>
+      <figure class="reveal"><?= picture('services/live-video', 'Broadcast switcher during a live stream', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Live switching</figcaption></figure>
+      <figure class="reveal"><?= picture('services/printing', 'Live heat-press merchandise station at an expo', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Live merch printing</figcaption></figure>
     </div>
   </div>
 </section>

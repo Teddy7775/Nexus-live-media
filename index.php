@@ -124,7 +124,7 @@ page_start([
       <figure class="reveal"><?= picture('gallery/keynote', 'Keynote speaker on stage with LED screen at a corporate summit', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Corporate summit, LED stage</figcaption></figure>
       <figure class="reveal"><?= picture('gallery/booth-guests', 'Guests laughing at the open-air photo booth tower', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Open-air photo booth</figcaption></figure>
       <figure class="reveal"><?= picture('gallery/booth-print', 'Guests holding their instant print from the DNP printer', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Instant dye-sub prints</figcaption></figure>
-      <figure class="reveal"><?= picture('services/led-wall', 'Modular LED video wall assembled on a ballroom stage', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Modular LED wall</figcaption></figure>
+      <figure class="reveal"><?= picture('services/media-coverage', 'Gala dinner with LED stage and guests at round tables', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Gala coverage</figcaption></figure>
     </div>
   </div>
 </section>

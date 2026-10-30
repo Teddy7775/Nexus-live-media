@@ -20,7 +20,12 @@ page_start([
 ]);
 ?>
 <section class="page-hero">
-  <div class="hero-media"><?= picture($imgBase, $e['image_alt'], ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media">
+    <?= picture($imgBase, $e['image_alt'], ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?>
+<?php if ($slug === 'corporate'): ?>
+    <video data-src="/assets/video/gala.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+<?php endif; ?>
+  </div>
   <div class="container">
     <?= breadcrumbs($crumbs) ?>
     <div class="hero-content reveal in">

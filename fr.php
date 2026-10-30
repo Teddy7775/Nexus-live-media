@@ -149,6 +149,7 @@ page_start([
 <?php endif; ?>
         </div>
       </div>
+      <div class="media-rounded mt"><?= picture('brand/sketch', 'Croquis du logo Nexus Live Media avec le slogan Your Event. Elevated.', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 40vw']) ?></div>
       <div class="panel mt">
         <h3 style="font-size:1.05rem">Zone d’intervention</h3>
         <p class="muted" style="margin:0">Washington DC, Maryland et Virginie. Déplacement gratuit dans un rayon de 35 miles autour de DC, puis 1,75 $ par mile. Interventions dans tout le pays sur demande.</p>

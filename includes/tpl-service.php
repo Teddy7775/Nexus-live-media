@@ -11,6 +11,9 @@ $url     = service_url($slug);
 $crumbs  = ['Home' => '/', 'Services' => '/services', $s['name'] => $url];
 $relatedEvents = array_filter(events(), fn($e) => in_array($slug, $e['services'], true));
 $pricing = pricing();
+// Brand clips that play behind the page hero on wide screens
+$heroVideos = ['live-video-production' => '/assets/video/switcher.mp4', 'media-coverage' => '/assets/video/gala.mp4', 'photo-booth' => '/assets/video/photo-booth.mp4'];
+$heroVideo = $heroVideos[$slug] ?? '';
 
 page_start([
   'title' => $s['meta_title'],
@@ -21,7 +24,12 @@ page_start([
 ]);
 ?>
 <section class="page-hero">
-  <div class="hero-media"><?= picture($imgBase, $s['image_alt'], ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media">
+    <?= picture($imgBase, $s['image_alt'], ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?>
+<?php if ($heroVideo !== ''): ?>
+    <video data-src="<?= h($heroVideo) ?>" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+<?php endif; ?>
+  </div>
   <div class="container">
     <?= breadcrumbs($crumbs) ?>
     <div class="hero-content reveal in">
@@ -68,12 +76,11 @@ page_start([
 <?php if ($slug === 'photo-booth'): ?>
 <section class="section tight" id="tiers">
   <div class="container">
-    <div class="grid grid-2 reveal" style="margin-bottom:34px;align-items:stretch">
-      <div class="media-rounded" style="aspect-ratio:16/9">
-        <?= picture('services/photo-booth', 'Guests at the Nexus Live Media open-air photo booth', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 50vw']) ?>
-        <video data-src="/assets/video/photo-booth.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
-      </div>
-      <div class="media-rounded"><?= picture('gallery/booth-print', 'Guests holding their instant print next to the DNP dye-sub printer', ['widths' => [800], 'sizes' => '(max-width: 1024px) 100vw, 50vw']) ?></div>
+    <div class="gallery reveal" style="margin-bottom:34px">
+      <figure><?= picture('gallery/booth-guests', 'Guests laughing at the open-air photo booth tower', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Open-air booth tower</figcaption></figure>
+      <figure><?= picture('gallery/booth-print', 'Guests holding their instant print next to the DNP dye-sub printer', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Instant dye-sub prints</figcaption></figure>
+      <figure><?= picture('gallery/booth-video', 'Two guests smiling for the booth camera at a gala', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Gala activation</figcaption></figure>
+      <figure><?= picture('gallery/booth-portrait', 'Guest dancing inside the photo booth frame', ['widths' => [500], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>GIFs and boomerangs</figcaption></figure>
     </div>
     <div class="section-head reveal">
       <div>
