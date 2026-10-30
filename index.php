@@ -51,7 +51,7 @@ page_start([
         <h2>Everything your event needs, from one crew</h2>
         <p>Book a single service or bundle them into a complete production. Every line below has a dedicated page with specs, pricing and answers.</p>
       </div>
-      <a class="btn" href="/services">All services <?= icon('arrow') ?></a>
+      <a class="btn" href="/services/">All services <?= icon('arrow') ?></a>
     </div>
     <div class="grid grid-4">
 <?php foreach ($services as $slug => $s): ?>
@@ -70,7 +70,7 @@ page_start([
         <h2>Built for your kind of event</h2>
         <p>Corporate town halls, commencements, worship services, weddings and cultural galas each need a different run-of-show. We plan for yours.</p>
       </div>
-      <a class="btn" href="/events">Browse event types <?= icon('arrow') ?></a>
+      <a class="btn" href="/events/">Browse event types <?= icon('arrow') ?></a>
     </div>
     <div class="grid grid-5">
 <?php foreach ($events as $slug => $e): ?>

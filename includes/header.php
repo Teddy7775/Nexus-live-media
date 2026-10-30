@@ -77,7 +77,7 @@ $wa        = wa_href($isFr ? 'Bonjour Nexus Live Media, je souhaite un devis pou
     <nav class="nav" id="nav" aria-label="Primary">
       <ul class="nav-list">
         <li class="has-sub<?= is_active('/services') ? ' active' : '' ?>">
-          <a href="/services">Services</a>
+          <a href="/services/">Services</a>
           <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show services"><?= icon('chevron') ?></button>
           <ul class="sub">
 <?php foreach (services() as $slug => $s): ?>
@@ -86,7 +86,7 @@ $wa        = wa_href($isFr ? 'Bonjour Nexus Live Media, je souhaite un devis pou
           </ul>
         </li>
         <li class="has-sub<?= is_active('/events') ? ' active' : '' ?>">
-          <a href="/events">Events</a>
+          <a href="/events/">Events</a>
           <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show event types"><?= icon('chevron') ?></button>
           <ul class="sub">
 <?php foreach (events() as $slug => $e): ?>

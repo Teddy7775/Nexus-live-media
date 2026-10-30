@@ -8,7 +8,7 @@ if (!isset($slug, $all[$slug])) { require dirname(__DIR__) . '/404.php'; exit; }
 $s       = $all[$slug];
 $imgBase = preg_replace('/\.jpg$/', '', $s['image']);
 $url     = service_url($slug);
-$crumbs  = ['Home' => '/', 'Services' => '/services', $s['name'] => $url];
+$crumbs  = ['Home' => '/', 'Services' => '/services/', $s['name'] => $url];
 $relatedEvents = array_filter(events(), fn($e) => in_array($slug, $e['services'], true));
 $pricing = pricing();
 // Brand clips that play behind the page hero on wide screens
@@ -160,7 +160,7 @@ page_start([
   <div class="container">
     <div class="section-head reveal">
       <div><span class="eyebrow">Popular for</span><h2>Events that book this service</h2></div>
-      <a class="btn" href="/events">All event types <?= icon('arrow') ?></a>
+      <a class="btn" href="/events/">All event types <?= icon('arrow') ?></a>
     </div>
     <div class="grid grid-<?= min(5, max(2, count($relatedEvents))) ?>">
 <?php foreach ($relatedEvents as $es => $e): ?>

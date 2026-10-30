@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/includes/helpers.php';
-$crumbs = ['Home' => '/', 'Events' => '/events'];
+require_once __DIR__ . '/../includes/helpers.php';
+$crumbs = ['Home' => '/', 'Events' => '/events/'];
 page_start([
   'title' => 'Event Types We Produce in DC, Maryland & Virginia | Nexus Live Media',
   'desc'  => 'Corporate and government meetings, graduations, weddings, church services and cultural celebrations. See how we plan live video, LED, audio and photo booths for each kind of event.',
-  'path'  => '/events',
+  'path'  => '/events/',
   'jsonld' => [ld_breadcrumb($crumbs)],
 ]);
 ?>
