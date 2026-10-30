@@ -14,8 +14,8 @@ AddDefaultCharset UTF-8
   RewriteCond %{HTTP_HOST} ^www\.nexuslivemedia\.com$ [NC]
   RewriteRule ^ https://nexuslivemedia.com%{REQUEST_URI} [R=301,L]
 
-  # 2) Never serve the includes/ or tools/ folders
-  RewriteRule ^(includes|tools)(/|$) - [F,L]
+  # 2) Never serve the includes/, tools/ or social/ folders
+  RewriteRule ^(includes|tools|social)(/|$) - [F,L]
 
   # 3) /page.php -> /page (only when the browser asked for .php explicitly)
   RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
