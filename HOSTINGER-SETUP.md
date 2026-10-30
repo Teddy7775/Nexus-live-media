@@ -7,9 +7,9 @@ Site multi-pages en PHP 8 (aucune base de données, aucune dépendance). Tout se
 ```
 public_html/
 ├── index.php                 Accueil
-├── services.php              Hub services  → /services
+├── services/index.php        Hub services  → /services/
 ├── services/*.php            8 pages services (ex. /services/led-screen-rental)
-├── events.php                Hub événements → /events
+├── events/index.php          Hub événements → /events/
 ├── events/*.php              5 pages par type d'événement
 ├── pricing.php  about.php  faq.php  contact.php  thank-you.php  404.php
 ├── fr.php                    Page communauté francophone → /fr

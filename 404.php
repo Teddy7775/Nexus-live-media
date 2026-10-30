@@ -15,7 +15,7 @@ page_start([
     <h1 style="font-size:2rem">That page went off air.</h1>
     <p class="muted" style="font-size:1.05rem">The link may be outdated. Here is where most people want to go:</p>
     <div class="hero-ctas" style="justify-content:center;margin-top:20px">
-      <a class="btn btn-primary" href="/services">Our services</a>
+      <a class="btn btn-primary" href="/services/">Our services</a>
       <a class="btn" href="/pricing">Pricing</a>
       <a class="btn" href="/contact">Get a quote</a>
     </div>

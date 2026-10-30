@@ -70,7 +70,7 @@ page_start([
   <div class="container">
     <div class="section-head reveal">
       <div><span class="eyebrow">Services</span><h2>What we bring to your event</h2></div>
-      <a class="btn" href="/services">All services <?= icon('arrow') ?></a>
+      <a class="btn" href="/services/">All services <?= icon('arrow') ?></a>
     </div>
     <div class="grid grid-4">
 <?php foreach (array_slice(services(), 0, 4, true) as $slug => $s): ?>
@@ -84,7 +84,7 @@ page_start([
   <div class="container">
     <div class="section-head reveal">
       <div><span class="eyebrow">On site</span><h2>A few moments from our events</h2></div>
-      <a class="btn" href="/events">Event types <?= icon('arrow') ?></a>
+      <a class="btn" href="/events/">Event types <?= icon('arrow') ?></a>
     </div>
     <div class="gallery">
       <figure class="reveal"><?= picture('gallery/keynote', 'Keynote speaker on stage with LED screen at a corporate summit', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Corporate summit</figcaption></figure>

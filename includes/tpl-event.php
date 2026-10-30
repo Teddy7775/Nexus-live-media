@@ -8,7 +8,7 @@ if (!isset($slug, $all[$slug])) { require dirname(__DIR__) . '/404.php'; exit; }
 $e       = $all[$slug];
 $imgBase = preg_replace('/\.jpg$/', '', $e['image']);
 $url     = event_url($slug);
-$crumbs  = ['Home' => '/', 'Events' => '/events', $e['name'] => $url];
+$crumbs  = ['Home' => '/', 'Events' => '/events/', $e['name'] => $url];
 $services = services();
 
 page_start([
@@ -67,7 +67,7 @@ page_start([
   <div class="container">
     <div class="section-head reveal">
       <div><span class="eyebrow">Recommended services</span><h2>What <?= h(mb_strtolower($e['short'])) ?> usually book</h2></div>
-      <a class="btn" href="/services">All services <?= icon('arrow') ?></a>
+      <a class="btn" href="/services/">All services <?= icon('arrow') ?></a>
     </div>
     <div class="grid grid-<?= min(4, max(2, count($e['services']))) ?>">
 <?php foreach ($e['services'] as $ss): if (!isset($services[$ss])) continue; ?>

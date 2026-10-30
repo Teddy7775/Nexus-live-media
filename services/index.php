@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/includes/helpers.php';
-$crumbs = ['Home' => '/', 'Services' => '/services'];
+require_once __DIR__ . '/../includes/helpers.php';
+$crumbs = ['Home' => '/', 'Services' => '/services/'];
 page_start([
   'title' => 'Event Production Services in Washington DC | Nexus Live Media',
   'desc'  => 'Live video production, hybrid conferencing, pro audio, LED wall rental, open-air photo booths, media coverage, special events video and event branding. Book one service or a full production.',
-  'path'  => '/services',
+  'path'  => '/services/',
   'jsonld' => [ld_breadcrumb($crumbs)],
 ]);
 ?>
