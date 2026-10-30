@@ -1,0 +1,69 @@
+# =============================================================
+# Nexus Live Media — Apache / LiteSpeed rules (Hostinger)
+# =============================================================
+Options -Indexes
+AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1) Always HTTPS on the apex domain (www -> apex, http -> https)
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://nexuslivemedia.com%{REQUEST_URI} [R=301,L]
+  RewriteCond %{HTTP_HOST} ^www\.nexuslivemedia\.com$ [NC]
+  RewriteRule ^ https://nexuslivemedia.com%{REQUEST_URI} [R=301,L]
+
+  # 2) Never serve the includes/ or tools/ folders
+  RewriteRule ^(includes|tools)(/|$) - [F,L]
+
+  # 3) /page.php -> /page (only when the browser asked for .php explicitly)
+  RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+  RewriteCond %{THE_REQUEST} \s/+index[\s?] [NC]
+  RewriteRule ^ / [R=301,L]
+
+  # 4) Strip trailing slash on pages (not on real directories)
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # 5) Clean URL -> .php file
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+  RewriteRule ^(.+?)$ $1.php [L]
+</IfModule>
+
+# Never serve docs, configs or logs that may sit in public_html
+<FilesMatch "\.(md|env|json|lock|sql|sh|bak|config|log|ini|mjs)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Long cache for versioned static assets
+  <FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|ico|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Custom error pages
+ErrorDocument 404 /404.php

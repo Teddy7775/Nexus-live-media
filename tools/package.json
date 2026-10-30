@@ -1,0 +1,10 @@
+{
+  "name": "nexus-live-media-tools",
+  "private": true,
+  "type": "module",
+  "description": "Image pipeline for nexuslivemedia.com: node optimize-images.mjs <raw-folder>",
+  "dependencies": {
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.33.5"
+  }
+}
