@@ -49,7 +49,7 @@ $wa        = wa_href($isFr ? 'Bonjour Nexus Live Media, je souhaite un devis pou
   <meta name="google-site-verification" content="<?= h(GSC_VERIFICATION) ?>">
 <?php endif; ?>
   <link rel="icon" href="/favicon.ico" sizes="32x32">
-  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/img/favicon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,7 +71,7 @@ $wa        = wa_href($isFr ? 'Bonjour Nexus Live Media, je souhaite un devis pou
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="<?= h(SITE_NAME) ?> — home">
       <?= logo_svg() ?>
-      <span class="brand-text"><b>Nexus Live Media</b><small>Live • Hybrid • LED • Photo Booth</small></span>
+      <span class="brand-text"><b>Nexus Live Media</b><small><?= $isFr ? 'Votre événement. Sublimé.' : 'Your Event. Elevated.' ?></small></span>
     </a>
 
     <nav class="nav" id="nav" aria-label="Primary">

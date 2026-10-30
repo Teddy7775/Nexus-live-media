@@ -9,7 +9,7 @@ declare(strict_types=1);
 const SITE_NAME   = 'Nexus Live Media';
 const LEGAL_NAME  = 'US AFRIK MEDIA LLC';
 const SITE_URL    = 'https://nexuslivemedia.com';   // canonical host, no trailing slash (www redirects here)
-const SITE_TAGLINE = 'Live Video Production • Hybrid Events • LED Walls • Photo Booths';
+const SITE_TAGLINE = 'Your Event. Elevated.';
 
 // ---- Contact ----
 const PHONE_DISPLAY = '+1 (202) 243-8880';

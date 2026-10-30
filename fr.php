@@ -33,10 +33,13 @@ page_start([
 ]);
 ?>
 <section class="hero">
-  <div class="hero-media"><?= picture('events/cultural', 'Gala de la diaspora africaine à Washington DC avec écran LED et photo booth', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media">
+    <?= picture('events/cultural', 'Gala de la diaspora africaine à Washington DC avec écran LED et photo booth', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?>
+    <video data-src="/assets/video/hero.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+  </div>
   <div class="container">
     <div class="hero-content reveal in">
-      <span class="eyebrow">Washington DC · Maryland · Virginie</span>
+      <span class="eyebrow">Votre événement. Sublimé.</span>
       <h1>Vos événements filmés, diffusés et sublimés, <span class="gradient-text">en français.</span></h1>
       <p class="lead">Mariages, dots, baptêmes, graduations, cultes, galas d’associations, concerts : une équipe de production qui parle votre langue, et une diffusion en direct pour vos proches restés au pays.</p>
       <div class="hero-ctas">
@@ -46,6 +49,7 @@ page_start([
 <?php endif; ?>
       </div>
       <div class="trust">
+        <span><?= icon('pin') ?> Washington DC · Maryland · Virginie</span>
         <span><?= icon('shield') ?> Assurance 2 M$, certificat gratuit</span>
         <span><?= icon('wifi') ?> Internet cellulaire autonome</span>
         <span><?= icon('globe') ?> Direct visible sur tous les téléphones</span>

@@ -49,6 +49,18 @@
     reveals.forEach(function (el) { io.observe(el); });
   }
 
+  /* ---------- Background videos: wide screens only, never with reduced motion or data saver ---------- */
+  var vids = doc.querySelectorAll('video[data-src]');
+  var saveData = navigator.connection && navigator.connection.saveData;
+  if (vids.length && !reduce && !saveData && window.matchMedia('(min-width: 900px)').matches) {
+    vids.forEach(function (v) {
+      v.addEventListener('playing', function () { v.classList.add('playing'); });
+      v.src = v.getAttribute('data-src');
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    });
+  }
+
   /* ---------- Quote form ---------- */
   var form = doc.getElementById('quoteForm');
   if (form) {

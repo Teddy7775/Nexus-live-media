@@ -18,10 +18,13 @@ page_start([
 ?>
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-media"><?= picture('hero', 'Live event production in a Washington DC ballroom: LED video wall, PTZ broadcast cameras and a video switcher', ['widths' => [800, 1280, 1920], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media">
+    <?= picture('hero', 'Live event production in a Washington DC ballroom: LED video wall, PTZ broadcast cameras and a video switcher', ['widths' => [800, 1280, 1920], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?>
+    <video data-src="/assets/video/hero.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+  </div>
   <div class="container">
     <div class="hero-content reveal in">
-      <span class="eyebrow">Washington DC · Maryland · Virginia</span>
+      <span class="eyebrow">Your Event. Elevated.</span>
       <h1>Live events that look <span class="gradient-text">premium</span>, run smoothly, and reach every screen.</h1>
       <p class="lead">Multi-camera live streaming, hybrid conferencing, pro audio, LED video walls, open-air photo booths and event branding, delivered by one crew under one contract.</p>
       <div class="hero-ctas">
@@ -29,6 +32,7 @@ page_start([
         <a class="btn btn-lg" href="/pricing">See packages &amp; pricing</a>
       </div>
       <div class="trust">
+        <span><?= icon('pin') ?> Washington DC · Maryland · Virginia</span>
         <span><?= icon('shield') ?> $2M liability, free COIs</span>
         <span><?= icon('wifi') ?> Bonded cellular, never venue Wi-Fi</span>
         <span><?= icon('clock') ?> Photos in 48 h, reels in 5–7 days</span>
@@ -102,7 +106,26 @@ page_start([
         </div>
       </div>
     </div>
-    <div class="media-rounded reveal"><?= picture('about/crew', 'Nexus Live Media crew setting up an LED wall and cabling before a conference', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 45vw']) ?></div>
+    <div class="media-rounded reveal"><?= picture('services/live-video', 'Live production control: video switcher and multiview monitor during an event', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 45vw']) ?></div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section tight" id="gallery">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">On site</span>
+        <h2>What it looks like when we show up</h2>
+      </div>
+      <a class="btn" href="/services/photo-booth">Photo booth experiences <?= icon('arrow') ?></a>
+    </div>
+    <div class="gallery">
+      <figure class="reveal"><?= picture('gallery/keynote', 'Keynote speaker on stage with LED screen at a corporate summit', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Corporate summit, LED stage</figcaption></figure>
+      <figure class="reveal"><?= picture('gallery/booth-guests', 'Guests laughing at the open-air photo booth tower', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Open-air photo booth</figcaption></figure>
+      <figure class="reveal"><?= picture('gallery/booth-print', 'Guests holding their instant print from the DNP printer', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Instant dye-sub prints</figcaption></figure>
+      <figure class="reveal"><?= picture('services/led-wall', 'Modular LED video wall assembled on a ballroom stage', ['widths' => [800], 'sizes' => '(max-width: 768px) 50vw, 25vw']) ?><figcaption>Modular LED wall</figcaption></figure>
+    </div>
   </div>
 </section>
 

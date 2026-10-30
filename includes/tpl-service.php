@@ -68,6 +68,13 @@ page_start([
 <?php if ($slug === 'photo-booth'): ?>
 <section class="section tight" id="tiers">
   <div class="container">
+    <div class="grid grid-2 reveal" style="margin-bottom:34px;align-items:stretch">
+      <div class="media-rounded" style="aspect-ratio:16/9">
+        <?= picture('services/photo-booth', 'Guests at the Nexus Live Media open-air photo booth', ['widths' => [800, 1600], 'sizes' => '(max-width: 1024px) 100vw, 50vw']) ?>
+        <video data-src="/assets/video/photo-booth.mp4" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+      </div>
+      <div class="media-rounded"><?= picture('gallery/booth-print', 'Guests holding their instant print next to the DNP dye-sub printer', ['widths' => [800], 'sizes' => '(max-width: 1024px) 100vw, 50vw']) ?></div>
+    </div>
     <div class="section-head reveal">
       <div>
         <span class="eyebrow">Three tiers</span>

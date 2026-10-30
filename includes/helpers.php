@@ -148,8 +148,9 @@ function icon(string $name, string $class = ''): string {
   return "<svg class=\"{$cls}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">{$d}</svg>";
 }
 
+/** Brand mark: the official logo symbol on a white rounded tile (reads on the dark theme) */
 function logo_svg(string $class = 'logo-mark'): string {
-  return '<svg class="' . h($class) . '" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="nlm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#nlm-g)"/><path d="M12 34V14l16 20V14" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 19l8 5-8 5z" fill="#fff"/></svg>';
+  return '<img class="' . h($class) . '" src="/assets/img/favicon-192.png" width="44" height="44" alt="" decoding="async">';
 }
 
 // ---- Signed, stateless form token (no PHP session needed) ----

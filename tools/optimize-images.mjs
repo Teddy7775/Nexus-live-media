@@ -7,8 +7,7 @@
 // apple-touch-icon.png generated from favicon.svg.
 // =============================================================
 import sharp from 'sharp';
-import pngToIco from 'png-to-ico';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,38 +29,40 @@ for (const it of cfg.images) {
   const meta = await sharp(src).metadata();
   for (const w of it.widths) {
     if (w > meta.width * 1.12) { console.warn(`skip ${it.out}-${w} (source is ${meta.width}px wide)`); continue; }
-    const base = sharp(src).resize({ width: w });
+    const opts = { width: w };
+    if (it.aspect) {                       // e.g. "16:9": crop around the most interesting region
+      const [aw, ah] = it.aspect.split(':').map(Number);
+      Object.assign(opts, { height: Math.round(w * ah / aw), fit: 'cover', position: 'attention' });
+    }
+    const base = sharp(src).resize(opts);
     const j = await base.clone().jpeg({ quality: cfg.quality.jpg, mozjpeg: true, progressive: true }).toFile(`${outBase}-${w}.jpg`);
     const p = await base.clone().webp({ quality: cfg.quality.webp, effort: 5 }).toFile(`${outBase}-${w}.webp`);
     console.log(`${it.out}-${w}: jpg ${kb(j.size)} / webp ${kb(p.size)}`);
   }
 }
 
-// ---- Icons from favicon.svg ----
-const svg = readFileSync(join(imgDir, 'favicon.svg'));
-const iconPng = (size) => sharp(svg, { density: 600 }).resize(size, size).png().toBuffer();
-writeFileSync(join(imgDir, 'logo.png'), await iconPng(512));
-writeFileSync(join(repoRoot, 'apple-touch-icon.png'), await iconPng(180));
-writeFileSync(join(repoRoot, 'favicon.ico'), await pngToIco([await iconPng(16), await iconPng(32), await iconPng(48)]));
-console.log('icons: logo.png, apple-touch-icon.png, favicon.ico');
+// Icons (favicon.ico, apple-touch-icon.png, logo.png, brand/*) come from the official logo;
+// they are generated once and committed, not rebuilt here.
 
 // ---- Open Graph image 1200x630 ----
 const ogSrc = join(rawDir, cfg.og.src);
-if (existsSync(ogSrc)) {
-  const mark = await iconPng(104);
+const markPath = join(imgDir, 'favicon-192.png');
+if (existsSync(ogSrc) && existsSync(markPath)) {
+  const mark = await sharp(markPath).resize(120, 120).png().toBuffer();
   const overlay = Buffer.from(`<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070A16" stop-opacity="0.10"/><stop offset="0.55" stop-color="#070A16" stop-opacity="0.55"/><stop offset="1" stop-color="#070A16" stop-opacity="0.94"/></linearGradient>
-      <linearGradient id="a" x1="0" x2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050B1E" stop-opacity="0.15"/><stop offset="0.55" stop-color="#050B1E" stop-opacity="0.60"/><stop offset="1" stop-color="#050B1E" stop-opacity="0.95"/></linearGradient>
+      <linearGradient id="a" x1="0" x2="1"><stop offset="0" stop-color="#1D4ED8"/><stop offset="1" stop-color="#60A5FA"/></linearGradient>
     </defs>
     <rect width="1200" height="630" fill="url(#g)"/>
-    <text x="196" y="402" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="bold" fill="#ffffff">Nexus Live Media</text>
-    <rect x="196" y="420" width="140" height="6" rx="3" fill="url(#a)"/>
-    <text x="196" y="470" font-family="Arial, Helvetica, sans-serif" font-size="27" fill="#DCE3FF">Live Video Production  •  Hybrid Events  •  LED Walls  •  Photo Booths</text>
-    <text x="196" y="512" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#AEB9DE">Washington DC  •  Maryland  •  Virginia      nexuslivemedia.com</text>
+    <text x="212" y="396" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="bold" fill="#ffffff">Nexus Live Media</text>
+    <text x="212" y="446" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-style="italic" fill="#D4B072">Your Event. Elevated.</text>
+    <rect x="212" y="466" width="150" height="6" rx="3" fill="url(#a)"/>
+    <text x="212" y="508" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#DCE3FF">LED Walls  •  Live Streaming  •  Photo Booth  •  AV Production</text>
+    <text x="212" y="546" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#AEB9DE">Washington DC  •  Maryland  •  Virginia      nexuslivemedia.com</text>
   </svg>`);
   await sharp(ogSrc).resize(1200, 630, { fit: 'cover', position: 'attention' })
-    .composite([{ input: overlay }, { input: mark, left: 72, top: 348 }])
+    .composite([{ input: overlay }, { input: mark, left: 72, top: 356 }])
     .jpeg({ quality: 82, mozjpeg: true }).toFile(join(imgDir, 'og.jpg'));
   console.log('og.jpg written');
 }

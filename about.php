@@ -6,12 +6,12 @@ page_start([
   'title' => 'About Nexus Live Media | Event Production Crew in Washington DC',
   'desc'  => 'Nexus Live Media is a Washington DC event production company (US AFRIK MEDIA LLC) delivering live video, hybrid conferencing, LED walls, audio, photo booths and branding across DC, Maryland and Virginia.',
   'path'  => '/about',
-  'og_image' => image_url('about/crew'),
+  'og_image' => image_url('events/corporate'),
   'jsonld' => [ld_breadcrumb($crumbs)],
 ]);
 ?>
 <section class="page-hero">
-  <div class="hero-media"><?= picture('about/crew', 'Nexus Live Media production crew setting up cameras and an LED wall', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
+  <div class="hero-media"><?= picture('events/corporate', 'Keynote speaker on an LED-backed stage at a corporate summit produced by Nexus Live Media', ['widths' => [800, 1600], 'sizes' => '100vw', 'loading' => 'eager', 'priority' => true]) ?></div>
   <div class="container">
     <?= breadcrumbs($crumbs) ?>
     <div class="hero-content reveal in">
