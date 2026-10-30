@@ -1,0 +1,143 @@
+[
+  {
+    "id": "p01",
+    "day": 1,
+    "date": "2026-11-02",
+    "platforms": ["instagram", "facebook", "linkedin"],
+    "type": "carousel",
+    "media": ["ig-carousel-01-1080x1350.jpg", "ig-carousel-02-1080x1350.jpg", "ig-carousel-03-1080x1350.jpg", "ig-carousel-04-1080x1350.jpg", "ig-carousel-05-1080x1350.jpg"],
+    "media_linkedin": ["post-landscape-1200x628.jpg"],
+    "time_et": "11:30",
+    "caption": {
+      "instagram": "Nexus Live Media is officially on Instagram. 🎬\n\nWe produce events across Washington DC, Maryland and Virginia: multi-camera live streaming, hybrid conferences, pro audio, modular LED video walls, open-air photo booths, event photography and printed merch.\n\nOne crew. One contract. One producer on site from load-in to the last cue.\n\nSwipe to see what we bring, then save this post for your next conference, graduation, wedding or gala.\n\nQuotes within 1 business day → link in bio\n📞 +1 (202) 243-8880\n\n#nexuslivemedia #dcevents #dmvevents #washingtondc #eventproduction #livestreaming #ledwallrental #photoboothdc #corporateeventsdc #hybridevents #dcweddings #marylandwedding #novaevents #dceventplanner #eventprofs #avproduction #dcgraduation #churchmedia #dcgala #dmvphotobooth #eventtech #washingtondcevents #virginiaevents #marylandevents",
+      "facebook": "Nexus Live Media is officially on Facebook. 🎬\n\nWe produce events across Washington DC, Maryland and Virginia: multi-camera live streaming, hybrid conferences, pro audio, modular LED video walls, open-air photo booths, event photography and printed merch.\n\nOne crew. One contract. One producer on site from load-in to the last cue.\n\nQuotes within 1 business day: https://nexuslivemedia.com/contact\n📞 +1 (202) 243-8880\n\n#nexuslivemedia #dcevents #dmvevents #eventproduction #livestreaming #ledwallrental #photoboothdc",
+      "linkedin": "Nexus Live Media is now on LinkedIn.\n\nWe are a Washington, DC event production company serving corporate, government, education and community clients across DC, Maryland and Virginia: multi-camera live streaming, hybrid conferencing on Zoom, Teams and Webex, pro audio, modular LED video walls, open-air photo booths, event photography and branded merchandise.\n\nWhat organizers get: one contract, one load-in plan and one lead producer on site. Bonded cellular internet on every stream, $2,000,000 liability insurance with certificates issued free to venues, recordings delivered within 24 to 48 hours.\n\nPlanning a town hall, summit or hybrid training? Request a quote at https://nexuslivemedia.com/contact\n\n#EventProduction #HybridEvents #WashingtonDC #LiveStreaming #CorporateEvents"
+    }
+  },
+  {
+    "id": "p02",
+    "day": 2,
+    "date": "2026-11-03",
+    "platforms": ["instagram", "tiktok", "facebook"],
+    "type": "video",
+    "media": ["video-vertical-1080x1920.mp4"],
+    "time_et": "18:00",
+    "caption": {
+      "instagram": "28 seconds of what we do: live switching, LED stage, open-air photo booth. 🎥\n\nConferences, graduations, worship services, weddings and galas across DC, Maryland and Virginia.\n\nQuotes within 1 business day → link in bio\n\n#nexuslivemedia #eventproduction #dcevents #dmvevents #livestreaming #ledwall #photobooth #behindthescenes #eventprofs #washingtondc #marylandevents #virginiaevents #corporateevents #dcweddings #hybridevents #avtech #videoproduction #dcgala #eventvideo #reels",
+      "tiktok": "Live switching, LED stage, photo booth. This is event production in DC. 🎬 #dcevents #eventproduction #ledwall #photobooth #livestream #dmv",
+      "facebook": "28 seconds of what we do: live switching, LED stage, open-air photo booth. 🎥\n\nConferences, graduations, worship services, weddings and galas across DC, Maryland and Virginia.\n\nQuotes within 1 business day: https://nexuslivemedia.com/contact\n\n#nexuslivemedia #eventproduction #dcevents #livestreaming #ledwall #photobooth"
+    }
+  },
+  {
+    "id": "p03",
+    "day": 3,
+    "date": "2026-11-04",
+    "platforms": ["instagram", "facebook"],
+    "type": "image",
+    "media": ["service-led-1080.jpg"],
+    "time_et": "12:00",
+    "caption": {
+      "instagram": "How much does an LED wall cost in Washington DC? 🖥️\n\nOur modular HD LED walls start at $3,000 for a 10x6 ft stage wall, install and video tech included. The 13x8 ft giant display runs up to $4,300. No venue Wi-Fi needed, no surprises on show day.\n\nLive feed, slides, sponsor logos, image magnification: everything your audience needs to see, from the back row.\n\nPricing and specs → link in bio\n📞 +1 (202) 243-8880\n\n#ledwallrental #ledwall #dcevents #dmvevents #washingtondc #eventproduction #corporateeventsdc #dcgala #stagedesign #eventtech #avrental #conferenceav #dceventplanner #eventprofs #marylandevents #novaevents #hybridevents #videowall #galaproduction #nexuslivemedia",
+      "facebook": "How much does an LED wall cost in Washington DC? 🖥️\n\nOur modular HD LED walls start at $3,000 for a 10x6 ft stage wall, install and video tech included. The 13x8 ft giant display runs up to $4,300. No venue Wi-Fi needed, no surprises on show day.\n\nLive feed, slides, sponsor logos, image magnification: everything your audience needs to see, from the back row.\n\nPricing and specs: https://nexuslivemedia.com/services/led-screen-rental\n📞 +1 (202) 243-8880\n\n#ledwallrental #dcevents #dmvevents #eventproduction #corporateeventsdc #nexuslivemedia"
+    }
+  },
+  {
+    "id": "p04",
+    "day": 4,
+    "date": "2026-11-05",
+    "platforms": ["instagram", "facebook", "tiktok"],
+    "type": "carousel",
+    "media": ["service-booth-1080.jpg", "ig-carousel-04-1080x1350.jpg"],
+    "time_et": "19:00",
+    "caption": {
+      "instagram": "Open-air photo booth, three ways. 📸\n\nEssential Digital, $550 for 2 hours: stills, GIFs, boomerangs, instant sharing by text and QR.\nSignature Print, $950 for 3 hours: unlimited instant prints, premium backdrop, two attendants. Our most-booked tier.\nVIP Brand Suite, $1,750 for 4 hours: custom 8x8 step-and-repeat, branded microsite, data capture, live slideshow.\n\nCanon DSLR capture, dye-sub prints, an attendant who keeps the line moving. Weddings, galas, graduations, corporate activations across DC, MD and VA.\n\nReserve your date → link in bio\n\n#photoboothdc #photoboothrental #dmvphotobooth #dcweddings #marylandwedding #virginiawedding #dcevents #dmvevents #weddingvendor #dcgala #corporateeventsdc #graduationparty #eventideas #weddingphotobooth #openairphotobooth #instantprints #dceventplanner #eventprofs #washingtondc #nexuslivemedia",
+      "facebook": "Open-air photo booth, three ways. 📸\n\nEssential Digital, $550 for 2 hours: stills, GIFs, boomerangs, instant sharing by text and QR.\nSignature Print, $950 for 3 hours: unlimited instant prints, premium backdrop, two attendants. Our most-booked tier.\nVIP Brand Suite, $1,750 for 4 hours: custom 8x8 step-and-repeat, branded microsite, data capture, live slideshow.\n\nCanon DSLR capture, dye-sub prints, an attendant who keeps the line moving. Weddings, galas, graduations, corporate activations across DC, MD and VA.\n\nReserve your date: https://nexuslivemedia.com/services/photo-booth\n\n#photoboothdc #dmvphotobooth #dcweddings #marylandwedding #dcevents #nexuslivemedia",
+      "tiktok": "Photo booth tiers from $550 in DC, MD & VA. Which one is your event? 📸 #photobooth #dcevents #dcwedding #dmvevents #photoboothrental #eventideas"
+    }
+  },
+  {
+    "id": "p05",
+    "day": 5,
+    "date": "2026-11-06",
+    "platforms": ["instagram", "facebook"],
+    "type": "image",
+    "media": ["service-live-1080.jpg"],
+    "time_et": "12:30",
+    "caption": {
+      "instagram": "Half your guest list lives in another country? They can still be in the room. 🌍\n\nWe stream weddings, graduations, church services and galas with 3 to 4 cameras, a live director and bonded cellular internet, never the venue Wi-Fi. Private viewing link for family only, replay available right after, and 4K recordings of every camera delivered within 48 hours.\n\nFrom $1,850 across DC, Maryland and Virginia.\n\nCheck your date → link in bio\n📞 +1 (202) 243-8880\n\n#livestreaming #weddinglivestream #dcweddings #marylandwedding #virginiawedding #livestreamwedding #graduationlivestream #churchlivestream #dcevents #dmvevents #washingtondc #eventproduction #videoproduction #hybridevents #familyabroad #nexuslivemedia #eventprofs #dceventplanner #multicamera #broadcast",
+      "facebook": "Half your guest list lives in another country? They can still be in the room. 🌍\n\nWe stream weddings, graduations, church services and galas with 3 to 4 cameras, a live director and bonded cellular internet, never the venue Wi-Fi. Private viewing link for family only, replay available right after, and 4K recordings of every camera delivered within 48 hours.\n\nFrom $1,850 across DC, Maryland and Virginia.\n\nCheck your date: https://nexuslivemedia.com/services/live-video-production\n📞 +1 (202) 243-8880\n\n#livestreaming #weddinglivestream #dcweddings #graduationlivestream #churchlivestream #nexuslivemedia"
+    }
+  },
+  {
+    "id": "p06",
+    "day": 6,
+    "date": "2026-11-07",
+    "platforms": ["facebook", "instagram"],
+    "type": "image",
+    "media": ["post-square-1080.jpg"],
+    "time_et": "10:00",
+    "caption": {
+      "facebook": "Mariage, dot, baptême, graduation, culte, gala d'association à Washington DC, dans le Maryland ou en Virginie ? 🎉\n\nNexus Live Media filme, diffuse et sublime votre événement, en français : captation multi-caméras, direct pour la famille restée à Douala, Abidjan, Dakar, Kinshasa ou Port-au-Prince, écran LED géant, sonorisation, photo booth avec impressions instantanées, t-shirts et étoles personnalisés.\n\nUn seul prestataire, un seul contrat, une équipe qui parle votre langue. Devis écrit sous 1 jour ouvré.\n\n👉 https://nexuslivemedia.com/fr\n📞 +1 (202) 243-8880 (appel ou WhatsApp)\n\n#diasporaafricaine #mariageafricain #washingtondc #maryland #virginie #evenementiel #photobooth #ecranled #livestreaming #nexuslivemedia",
+      "instagram": "Mariage, dot, baptême, graduation, culte, gala d'association à Washington DC, dans le Maryland ou en Virginie ? 🎉\n\nNexus Live Media filme, diffuse et sublime votre événement, en français : captation multi-caméras, direct pour la famille restée à Douala, Abidjan, Dakar, Kinshasa ou Port-au-Prince, écran LED géant, sonorisation, photo booth avec impressions instantanées, t-shirts et étoles personnalisés.\n\nUn seul prestataire, un seul contrat, une équipe qui parle votre langue. Devis écrit sous 1 jour ouvré.\n\n👉 nexuslivemedia.com/fr (lien en bio)\n📞 +1 (202) 243-8880 (appel ou WhatsApp)\n\n#diasporaafricaine #camerounaisdeusa #ivoiriensdeusa #senegalaisdeusa #congolaisdeusa #haitiensdeusa #mariageafricain #washingtondc #maryland #virginie #evenementiel #photobooth #ecranled #livestreaming #nexuslivemedia #communautefrancophone #silverspring #hyattsville #graduation #gala"
+    }
+  },
+  {
+    "id": "p07",
+    "day": 7,
+    "date": "2026-11-08",
+    "platforms": ["youtube"],
+    "type": "video",
+    "media": ["video-youtube-1920x1080.mp4"],
+    "thumbnail": "thumbnail-youtube-1280x720.jpg",
+    "time_et": "15:00",
+    "caption": {
+      "youtube": {
+        "title": "Event Production in Washington DC | Live Streaming, LED Walls & Photo Booths | Nexus Live Media",
+        "description": "Nexus Live Media produces live events across Washington DC, Maryland and Virginia: multi-camera live streaming and hybrid conferencing, pro audio, modular LED video walls, open-air photo booths, event photography, 4K highlight films and printed merchandise. One crew, one contract, one producer on site. Bonded cellular internet on every stream, $2,000,000 liability insurance with free certificates for venues.\n\nServices and pricing: https://nexuslivemedia.com/pricing\nLED wall rental: https://nexuslivemedia.com/services/led-screen-rental\nPhoto booth rental: https://nexuslivemedia.com/services/photo-booth\nLive video production: https://nexuslivemedia.com/services/live-video-production\nRequest a quote: https://nexuslivemedia.com/contact\nCall or text: +1 (202) 243-8880\n\n#EventProduction #WashingtonDC #LiveStreaming #LEDWall #PhotoBooth",
+        "tags": ["event production washington dc", "led wall rental dc", "photo booth rental dc", "live streaming services dc", "hybrid event production", "audio visual rental maryland", "event videography virginia", "corporate event production dmv", "wedding live stream dc", "nexus live media"]
+      }
+    }
+  },
+  {
+    "id": "p08",
+    "day": 8,
+    "date": "2026-11-09",
+    "platforms": ["linkedin", "facebook"],
+    "type": "image",
+    "media": ["ig-carousel-02-1080x1350.jpg"],
+    "time_et": "08:30",
+    "caption": {
+      "linkedin": "Three reasons hybrid events go wrong, and how we remove each one.\n\n1. Venue Wi-Fi drops mid-keynote. We bring bonded multi-carrier cellular internet and never depend on the venue network.\n2. Remote speakers look like an afterthought. We integrate Zoom, Teams or Webex guests into the live switch with proper audio, lower-thirds and a moderator.\n3. Nobody owns the run-of-show. One lead producer walks the venue with you, builds the timing sheet and stays from load-in to the last cue.\n\nExecutive Hybrid Suite from $4,450: 3-camera live stream, digital PA with 4 wireless mics, photo kiosk, photographer and 4K ISO recordings for meetings up to 120 guests.\n\nDetails: https://nexuslivemedia.com/services/hybrid-conferencing\n\n#HybridEvents #CorporateEvents #WashingtonDC #EventProduction #AVProduction",
+      "facebook": "Three reasons hybrid events go wrong, and how we remove each one.\n\n1. Venue Wi-Fi drops mid-keynote. We bring bonded multi-carrier cellular internet and never depend on the venue network.\n2. Remote speakers look like an afterthought. We integrate Zoom, Teams or Webex guests into the live switch with proper audio, lower-thirds and a moderator.\n3. Nobody owns the run-of-show. One lead producer walks the venue with you, builds the timing sheet and stays from load-in to the last cue.\n\nExecutive Hybrid Suite from $4,450 for meetings up to 120 guests.\n\nDetails: https://nexuslivemedia.com/services/hybrid-conferencing\n\n#hybridevents #corporateeventsdc #washingtondc #eventproduction #nexuslivemedia"
+    }
+  },
+  {
+    "id": "p09",
+    "day": 9,
+    "date": "2026-11-10",
+    "platforms": ["instagram", "tiktok", "facebook"],
+    "type": "story",
+    "media": ["story-1080x1920.jpg"],
+    "media_tiktok": ["video-vertical-1080x1920.mp4"],
+    "time_et": "17:30",
+    "link": "https://nexuslivemedia.com/services/photo-booth",
+    "caption": {
+      "instagram": "Instant prints in 10 seconds. From $550.",
+      "facebook": "Instant prints in 10 seconds. From $550.",
+      "tiktok": "Instant prints, GIFs and boomerangs. The booth that keeps the line moving. 📸 #photoboothdc #dcevents #weddingtiktok #dmv #photobooth #eventideas"
+    }
+  },
+  {
+    "id": "p10",
+    "day": 10,
+    "date": "2026-11-11",
+    "platforms": ["gmb"],
+    "type": "image",
+    "media": ["post-landscape-1200x628.jpg"],
+    "time_et": "09:00",
+    "cta": { "label": "Get a quote", "url": "https://nexuslivemedia.com/contact" },
+    "caption": {
+      "gmb": "Nexus Live Media produces live events across Washington DC, Maryland and Virginia: multi-camera live streaming, hybrid conferencing, pro audio, modular LED video walls from $3,000, open-air photo booths from $550, event photography with 48-hour delivery and printed merchandise. One crew, one contract, one producer on site. $2,000,000 liability insurance with free certificates for your venue. English and French-speaking team. Quotes within 1 business day."
+    }
+  }
+]
