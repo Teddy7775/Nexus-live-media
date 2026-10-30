@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /submissions.log
+Disallow: /includes/
+Disallow: /tools/
+Disallow: /thank-you
 
 Sitemap: https://nexuslivemedia.com/sitemap.xml

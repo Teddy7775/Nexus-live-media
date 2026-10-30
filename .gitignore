@@ -1,0 +1,8 @@
+.claude/
+tools/node_modules/
+tools/package-lock.json
+*.log
+.nlm-form-secret
+ratelimit/
+.DS_Store
+Thumbs.db

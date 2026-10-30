@@ -1,169 +1,105 @@
-# Guide de déploiement — Nexus Live Media sur Hostinger
+# Déploiement sur Hostinger — nexuslivemedia.com
 
-## 1. Fichiers à uploader
+Site multi-pages en PHP 8 (aucune base de données, aucune dépendance). Tout se configure dans **`includes/config.php`**.
 
-Connectez-vous au **hPanel Hostinger** → **Gestionnaire de fichiers** → dossier `public_html`.
+## 1. Structure
 
-Uploadez les fichiers suivants dans `public_html/` :
+```
+public_html/
+├── index.php                 Accueil
+├── services.php              Hub services  → /services
+├── services/*.php            8 pages services (ex. /services/led-screen-rental)
+├── events.php                Hub événements → /events
+├── events/*.php              5 pages par type d'événement
+├── pricing.php  about.php  faq.php  contact.php  thank-you.php  404.php
+├── fr.php                    Page communauté francophone → /fr
+├── includes/                 Config, helpers, header/footer, données, formulaire (bloqué par .htaccess)
+├── assets/css, assets/js, assets/img
+├── tools/                    Pipeline images (Node) + routeur de prévisualisation locale
+├── .htaccess  .user.ini  robots.txt  sitemap.xml  favicon.ico  apple-touch-icon.png
+```
 
-| Fichier local | Destination sur le serveur |
+Les URL sont « propres » (`/pricing`, pas `/pricing.php`) grâce au `.htaccess`. `www.nexuslivemedia.com` et `http://` redirigent en 301 vers `https://nexuslivemedia.com`.
+
+## 2. Mise en ligne
+
+**Option A — Git (recommandé)** : hPanel → *Avancé* → *Git* → déployer le dépôt `Teddy7775/Nexus-live-media`, branche `main`, dans `public_html`. Chaque fusion sur `main` redéploie le site.
+
+**Option B — Gestionnaire de fichiers** : uploader tout le dépôt dans `public_html` **sauf** `tools/node_modules`, `.claude`, `photobooth/`. Supprimer l'ancien `photo-booth-tiers.jpg` à la racine (il est maintenant dans `assets/img/`).
+
+Ensuite, dans hPanel → *Sites web* → *Configuration PHP* : choisir **PHP 8.2 ou 8.3** (le code utilise des fonctionnalités 8.1+).
+
+## 3. À renseigner dans `includes/config.php`
+
+| Constante | Quoi mettre |
 |---|---|
-| `index.php` | `public_html/index.php` |
-| `.htaccess` | `public_html/.htaccess` |
-| `robots.txt` | `public_html/robots.txt` |
-| `sitemap.xml` | `public_html/sitemap.xml` |
+| `GA_MEASUREMENT_ID` | l'ID GA4 `G-XXXXXXXXXX` (analytics.google.com → Admin → Flux de données). Vide = aucun script chargé. |
+| `GSC_VERIFICATION` | facultatif : la valeur de la balise HTML Search Console (le domaine est déjà vérifié par DNS). |
+| `SOCIAL[...]` | vos URL Instagram, Facebook, YouTube, LinkedIn, TikTok. Seules les non vides s'affichent. |
+| `GOOGLE_BUSINESS_URL` | le lien « Rédiger un avis » de votre fiche Google Business. |
+| `WHATSAPP_E164` | numéro WhatsApp (chiffres seulement). Vide = boutons WhatsApp masqués. |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET` | facultatif : Cloudflare Turnstile (anti-bot gratuit, sans puzzle). |
+| `EMAIL_TO`, `EMAIL_CC`, `MAIL_FROM` | déjà remplis ; `no-reply@nexuslivemedia.com` doit exister comme boîte mail. |
 
-> **Note :** Le fichier `submissions.log` sera créé automatiquement par PHP lors du premier envoi du formulaire. Il est protégé par `.htaccess` (accès web bloqué). Pour une sécurité renforcée, déplacez-le un niveau au-dessus de `public_html` et mettez à jour le chemin `$logPath` dans `index.php` (voir section 5).
+## 4. Formulaire de devis : sécurité et fichiers créés
 
----
+Le formulaire (`/contact`) est traité par `includes/form-handler.php`. Protections actives :
 
-## 2. Configuration Email (CRITIQUE)
+1. **Jeton signé** (HMAC) avec âge minimum de 4 s et expiration 6 h — plus de session PHP, donc les pages sont cacheables par le CDN.
+2. **Pot de miel** (champ `fax_line` invisible).
+3. **Vérification d'origine** (Origin/Referer = nexuslivemedia.com).
+4. **Limite par IP** : 3 envois / 15 min, 10 / jour.
+5. **Refus des liens** dans le message (les robots en mettent toujours).
+6. **Filtre de contenu** : mots-clés publicitaires (SEO, backlink, wholesale, 广告, 推广…), messages majoritairement en caractères chinois/japonais/coréens/cyrilliques, noms aberrants → **rejet silencieux** (le robot voit une page « merci », rien n'est envoyé).
+7. **Domaine email vérifié** (enregistrement MX/A).
+8. Turnstile Cloudflare si les clés sont renseignées.
 
-### Créer l'adresse d'expédition
-1. Dans hPanel → **Emails** → **Comptes Email**
-2. Créer l'adresse : `no-reply@nexuslivemedia.com`
-3. Notez bien le mot de passe (même si PHP `mail()` ne l'utilise pas directement, le compte doit exister pour que le domaine soit valide)
-
-### Enregistrement SPF (DNS)
-Dans hPanel → **DNS** → **Zone DNS**, ajoutez ou modifiez l'enregistrement TXT :
-
-```
-Type : TXT
-Nom  : @
-Valeur : v=spf1 include:spf.hostinger.com ~all
-```
-
-> Si vous utilisez un service externe (SendGrid, Brevo), ajoutez également leur entrée `include:`.
-
-### DKIM
-1. hPanel → **Emails** → **Sécurité Email**
-2. Activez **DKIM** pour `nexuslivemedia.com`
-3. Hostinger génère automatiquement la clé et l'ajoute à votre DNS
-
-### DMARC (recommandé)
-Ajoutez un enregistrement TXT dans votre DNS :
+Fichiers créés automatiquement **un niveau au-dessus de `public_html`** (jamais accessibles par le web) :
 
 ```
-Type  : TXT
-Nom   : _dmarc
-Valeur: v=DMARC1; p=none; rua=mailto:executive@nexuslivemedia.com
+/home/uXXXXXXXX/.nlm-form-secret     clé de signature (générée au 1er chargement)
+/home/uXXXXXXXX/submissions.log      demandes envoyées
+/home/uXXXXXXXX/blocked-spam.log     spam bloqué, avec la raison — à consulter si un vrai client dit n'avoir pas pu envoyer
+/home/uXXXXXXXX/form-errors.log      échecs de mail()
+/home/uXXXXXXXX/ratelimit/           compteurs par IP
 ```
 
-### Important
-PHP `mail()` fonctionne mieux quand le domaine de l'expéditeur (`MAIL_FROM`) correspond au domaine hébergé sur le même serveur. C'est pourquoi `no-reply@nexuslivemedia.com` est utilisé comme expéditeur.
+Pour ajuster les règles : constantes `SPAM_WORDS`, `RATE_LIMIT_*`, `FORM_MIN_SECONDS` dans `config.php`.
 
----
+## 5. Email : éviter le spam et les usurpations
 
-## 3. Version PHP
+- SPF actuel : `v=spf1 include:_spf.mail.hostinger.com ~all` ✔
+- DKIM actif (sélecteur `hostingermail1`) ✔
+- DMARC actuel : `p=none`. Après 2 à 4 semaines de rapports propres, passer à :
+  `v=DMARC1; p=quarantine; rua=mailto:executive@nexuslivemedia.com; adkim=r; aspf=r`
+  puis à `p=reject`. Cela bloque les emails qui usurpent `@nexuslivemedia.com`.
+- Les spams « annonceurs » reçus directement dans la boîte (hors formulaire) : hPanel → *Emails* → *Filtres anti-spam* ; créer une règle sur les mots « advertising », « SEO », « wholesale », et une règle sur les caractères chinois dans l'objet.
 
-1. hPanel → **Sites Web** → votre domaine → **PHP Configuration**
-2. Sélectionnez **PHP 8.1** ou **PHP 8.2**
-3. Cliquez sur **Enregistrer**
+## 6. Checklist après mise en ligne
 
-> Les fonctions utilisées dans le code (`bin2hex`, `random_bytes`, `quoted_printable_encode`, `match`, `fn()`) requièrent PHP 7.4 minimum — PHP 8.1/8.2 est recommandé.
+1. `https://nexuslivemedia.com/` s'affiche, cadenas HTTPS, favicon visible.
+2. `http://www.nexuslivemedia.com/pricing` → redirige vers `https://nexuslivemedia.com/pricing`.
+3. `https://nexuslivemedia.com/includes/config.php` → **403**.
+4. Menu mobile : ouvrir sur un téléphone, les sous-menus Services / Events se déplient.
+5. Formulaire : envoyer une vraie demande → email reçu sur `executive@` et `theonana@`, page `/thank-you`, ligne dans `submissions.log`.
+6. Formulaire : envoyer un message contenant `http://` → message d'erreur « remove web links ».
+7. Partager le lien sur WhatsApp : l'image de prévisualisation (`og.jpg`) apparaît.
+8. Search Console → *Sitemaps* → envoyer `https://nexuslivemedia.com/sitemap.xml`, puis *Inspection d'URL* → *Demander l'indexation* pour l'accueil, `/services`, `/pricing`, `/fr`.
 
----
+## 7. Images
 
-## 4. SSL / HTTPS
+Les visuels sont générés par IA (Kling) et optimisés par `tools/optimize-images.mjs` (JPG + WebP en 800/1600/1920 px). Pour remplacer une image par une vraie photo d'événement :
 
-1. hPanel → **Sites Web** → votre domaine → **SSL**
-2. Activez le **SSL gratuit Let's Encrypt** si ce n'est pas déjà fait
-3. Le fichier `.htaccess` inclus force automatiquement la redirection HTTP → HTTPS (301)
-4. Attendez la propagation DNS (quelques minutes à 24h) avant de tester
-
----
-
-## 5. Protection du fichier de log
-
-Le fichier `submissions.log` stocke chaque envoi de formulaire.
-
-**Situation actuelle :** il est créé dans `public_html/` et protégé par `.htaccess` (toute tentative d'y accéder via le navigateur retourne une erreur 403).
-
-**Situation idéale (production) :**
-1. Déplacez le log un niveau au-dessus de `public_html` :
-   ```
-   /home/u123456789/submissions.log   (hors public_html)
-   ```
-2. Dans `index.php`, modifiez la ligne `$logPath` :
-   ```php
-   // Avant :
-   $logPath = __DIR__ . '/submissions.log';
-   // Après :
-   $logPath = dirname(__DIR__) . '/submissions.log';
-   ```
-3. Vérifiez que PHP a les droits d'écriture sur ce dossier parent
-
----
-
-## 6. Test du formulaire
-
-Après déploiement, suivez ces étapes :
-
-1. **Visitez** `https://nexuslivemedia.com/` — vérifiez que le site s'affiche correctement
-2. **HTTPS** — vérifiez le cadenas dans la barre d'adresse
-3. **Formulaire** — remplissez tous les champs obligatoires (Nom, Email, Service) et soumettez
-4. **Email reçu** — vérifiez la boîte de `executive@nexuslivemedia.com` (et `theonana@nexuslivemedia.com` en CC)
-5. **Log** — vérifiez que `submissions.log` a été créé avec une ligne de log
-6. **Honeypot** — inspectez le code source de la page : le champ `company` doit être hors écran et invisible
-7. **CSRF** — tentez de soumettre le formulaire avec un token invalide : vous devriez voir le message d'erreur de sécurité
-8. **Rate limit** — soumettez 3 fois en moins de 10 minutes : la 4e tentative doit être bloquée
-
----
-
-## 7. Si les emails n'arrivent pas
-
-**Étape 1 — Vérifiez les logs Hostinger :**
-- hPanel → **Emails** → **Journaux Email** ou **Logs d'erreur PHP**
-
-**Étape 2 — Vérifiez le dossier spam :**
-- Vérifiez le dossier spam/junk de `executive@nexuslivemedia.com`
-- Ajoutez `no-reply@nexuslivemedia.com` aux contacts fiables
-
-**Étape 3 — PHP `mail()` ne fonctionne pas :**
-Certains hébergeurs désactivent `mail()`. Dans ce cas, passez à un service SMTP externe :
-
-**Option A : SMTP Hostinger** (si disponible dans votre plan)
-- Paramètres dans hPanel → **Emails** → **Configuration Email**
-
-**Option B : Brevo (ex-Sendinblue)** — gratuit jusqu'à 300 emails/jour
-```
-SMTP Host : smtp-relay.brevo.com
-Port      : 587
-User      : votre email Brevo
-Password  : votre clé API SMTP
+```bash
+cd tools && npm install
+node optimize-images.mjs  /chemin/vers/vos/photos   # noms attendus dans tools/images.json
 ```
 
-**Option C : SendGrid** — fiable, plan gratuit disponible
+Dès que vous avez de vraies photos et vidéos, remplacez les visuels : c'est ce qui convertit le mieux.
+
+## 8. Prévisualisation locale
+
+```bash
+php -S 127.0.0.1:8080 -t . tools/dev-router.php
 ```
-SMTP Host : smtp.sendgrid.net
-Port      : 587
-User      : apikey
-Password  : votre clé API SendGrid
-```
-
-> Pour utiliser SMTP avec PHP, installez la librairie **PHPMailer** via Composer, ou utilisez l'extension `mail()` configurée avec un relais SMTP dans `php.ini`.
-
----
-
-## 8. Optimisations SEO
-
-### Google Search Console
-1. Allez sur [search.google.com/search-console](https://search.google.com/search-console)
-2. Ajoutez la propriété `https://nexuslivemedia.com/`
-3. Vérifiez la propriété via la méthode **Balise HTML** (copiez la meta tag dans `<head>` de `index.php`)
-4. Soumettez le sitemap : `https://nexuslivemedia.com/sitemap.xml`
-
-### Google Analytics (GA4)
-1. Créez un compte sur [analytics.google.com](https://analytics.google.com)
-2. Créez une propriété GA4 pour `nexuslivemedia.com`
-3. Copiez le snippet `gtag.js` fourni
-4. Collez-le dans `index.php` juste avant `</head>`
-
-### Google Business Profile
-1. Créez ou revendiquez votre fiche sur [business.google.com](https://business.google.com)
-2. Renseignez les horaires, photos, description, et numéro de téléphone
-3. Demandez des avis clients après chaque événement réussi — utilisez-les pour remplacer les témoignages placeholder dans `index.php`
-
-### Mises à jour du sitemap
-- Mettez à jour `sitemap.xml` à chaque modification majeure du site
-- Renvoyez le sitemap dans Google Search Console après chaque mise à jour
+puis ouvrir `http://127.0.0.1:8080/`.

@@ -1,0 +1,21 @@
+{
+  "quality": { "jpg": 78, "webp": 74 },
+  "images": [
+    { "src": "hero-a.png",         "out": "hero",                    "widths": [800, 1280, 1920] },
+    { "src": "hero-b.png",         "out": "events/corporate",        "widths": [800, 1600] },
+    { "src": "led-wall.png",       "out": "services/led-wall",       "widths": [800, 1600] },
+    { "src": "live-video.png",     "out": "services/live-video",     "widths": [800, 1600] },
+    { "src": "hybrid.png",         "out": "services/hybrid",         "widths": [800, 1600] },
+    { "src": "audio.png",          "out": "services/audio",          "widths": [800, 1600] },
+    { "src": "photo-booth.png",    "out": "services/photo-booth",    "widths": [800, 1600] },
+    { "src": "media-coverage.png", "out": "services/media-coverage", "widths": [800, 1600] },
+    { "src": "wedding.png",        "out": "services/special-events", "widths": [800, 1600] },
+    { "src": "wedding.png",        "out": "events/wedding",          "widths": [800, 1600] },
+    { "src": "printing.png",       "out": "services/printing",       "widths": [800, 1600] },
+    { "src": "graduation.png",     "out": "events/graduation",       "widths": [800, 1600] },
+    { "src": "church.png",         "out": "events/church",           "widths": [800, 1600] },
+    { "src": "cultural.png",       "out": "events/cultural",         "widths": [800, 1600] },
+    { "src": "crew.png",           "out": "about/crew",              "widths": [800, 1600] }
+  ],
+  "og": { "src": "hero-a.png" }
+}
